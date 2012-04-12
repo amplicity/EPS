@@ -1,0 +1,11 @@
+ALTER TABLE `dbeps01`.`schedule` ADD(nmEffort40Flag int(11))
+UPDATE `dbeps01`.`teb_fields` SET nmFlags=1 WHERE nmForeignId=815
+UPDATE `dbeps01`.`teb_reportcolumns` SET stShow='Y', stShort='Effort to Date' WHERE nmFieldId=815 AND stShort='ETD'
+ALTER TABLE `dbeps01`.`schedule` ADD(nmEffort40Flag int(11))
+ALTER TABLE `dbeps01`.`schedule` ADD(SchDone char(1))
+INSERT INTO `dbeps01`.`teb_fields` (stDbFieldName, nmDataType, nmFlags, nmGrouping, nmTabId, stLabel, nmMaxBytes, nmCols) VALUES('SchDone', 3, 1, 21, 21, 'Done', 5, 5)
+INSERT INTO `dbeps01`.`teb_reportcolumns` (nmCustomReportId, nmFieldId, stShow, nmOrder, stShort, nmWidth) VALUES (2, (SELECT nmForeignId FROM `dbeps01`.`teb_fields` WHERE stDbFieldName='SchDone'),'Y', 25, 'Done', 3)
+ALTER TABLE `dbeps01`.`schedule` ADD(SchMessage char(1))
+
+UPDATE `dbeps01`.`teb_fields` SET nmCols=5 WHERE nmForeignId=49
+ALTER TABLE `dbeps01`.`schedule` ADD(lowlvl int(11))
