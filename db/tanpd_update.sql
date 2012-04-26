@@ -16,5 +16,5 @@ UPDATE `dbeps01`.`teb_fields` SET `stDbFieldName` = 'UserLaborCategory' WHERE `t
 UPDATE `ebeps01`.`x25user` SET `stPassword`='*3B1FD1671E1353A14FA2B20E97F70A4BB1EF0DBB' WHERE `stPassword`='*3E1DFA47500CCB1882BD912C951259C5A842B17F'
 
 
-
+--issue 73,75
 UPDATE `dbeps01`.`teb_fields` SET `nmDataType` = '9' WHERE `teb_fields`.`nmForeignId` =231 OR `teb_fields`.`nmForeignId` =271;;

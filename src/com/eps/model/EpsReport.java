@@ -129,12 +129,15 @@ public class EpsReport
   {
     String stReturn = "";
     String stT = epsUd.ebEnt.ebUd.request.getParameter("t");
+    String stValue = epsUd.ebEnt.ebUd.request.getParameter("customreport");
+    int iValue = -1 ;
+    if (stValue != null && !"".equals(stValue)) iValue = Integer.parseInt(stValue);
     try
     {
     	// todo
     	/* AS -- 29Sept2011 -- Issue #9*/
       //String stSql = "select r.*,cr.stReportType,cr.stReportName from teb_reports r, teb_customreport cr where r.nmCustomReportId=cr.RecId order by r.RecId Desc";
-    	String stSql = "select r.*,cr.stReportType,cr.stReportName from teb_reports r, teb_customreport cr where r.nmCustomReportId=cr.RecId and cr.stReportType="+ rsTable.getInt("nmTableId") +" order by r.RecId Desc";
+    	String stSql = "select r.*,cr.stReportType,cr.stReportName from teb_reports r, teb_customreport cr where r.nmCustomReportId=cr.RecId"+(iValue>0?" and r.nmCustomReportId="+iValue:"")+" and cr.stReportType="+ rsTable.getInt("nmTableId") +" order by r.RecId Desc";
       ResultSet rs = epsUd.ebEnt.dbDyn.ExecuteSql(stSql);
       if (rs != null)
       {

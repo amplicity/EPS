@@ -259,7 +259,6 @@ public class EpsUserData
         iRecId = this.ebEnt.ebUd.checkLogin(); 
         if (iRecId > 0)
         {
-        	System.out.println(request.getSession().getAttribute("userId"));
         	request.getSession(true).setAttribute("userId", iRecId);
           if (stTemp != null && !stTemp.equals(""))
           {
@@ -4756,7 +4755,9 @@ public class EpsUserData
 	    	  stSql = "SELECT s.dtSchLastUpdate, p.ProjectName, p.ProjectPortfolioManagerAssignment, p.ProjectManagerAssignment FROM schedule as s INNER JOIN projects as p ON s.nmProjectId=p.RecId WHERE nmProjectId="+rs.getString("nmProjectId")+" ORDER BY dtSchLastUpdate DESC LIMIT 1";
 	    	  rs2 = this.ebEnt.dbDyn.ExecuteSql(stSql);
 	          rs2.absolute(1);
-	          makeMessage("All", rs2.getString("ProjectPortfolioManagerAssignment")+","+rs2.getString("ProjectManagerAssignment"), "Schdule Warning", rs2.getString("ProjectName")+": Schedules should be updated daily", dateEnd);
+	          if (rs2.getRow()>0) {
+	          	makeMessage("All", rs2.getString("ProjectPortfolioManagerAssignment")+","+rs2.getString("ProjectManagerAssignment"), "Schdule Warning", rs2.getString("ProjectName")+": Schedules should be updated daily", dateEnd);
+	          }
     	  }
       }
       
