@@ -375,9 +375,17 @@ public class EpsEditField
             {
               String[] aV = stValue.split("~", -1);
               int iN = 0;
-              for (iN = 0; iN < aV.length; iN++)
-              {
-                stEdit += "<option value=\"" + aV[iN] + "\">" + aV[iN] + "</option>";
+              if (rsFields.getString("stDbFieldName").equals("ReqLevel") || rsFields.getString("stDbFieldName").equals("SchLevel")) {
+              	for(int i=0; i<Integer.parseInt(stValue); i++){
+              		stEdit += "<option value=\"" + i + "\">" + i + "</option>";
+              	}
+              	stEdit += "<option value=\"" + stValue + "\" selected='selected'>" + stValue + "</option>" +
+            		  	"<option value=\"" + (Integer.parseInt(stValue)+1) + "\">" + (Integer.parseInt(stValue)+1) + "</option>";
+              } else {
+	              for (iN = 0; iN < aV.length; iN++)
+	              {
+	                stEdit += "<option value=\"" + aV[iN] + "\">" + aV[iN] + "</option>";
+	              }
               }
             }
             stEdit += "</select>";

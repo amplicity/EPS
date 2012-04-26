@@ -273,7 +273,7 @@ public class EpsReport
           }
           
           //add project name immediately before project info from project filter #105
-          if(!aFields[aFields.length-1].equals(currPrj) && iL > 0 && iL < (aLines.length-1)){
+          if(!"89".equals(stT) && !aFields[aFields.length-1].equals(currPrj) && iL > 0 && iL < (aLines.length-1)){
         	  stReturn += "<tr><td colspan=" + (aFields.length - 1) + "><strong>" + aFields[aFields.length-1].replace("`", "<br>") + "</strong></td></tr>";
         	  currPrj = aFields[aFields.length-1];
           }
@@ -289,7 +289,7 @@ public class EpsReport
               //stReturn += "<th>" + aV[0] + "</td>";
               stReturn += "<th STYLE='font-size: 12px; background-color:yellow;'>" + aV[0] + "</td>";
             } else {
-              stReturn += "<td " + aTdClass[iF] + ">" + aFields[iF].replace("`", "<br>") + "</td>";
+              stReturn += "<td " + aTdClass[iF] + ">" + (aFields[iF].replace("`", "<br>").equals("") ? "&nbsp;" : aFields[iF].replace("`", "<br>")) + "</td>";
             }
           }
           stReturn += "</tr>";

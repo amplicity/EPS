@@ -51,6 +51,7 @@ class ExchangeRateTask implements Runnable {
 	  {
 		  String stSql = "select now() as CurrentDateTime";
 		  ResultSet rs = ebd.ExecuteSql(stSql);
+		  if (rs == null) return;
 		  String dttime = "";
 		  try {
 			if(rs.next())
@@ -82,6 +83,57 @@ class ExchangeRateTask implements Runnable {
 					} 
 				
 			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	  }
+
+}
+
+class AnnualEOBTask implements Runnable {
+	public static EbDatabase ebd1 = null;
+	AnnualEOBTask(EbDatabase ebd)
+	{
+		ebd1 = ebd;
+	}
+	@Override
+	public void run() {
+		//System.out.println("Current system time: " + new Date());
+		//System.out.println("Another minute ticked away...");
+		
+		invoke(ebd1);
+	}
+	
+	 public void invoke(EbDatabase ebd)
+	  {
+		 	//reset sick days of all user
+		  String stSql = "update Users set SickDaysToDate=0";
+		  ebd.ExecuteUpdate(stSql);
+		  
+		  
+		  try {
+		  	stSql = "SELECT nmRefId,nmLaborCategoryId,nmActualHours,nmEstimatedHours FROM teb_reflaborcategory rlc, laborcategory lc"
+		  			+ " where rlc.nmRefType=42 and rlc.nmLaborCategoryId = lc.nmLcId and nmActualHours>nmEstimatedHours order by LaborCategory";
+		  	ResultSet rsC = ebd.ExecuteSql(stSql);
+
+		      while(rsC.next()) {
+		      	double newExpendedHours = 50;
+		      	double newEstimatedHours = 0;
+		      	
+		        String refId = rsC.getString("nmRefId");
+		        String nmLcId = rsC.getString("nmLaborCategoryId");
+		        double oldExpendedHours = rsC.getDouble("nmActualHours");
+		        double oldEstimatedHours = rsC.getDouble("nmEstimatedHours");
+		        
+		        if (oldEstimatedHours <=0 ) newEstimatedHours = newExpendedHours;
+		        else if (oldExpendedHours <= 0) newEstimatedHours = oldEstimatedHours;
+		        else newEstimatedHours = newExpendedHours*oldEstimatedHours/oldExpendedHours;
+		        
+		        stSql = "update teb_reflaborcategory set nmActualHours=" + newExpendedHours	+ ",nmEstimatedHours=" + newEstimatedHours
+		        		+ " where nmRefType=42 and nmRefId=" + refId + " and nmLaborCategoryId=" + nmLcId;
+		        ebd.ExecuteUpdate(stSql);
+		      }
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -125,15 +177,28 @@ public class EpsUserData
   {
 	
 	//Check for exchange rates
-    // Prepares the task.
-	ExchangeRateTask task = new ExchangeRateTask(this.ebEnt.dbEnterprise);
 	// Creates the scheduler.
-	Scheduler scheduler = new Scheduler();
-	// Schedules the task, once every minute.
-	scheduler.schedule("* * * * *", task);
+	Scheduler scheduler = null;
+	Object sch = request.getSession().getServletContext().getAttribute("scheduler");
+	if (sch == null) {
+		scheduler = new Scheduler();
+		// Schedules the task, once every minute.
+		// Prepares the task.
+		ExchangeRateTask task = new ExchangeRateTask(this.ebEnt.dbEnterprise);
+		scheduler.schedule("* * * * *", task);
+		
+		AnnualEOBTask task2 = new AnnualEOBTask(this.ebEnt.dbDyn);
+		scheduler.schedule("1 0 1 1 *", task2);
+		
+		request.getSession().getServletContext().setAttribute("scheduler", scheduler);
+	} else {
+		scheduler = (Scheduler) sch;
+	}
+	
 	// Starts the scheduler.
-	scheduler.start();
-	//Close check for exchange rates  
+	if (!scheduler.isStarted()) scheduler.start();
+	
+	
     String stTemp = "";
     stTemp = this.ebEnt.ebUd.request.getLocalAddr();
     int iRecId = 0; // only local here for dynamic
@@ -744,8 +809,8 @@ public class EpsUserData
       //This version, V1.5, was released 1 August 2011.
       stHelp = "<h1>Help About</h1><p>Enterprise Project Portfolio Optimized Resource Allocation (EPPORA) is an "
         + "Enterprise Portfolio Software, Inc. (EPS) product.  This " + stVersion + ".  "
-        + "EPPORAâ€™s functionality is described in the EPPORA Userâ€™s Guide, which can be accessed using the Help "
-        + "tab â€œContentâ€� command.  For any questions contact EPS at 310-287-0800 or email EPS at:<br><br><table>";
+        + "EPPORA&apos;s functionality is described in the EPPORA User&apos;s Guide, which can be accessed using the Help "
+        + "tab &quot;Content&quot; command.  For any questions contact EPS at 310-287-0800 or email EPS at:<br><br><table>";
       stHelp += "<tr><td>&nbsp;&nbsp;</td><td>Technical</td><td><a href='mailto:t@EPPORA.com'>t@EPPORA.com</a></td></tr>";
       stHelp += "<tr><td>&nbsp;&nbsp;</td><td>Marketing</td><td><a href='mailto:m@EPPORA.com'>m@EPPORA.com</a></td></tr>";
       stHelp += "<tr><td>&nbsp;&nbsp;</td><td>Sales</td><td><a href='mailto:s@EPPORA.com'>s@EPPORA.com</a></td></tr>";

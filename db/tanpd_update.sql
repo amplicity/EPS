@@ -9,8 +9,12 @@ UPDATE `dbeps01`.`schedule` SET `SchFlags`='0' WHERE `SchFlags`='';
 
 --issue 55 April2012
 UPDATE `dbeps01`.`teb_fields` SET `stDbFieldName` = 'UserDivision' WHERE `teb_fields`.`nmForeignId` =42;
-ALTER TABLE `dbeps01``users` ADD `UserLaborCategory` VARCHAR( 10 ) NOT NULL DEFAULT '' AFTER `UserDivision`;
+ALTER TABLE `dbeps01`.`users` ADD `UserLaborCategory` VARCHAR( 10 ) NOT NULL DEFAULT '' AFTER `UserDivision`;
 UPDATE `dbeps01`.`teb_fields` SET `stDbFieldName` = 'UserLaborCategory' WHERE `teb_fields`.`nmForeignId` =16;
 
 --issue 35 April2012
 UPDATE `ebeps01`.`x25user` SET `stPassword`='*3B1FD1671E1353A14FA2B20E97F70A4BB1EF0DBB' WHERE `stPassword`='*3E1DFA47500CCB1882BD912C951259C5A842B17F'
+
+
+
+UPDATE `dbeps01`.`teb_fields` SET `nmDataType` = '9' WHERE `teb_fields`.`nmForeignId` =231 OR `teb_fields`.`nmForeignId` =271;;
