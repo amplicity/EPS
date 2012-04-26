@@ -27,8 +27,6 @@ public class EpsController extends HttpServlet
   protected void processRequest(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException
   {
-  	HttpSession session = request.getSession(true);
-  	
     long startTime = System.nanoTime();
     long dbTime = 0;
     int iSqlCount = 0;

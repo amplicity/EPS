@@ -259,6 +259,8 @@ public class EpsUserData
         iRecId = this.ebEnt.ebUd.checkLogin(); 
         if (iRecId > 0)
         {
+        	System.out.println(request.getSession().getAttribute("userId"));
+        	request.getSession(true).setAttribute("userId", iRecId);
           if (stTemp != null && !stTemp.equals(""))
           {
             if (this.rsMyDiv != null && this.rsMyDiv.getInt("UserQuestionsOnOff") > 0)
