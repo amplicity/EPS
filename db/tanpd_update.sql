@@ -17,4 +17,11 @@ UPDATE `ebeps01`.`x25user` SET `stPassword`='*3B1FD1671E1353A14FA2B20E97F70A4BB1
 
 
 --issue 73,75
-UPDATE `dbeps01`.`teb_fields` SET `nmDataType` = '9' WHERE `teb_fields`.`nmForeignId` =231 OR `teb_fields`.`nmForeignId` =271;;
+UPDATE `dbeps01`.`teb_fields` SET `nmDataType` = '9' WHERE `teb_fields`.`nmForeignId` =231 OR `teb_fields`.`nmForeignId` =271;
+
+--issue 36
+INSERT INTO `dbeps01`.`teb_reportcolumns` (
+`nmCustomReportId` ,`nmFieldId` ,`stShow` ,`nmOrder` ,`stShort` ,`nmWidth` ,`stClass` ,`stCustom`
+)
+VALUES ('11', '873', 'Y', '8', '', '10', 'null', ''),('11', '884', 'Y', '9'', '', '3', 'null', ''),('11', '883', 'Y', '10', '', '20', 'null', '');
+

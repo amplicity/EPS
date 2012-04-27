@@ -854,6 +854,7 @@ public class EpsReport
         String prjFilter = epsUd.ebEnt.dbDyn.ExecuteSql1("select prjFilter from teb_customreport where RecId=" + nmCustomReportId);
         String[] prjArr = null;
         String pIDs = "";
+        String stDivList = "";
         switch (rsTable.getInt("nmTableId"))
         {
           case 76: // Project Requirement
@@ -1193,7 +1194,6 @@ public class EpsReport
             }
             break;
           case 56: // Division
-          	String stDivList = "";
             if (stFilter != null && stFilter.length() > 7)
             { //128^,3,,4,,6,^,3,,1,^full^^beg
               String[] aV = stFilter.split("\\^", -1);
@@ -1304,15 +1304,23 @@ public class EpsReport
               String[] aV = stFilter.split("\\^", -1);
               int nmType = Integer.parseInt(aV[0]);
               stSqlUser = this.epsUd.makeUserSql(nmType, aV[1], aV[2], aV[3], aV[4], aV[5]);
+              stDivList = aV[2];
+              if (!stDivList.contains(",0,"))
+              {
+              	stDivList = stDivList.replace(",,", ",");
+              	stDivList = stDivList.substring(1, stDivList.length() - 1);
+              	//stSql += " where nmDivision in (" + stDivList + ") ";
+              }
             } else
             {
               stSqlUser = this.epsUd.makeUserSql(0xFFFF, ",0", ",0,", "full", "", "beg"); // Do all
             }
             stSqlUser = stSqlUser.replace("u.*,xu.stEMail,xu.nmPriviledge,xu.RecId", "u.nmUserId");
 
-            stSql = "SELECT * FROM Users u, LaborCategory lc, teb_reflaborcategory rlc"
-              + " where u.nmUserId in (" + stSqlUser + ") "
-              + " and u.nmUserId=rlc.nmRefId and rlc.nmRefType=42 and rlc.nmLaborCategoryId=lc.nmLcId"
+            stSql = "SELECT DISTINCT u.*,lc.*,rlc.*,d.nmExchangeRate,d.stCurrency, d.dtExchangeRate, d.stDivisionName" +
+            		" FROM Users u, LaborCategory lc, teb_reflaborcategory rlc, teb_division d, teb_refdivision rd"
+              + " where u.nmUserId in (" + stSqlUser + ") "+(stDivList.length()>0? " and d.nmDivision in ("+stDivList+")":"")
+              + " and u.nmUserId=rlc.nmRefId and rlc.nmRefType=42 and rlc.nmLaborCategoryId=lc.nmLcId and u.nmUserId=rd.nmRefId and rd.nmDivision=d.nmDivision"
               + " order by u.LastName,u.FirstName; ";
             rsR = this.epsUd.ebEnt.dbDyn.ExecuteSql(stSql);
             rsR.last();
@@ -1343,7 +1351,7 @@ public class EpsReport
 	                  }
 	              }
             	  val += "~" + fieldArr[i];
-            	  System.out.println(fieldArr[i]);
+            	  //System.out.println(fieldArr[i]);
               }
               stReport += val + "|";
             }
