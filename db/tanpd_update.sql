@@ -23,5 +23,5 @@ UPDATE `dbeps01`.`teb_fields` SET `nmDataType` = '9' WHERE `teb_fields`.`nmForei
 INSERT INTO `dbeps01`.`teb_reportcolumns` (
 `nmCustomReportId` ,`nmFieldId` ,`stShow` ,`nmOrder` ,`stShort` ,`nmWidth` ,`stClass` ,`stCustom`
 )
-VALUES ('11', '873', 'Y', '8', '', '10', 'null', ''),('11', '884', 'Y', '9'', '', '3', 'null', ''),('11', '883', 'Y', '10', '', '20', 'null', '');
+VALUES ('11', '873', 'Y', '8', '', '10', 'null', ''),('11', '884', 'Y', '9'', '', '3', 'null', ''),('11', '883', 'Y', '10', '', '20', 'null', ''),('11', '880', 'Y', '11', '', '45', 'null', '');
 
