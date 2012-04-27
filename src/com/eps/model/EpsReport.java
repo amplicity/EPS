@@ -1193,8 +1193,23 @@ public class EpsReport
             }
             break;
           case 56: // Division
+          	String stDivList = "";
+            if (stFilter != null && stFilter.length() > 7)
+            { //128^,3,,4,,6,^,3,,1,^full^^beg
+              String[] aV = stFilter.split("\\^", -1);
+              int nmType = Integer.parseInt(aV[0]);
+              //stSqlUser = this.epsUd.makeUserSql(nmType, aV[1], aV[2], aV[3], aV[4], aV[5]);
+              stDivList = aV[2];
+              if (!stDivList.contains(",0,"))
+              {
+              	stDivList = stDivList.replace(",,", ",");
+              	stDivList = stDivList.substring(1, stDivList.length() - 1);
+                //stSql += " where nmDivision in (" + stDivList + ") ";
+              }
+              
+            }
             this.epsUd.epsEf.processUsersInDivision();
-            stSql += "SELECT * FROM teb_division order by stDivisionName;";
+            stSql += "SELECT * FROM teb_division"+(stDivList.length()>0? " where nmDivision in ("+stDivList+")":"")+" order by stDivisionName;";
             rsR = this.epsUd.ebEnt.dbDyn.ExecuteSql(stSql);
             rsR.last();
             iMaxR = rsR.getRow();
