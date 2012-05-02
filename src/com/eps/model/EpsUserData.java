@@ -1790,7 +1790,7 @@ public class EpsUserData
       stReturn += "</table>"
         + "</td><td valign=top>&nbsp;</td><td valign=top>"
         + "<table class=l1tablenarrow>"
-        + "<tr><th class=l1th>Message</th><th class=l1th>Description/Info</th><th class=l1th>Date</th></tr>";
+        + "<tr><th class=l1th>Date</th><th class=l1th>Time</th><th class=l1th>Message</th><th class=l1th>Details</th><th class=l1th>Delete</th></tr>";
       rs.close();
 
       rs = this.ebEnt.dbEnterprise.ExecuteSql("select t.* from X25RefTask rt, X25Task t"
@@ -1802,6 +1802,8 @@ public class EpsUserData
       rs.last();
       iMax = rs.getRow();
       iCount = 0;
+      SimpleDateFormat dateFormatter = new SimpleDateFormat("ddMMMyy");
+      SimpleDateFormat timeFormatter = new SimpleDateFormat("hh:mm");
       if (iMax > 0)
       {
         for (int iR = 1; iR <= iMax; iR++)
@@ -1819,25 +1821,27 @@ public class EpsUserData
         	if(!prjArr[0].equals(""))
         		approved = this.ebEnt.dbDyn.ExecuteSql1n("select ProjectStatus from projects where ProjectName = '" + prjArr[0] + "'");
         	
-        	if(approved == 1){
+        	Date aDate = rs.getTimestamp("dtStart");
+        	String stDate = (aDate == null ? "&nbsp;" : dateFormatter.format(aDate));
+        	String stTime = (aDate == null ? "&nbsp;" : timeFormatter.format(aDate));
+        	if(approved == 1 || (approved!=1 && prjArr[0].equals("All"))){
 	            iCount++;
-	            stReturn += "<tr><td class=l1td>" + rs.getString("stTitle") + "</td><td class=l1td>";
+	            stReturn += "<tr>" +
+	            		"<td class=l1td>" + stDate + "</td>" +
+	            		"<td class=l1td>" + stTime + "</td>" +
+	            		"<td class=l1td>" + rs.getString("stTitle") + "</td><td class=l1td>";
 	            if (rs.getString("stDescription") != null)
 	            {
-	              if (rs.getString("stDescription").length() > 200)
-	              {
-	                stReturn += "<a target=_blank href='./?stAction=admin&t=0&do=taskdetail&h=n&list=" + rs.getString("RecId") + "'>Details</a>";
-	              } else
-	              {
-	                stReturn += rs.getString("stDescription");
-	              }
+	                stReturn += "<input type='button' onclick='window.open(\"./?stAction=admin&t=0&do=taskdetail&h=n&list=" + rs.getString("RecId") + "\")' value='Details' />";
 	            } else
 	            {
 	              stReturn += "&nbsp;";
 	            }
-	            stReturn += "</td><td class=l1td>" + this.ebEnt.ebUd.fmtDateFromDb(rs.getString("dtStart"))
-	              + "</td></tr>";
-        	}else if(prjArr[0].equals("All")){	//message from eob #19
+	            stReturn += "</td>" +
+	            		"<td class=l1td><input type='button' onclick='parent.location=\"./?stAction=admin&t=0&do=taskdelete&h=n&list=" + rs.getString("RecId") + "\"' value='Delete' /></td>" +
+	            		"</tr>";
+        	}
+        	/*else if(prjArr[0].equals("All")){	//message from eob #19
         		iCount++;
 	            stReturn += "<tr><td class=l1td>" + rs.getString("stTitle") + "</td><td class=l1td>";
 	            if (rs.getString("stDescription") != null)
@@ -1849,7 +1853,7 @@ public class EpsUserData
 	            }
 	            stReturn += "</td><td class=l1td>" + this.ebEnt.ebUd.fmtDateFromDb(rs.getString("dtStart"))
 	              + "</td></tr>";
-        	}
+        	}*/
           }
         }
       }
@@ -1857,35 +1861,43 @@ public class EpsUserData
       //flag low level tasks with 40+ hours to PM, PPM, BA, Sponsor #21
       String userType = this.ebEnt.dbEnterprise.ExecuteSql1("select nmPriviledge from X25user where RecId=" + this.ebEnt.ebUd.getLoginId());
       if(userType.equals(getPriviledge("pm")) || userType.equals(getPriviledge("ppm")) || userType.equals(getPriviledge("ba")) || userType.equals(getPriviledge("su")) || userType.equals("65535")){
-	      SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 	      Date aDate = null;
 	      rs = this.ebEnt.dbDyn.ExecuteSql("SELECT * FROM schedule WHERE nmEffort40Flag = 1 AND dtSchLastUpdate IS NOT NULL");
 	      while(rs.next()){
-	    	  aDate = formatter.parse(rs.getString("dtSchLastUpdate"));
+	    	  aDate = rs.getTimestamp("dtSchLastUpdate");
 	    	  iCount++;
-	          stReturn += "<tr><td class=l1td>" + rs.getString("SchTitle") + "</td>"
-	          + "<td class=l1td>"
-	          + "Task may not exceed 40 hours"
-	          + "</td><td class=l1td>" + formatter.format(aDate) + "</td></tr>";
+	          stReturn += "<tr>" 
+	          + "<td class='l1td'>" + (aDate == null ? "&nbsp;" : dateFormatter.format(aDate)) + "</td>"
+        		+ "<td class='l1td'>" + (aDate == null ? "&nbsp;" : timeFormatter.format(aDate)) + "</td>"
+	          + "<td class='l1td'>" + rs.getString("SchTitle") + "</td>"
+	          + "<td class='l1td'><input type='button' value='Details' onclick='window.open(\"./?stAction=admin&t=0&h=n&do=scheduledetail&listm=0&lists="+rs.getString("recId")+"&listp="+rs.getString("nmProjectId")+"&listb="+rs.getString("nmBaseLine")+"\")'/></td>"
+//	          "Task may not exceed 40 hours"
+//	          + "<td class='l1td'><input type='button' value='Delete' /></td>"
+	          + "<td class='l1td'>&nbsp;</td>"
+	          + "</tr>";
 	      }
       }
 
       //show estimated, expended hours and done tasks to pm and ppm
       //String userType = this.ebEnt.dbEnterprise.ExecuteSql1("select nmPriviledge from X25user where RecId=" + this.ebEnt.ebUd.getLoginId());
       if(userType.equals(getPriviledge("pm")) || userType.equals(getPriviledge("ppm")) || userType.equals("65535")){
-	      SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 	      Date aDate = null;
 	      rs = this.ebEnt.dbDyn.ExecuteSql("SELECT * FROM schedule WHERE SchMessage IS NOT NULL");
 	      while(rs.next()){
-	    	  aDate = formatter.parse(rs.getString("dtSchLastUpdate"));
+	      	aDate = rs.getTimestamp("dtSchLastUpdate");
 	    	  iCount++;
-	          stReturn += "<tr><td class=l1td>" + rs.getString("SchTitle") + "</td>";
-	          stReturn += "<td class=l1td>";
+	    	  stReturn += "<tr>" 
+		          + "<td class='l1td'>" + (aDate == null ? "&nbsp;" : dateFormatter.format(aDate)) + "</td>"
+	        		+ "<td class='l1td'>" + (aDate == null ? "&nbsp;" : timeFormatter.format(aDate)) + "</td>"
+		          + "<td class='l1td'>" + rs.getString("SchTitle") + "</td>"
+		          + "<td class='l1td'><input type='button' value='Details' onclick='window.open(\"./?stAction=admin&t=0&h=n&do=scheduledetail&listm=1&lists="+rs.getString("recId")+"&listp="+rs.getString("nmProjectId")+"&listb="+rs.getString("nmBaseLine")+"\")'/></td>"
+	          /*stReturn += "<td class=l1td>";
 	          if(rs.getString("SchDone") != null && rs.getString("SchDone").equals("Y"))
 	        	  stReturn += "Status: Done<br>";
 	          stReturn += "Estimated Hours: " + rs.getString("SchEstimatedEffort") + "<br>"
-	          + "Expended Hours: " + rs.getString("SchEfforttoDate")
-	          + "</td><td class=l1td>" + formatter.format(aDate) + "</td></tr>";
+	          + "Expended Hours: " + rs.getString("SchEfforttoDate")*/
+	          + "<td class='l1td'>&nbsp;</td>"
+	          + "</tr>";
 	      }
       }
       
@@ -1946,6 +1958,47 @@ public class EpsUserData
         {
           stReturn += this.ebEnt.dbEnterprise.ExecuteSql1("SELECT stDescription FROM x25task where RecId="
             + this.ebEnt.ebUd.request.getParameter("list"));
+        } else if (stTemp != null && stTemp.equals("taskdelete"))
+        {
+          this.ebEnt.dbEnterprise.ExecuteUpdate("DELETE FROM x25task where RecId="
+            + this.ebEnt.ebUd.request.getParameter("list"));
+          this.ebEnt.ebUd.setRedirect("./?stAction=home");
+        } else if (stTemp != null && stTemp.equals("scheduledetail"))
+        {
+        	String nmProjectId = this.ebEnt.ebUd.request.getParameter("listp");
+        	String nmBaseLineId = this.ebEnt.ebUd.request.getParameter("listb");
+        	String nmScheduleId = this.ebEnt.ebUd.request.getParameter("lists");
+        	String nmMessage = this.ebEnt.ebUd.request.getParameter("listm");
+        	ResultSet rsSch = this.ebEnt.dbDyn.ExecuteSql("SELECT s.*,p.ProjectName,d.stDivisionName FROM schedule s, projects p, teb_division d WHERE d.nmDivision=p.nmDivision AND p.RecId=s.nmProjectId AND s.nmProjectId="+nmProjectId+" AND s.nmBaseLine="+nmBaseLineId+" AND s.recID="+nmScheduleId);
+        	if (rsSch.next()) {
+        		String stDesc = "Task may not exceed 40 hours";
+        		try {
+	            int iM = Integer.parseInt(nmMessage);
+	            if (iM>0) {
+	            	stDesc = "";
+			          if(rs.getString("SchDone") != null && rs.getString("SchDone").equals("Y"))
+			          	stDesc += "Status: Done<br>";
+			          stDesc += "Estimated Hours: " + rs.getString("SchEstimatedEffort") + "<br>"
+			          		+ "Expended Hours: " + rs.getString("SchEfforttoDate");
+	            	
+	            }
+            } catch (Exception e) {
+            }
+        		Date aDate = rsSch.getDate("dtSchLastUpdate");
+        		SimpleDateFormat formatter = new SimpleDateFormat("ddMMMyy hh:mm");
+	        	stReturn += "<h2>" + rsSch.getString("SchTitle") + " per Project Schedule</h2>";
+	        	stReturn += "<table border='1'>" +
+	        			"<tr><th>Schedule ID</th><th>Level</th><th>Project Name</th><th>Division</th><th>Time</th><th>Description</th></tr>" +
+	        			"<tr>" +
+	        			"	<td>" + rsSch.getString("RecId") + "</td>" +
+	        			"	<td>" + rsSch.getString("SchLevel") + "</td>" +
+	        			"	<td>" + rsSch.getString("ProjectName") + "</td>" +
+	        			"	<td>" + rsSch.getString("stDivisionName") + "</td>" +
+	        			"	<td>" + (aDate == null ? "&nbsp;" : formatter.format(aDate)) + "</td>" +
+	        			"	<td>" + stDesc +"</td>" +
+	        			"</tr>" +
+	        			"</table>";
+        	}
         } else
         {
           if (rs.getInt("nmTableId") == 12 && stTemp != null && stTemp.equals("edit"))

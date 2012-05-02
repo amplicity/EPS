@@ -1166,24 +1166,31 @@ public class EpsReport
           case 55: // Criteria
         	
     	  /* Start of Issue AS -- 12Oct2011 -- Issue # 50 */
-          String stDivList1 = "";
-          if (stFilter != null && stFilter.length() > 7)
-          { //128^,3,,4,,6,^,3,,1,^full^^beg
-            String[] aV = stFilter.split("\\^", -1);
-            int nmType = Integer.parseInt(aV[0]);
-            //stSqlUser = this.epsUd.makeUserSql(nmType, aV[1], aV[2], aV[3], aV[4], aV[5]);
-            stDivList1 = aV[2];
-            if (!stDivList1.contains(",0,"))
-            {
-              stDivList1 = stDivList1.replace(",,", ",");
-              stDivList1 = stDivList1.substring(1, stDivList1.length() - 1);
-              //stSql += " where nmDivision in (" + stDivList + ") ";
-            }
-            
-          }
+	        	if (stFilter != null && stFilter.length() > 7)
+	          { //128^,3,,4,,6,^,3,,1,^full^^beg
+	            String[] aV = stFilter.split("\\^", -1);
+	            int nmType = Integer.parseInt(aV[0]);
+	            //stSqlUser = this.epsUd.makeUserSql(nmType, aV[1], aV[2], aV[3], aV[4], aV[5]);
+	            stDivList = aV[2];
+	            if (!stDivList.contains(",0,"))
+	            {
+	            	stDivList = stDivList.replace(",,", ",");
+	            	stDivList = stDivList.substring(1, stDivList.length() - 1);
+	              //stSql += " where nmDivision in (" + stDivList + ") ";
+	            } else {
+	            	stDivList = "";
+	            }
+	            
+	          }
           /* End of Issue AS -- 12Oct2011 -- Issue # 50 */
             this.epsUd.epsEf.processUsersInDivision();
-            stSql += "SELECT * FROM Criteria c, teb_division d where c.nmDivision = d.nmDivision order by stDivisionName,c.CriteriaName";
+            //stSql += "SELECT * FROM Criteria c, teb_division d where c.nmDivision = d.nmDivision order by stDivisionName,c.CriteriaName";
+            stSql +="select c.RecId,c.nmDivision,c.nmFlags,c.CriteriaName,c.WeightImportance,d.stDivisionName, CONCAT(u.FirstName, ' ', u.LastName) as Responsibilities" +
+            		" from Criteria c, teb_division d, teb_refdivision rd, users u" +
+            		" where d.nmDivision=c.nmDivision and rd.nmRefType=42 and rd.nmRefId=2 and rd.nmDivision=d.nmDivision " +
+            		" and u.nmUserId=CAST(c.Responsibilities AS UNSIGNED)" +
+            		(stDivList.length()>0? " and d.nmDivision in ("+stDivList+")":"") +
+            		" order by stDivisionName,CriteriaName";
             rsR = this.epsUd.ebEnt.dbDyn.ExecuteSql(stSql);
             rsR.last();
             iMaxR = rsR.getRow();
@@ -1205,6 +1212,8 @@ public class EpsReport
               	stDivList = stDivList.replace(",,", ",");
               	stDivList = stDivList.substring(1, stDivList.length() - 1);
                 //stSql += " where nmDivision in (" + stDivList + ") ";
+              } else {
+              	stDivList = "";
               }
               
             }
@@ -1310,6 +1319,8 @@ public class EpsReport
               	stDivList = stDivList.replace(",,", ",");
               	stDivList = stDivList.substring(1, stDivList.length() - 1);
               	//stSql += " where nmDivision in (" + stDivList + ") ";
+              }else {
+              	stDivList = "";
               }
             } else
             {
