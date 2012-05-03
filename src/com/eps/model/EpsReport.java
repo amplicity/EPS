@@ -276,10 +276,11 @@ public class EpsReport
           }
           
           //add project name immediately before project info from project filter #105
-          if(!"89".equals(stT) && !aFields[aFields.length-1].equals(currPrj) && iL > 0 && iL < (aLines.length-1)){
-        	  stReturn += "<tr><td colspan=" + (aFields.length - 1) + "><strong>" + aFields[aFields.length-1].replace("`", "<br>") + "</strong></td></tr>";
-        	  currPrj = aFields[aFields.length-1];
-          }
+          //TODO: TanPD remove group line
+//          if(!"89".equals(stT) && !aFields[aFields.length-1].equals(currPrj) && iL > 0 && iL < (aLines.length-1)){
+//        	  stReturn += "<tr><td colspan=" + (aFields.length - 1) + "><strong>" + aFields[aFields.length-1].replace("`", "<br>") + "</strong></td></tr>";
+//        	  currPrj = aFields[aFields.length-1];
+//          }
           
           stReturn += "<tr>";
           //~Project Name^123~Synergy With Organization^1088~Synergy With Other Projects^1089~Total Ranking Score^998|~EPS Office Building~27~24~3370|~EPPORA Training Sessions~21~21~3179|~EPPORA SQL Server Conversion Suite~18~18~2950|~EPPORA Source Analysis~15~15~2749|~EPPORA Resource Modeling~12~12~2546|~EPPORA Project Templates~9~9~2365|~EPPORA Project Manager Scheduling Enhancer~24~27~2192|~EPPORA Primavera Conversion Suite~6~6~2022|~EPPORA Performance Enhancer~3~3~1871|~EPPORA Oracle Conversion Suite~6~6~1833|~EPPORA Online Training~9~9~1761|~EPPORA Niku Workbench Conversion Suite~12~12~1655|~EPPORA MySQL Conversion Suite~15~15~1511|~EPPORA Microsoft Project Conversion Suite~30~0~1337|~EPPORA Implementation~27~27~1148|~EPPORA Estimation Analyzer~18~18~852|~EPPORA DB2 Conversion Suite~21~21~650|~EPPORA Comprehensive Project Test Tool~24~24~418|~EPPORA Automated Test Suite~18~21~156|

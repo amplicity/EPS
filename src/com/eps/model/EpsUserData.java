@@ -4,11 +4,6 @@
  */
 package com.eps.model;
 
-import com.ederbase.model.EbDatabase;
-import com.ederbase.model.EbEnterprise;
-import com.ederbase.model.EbMail;
-import com.ederbase.model.EbStatic;
-
 import it.sauronsoftware.cron4j.Scheduler;
 
 import java.io.BufferedReader;
@@ -21,12 +16,19 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ederbase.model.EbDatabase;
+import com.ederbase.model.EbEnterprise;
+import com.ederbase.model.EbMail;
+import com.ederbase.model.EbStatic;
 
 /**
  *
@@ -91,6 +93,69 @@ class ExchangeRateTask implements Runnable {
 
 }
 
+class DailyEOBTask implements Runnable {
+	public static EpsUserData epsud;
+	public DailyEOBTask(EpsUserData ud) {
+		epsud = ud;
+  }
+	
+	public void run() {
+		epsud.runEOB();
+	}
+}
+
+class MonthlyEOBTask implements Runnable {
+	public static EpsUserData epsud;
+	public MonthlyEOBTask(EpsUserData ud) {
+		epsud = ud;
+  }
+	
+	public void run() {
+		
+		try {
+			String stSql = "SELECT RecId FROM Projects";
+	    ResultSet rs = epsud.ebEnt.dbDyn.ExecuteSql(stSql);
+	    String pids = "";
+	    while (rs.next()) {
+	      pids += rs.getString("RecId") + ",";
+	    }
+	    if (pids.length()>0) pids = pids.substring(0,pids.length()-1);
+	    rs.close();
+	    //clean up for deleted projects
+	    epsud.ebEnt.dbDyn.ExecuteUpdate("DELETE FROM requirements WHERE nmProjectId NOT IN ("+pids+")");
+	    epsud.ebEnt.dbDyn.ExecuteUpdate("DELETE FROM schedule WHERE nmProjectId NOT IN ("+pids+")");
+	    epsud.ebEnt.dbDyn.ExecuteUpdate("DELETE FROM teb_baseline WHERE nmProjectId NOT IN ("+pids+")");
+	    epsud.ebEnt.dbDyn.ExecuteUpdate("DELETE FROM teb_link WHERE nmProjectId NOT IN ("+pids+")");
+	    epsud.ebEnt.dbDyn.ExecuteUpdate("DELETE FROM teb_project WHERE nmProjectId NOT IN ("+pids+")");
+	    epsud.ebEnt.dbDyn.ExecuteUpdate("DELETE FROM teb_refinventory WHERE nmProjectId NOT IN ("+pids+")");
+	    epsud.ebEnt.dbDyn.ExecuteUpdate("DELETE FROM test WHERE nmProjectId NOT IN ("+pids+")");
+	    epsud.ebEnt.dbEnterprise.ExecuteUpdate("DELETE FROM x25audittrail WHERE nmProject NOT IN ("+pids+")");
+	    
+	    
+	    stSql = "SELECT nmUserId FROM users";
+	    rs = epsud.ebEnt.dbDyn.ExecuteSql(stSql);
+	    String uids = "";
+	    while (rs.next()) {
+	    	uids += rs.getString("nmUserId") + ",";
+	    }
+	    if (uids.length()>0) uids = uids.substring(0,uids.length()-1);
+	    rs.close();
+	    //clean up for deleted users
+	    epsud.ebEnt.dbDyn.ExecuteUpdate("UPDATE projects SET nmLockUserId=0 WHERE nmLockUserId NOT IN ("+uids+")");
+	    epsud.ebEnt.dbDyn.ExecuteUpdate("UPDATE teb_project SET nmUserId=0 WHERE nmUserId NOT IN ("+uids+")");
+	    epsud.ebEnt.dbDyn.ExecuteUpdate("DELETE FROM teb_allocate WHERE nmUserId NOT IN ("+uids+")");
+	    epsud.ebEnt.dbDyn.ExecuteUpdate("DELETE FROM v_allocate WHERE nmUserId NOT IN ("+uids+")");
+	    epsud.ebEnt.dbEnterprise.ExecuteUpdate("DELETE FROM x25audittrail WHERE nmUserId NOT IN ("+uids+")");
+	    epsud.ebEnt.dbEnterprise.ExecuteUpdate("DELETE FROM x25user WHERE RecId NOT IN ("+uids+")");
+	    epsud.ebEnt.dbEnterprise.ExecuteUpdate("DELETE FROM x25refuser WHERE nmUserId NOT IN ("+uids+")");
+	    epsud.ebEnt.dbEnterprise.ExecuteUpdate("UPDATE x25refuser SET nmApproveUserId=0 WHERE nmApproveUserId NOT IN ("+uids+")");
+	    System.out.println("Finish Monthly EOB");
+    } catch (SQLException e) {
+	    System.out.println("Finish Monthly EOB with ERROR: " + e.getMessage());
+    }
+	}
+}
+
 class AnnualEOBTask implements Runnable {
 	public static EbDatabase ebd1 = null;
 	AnnualEOBTask(EbDatabase ebd)
@@ -114,7 +179,7 @@ class AnnualEOBTask implements Runnable {
 		  
 		  try {
 		  	stSql = "SELECT nmRefId,nmLaborCategoryId,nmActualHours,nmEstimatedHours FROM teb_reflaborcategory rlc, laborcategory lc"
-		  			+ " where rlc.nmRefType=42 and rlc.nmLaborCategoryId = lc.nmLcId and nmActualHours>nmEstimatedHours order by LaborCategory";
+		  			+ " WHERE rlc.nmRefType=42 and rlc.nmLaborCategoryId = lc.nmLcId and nmActualHours>nmEstimatedHours order by LaborCategory";
 		  	ResultSet rsC = ebd.ExecuteSql(stSql);
 
 		      while(rsC.next()) {
@@ -184,11 +249,17 @@ public class EpsUserData
 		scheduler = new Scheduler();
 		// Schedules the task, once every minute.
 		// Prepares the task.
-		ExchangeRateTask task = new ExchangeRateTask(this.ebEnt.dbEnterprise);
-		scheduler.schedule("* * * * *", task);
+//		ExchangeRateTask task = new ExchangeRateTask(this.ebEnt.dbEnterprise);
+//		scheduler.schedule("* * * * *", task);
 		
-		AnnualEOBTask task2 = new AnnualEOBTask(this.ebEnt.dbDyn);
-		scheduler.schedule("1 0 1 1 *", task2);
+		DailyEOBTask dailyTask = new DailyEOBTask(this);
+		scheduler.schedule("0 0 * * *", dailyTask);
+		
+		MonthlyEOBTask monthlyTask = new MonthlyEOBTask(this);
+		scheduler.schedule("1 0 1 * *", monthlyTask);
+		
+		AnnualEOBTask annualTask = new AnnualEOBTask(this.ebEnt.dbDyn);
+		scheduler.schedule("0 0 1 1 *", annualTask);
 		
 		request.getSession().getServletContext().setAttribute("scheduler", scheduler);
 	} else {
@@ -1903,7 +1974,7 @@ public class EpsUserData
       
       if (iCount == 0)
       {
-        stReturn += "<tr><td class=l1td colspan=3>No Messages</td></tr>";
+        stReturn += "<tr><td class=l1td colspan=5>No Messages</td></tr>";
       }
       stReturn += "</table>"
         + "</td></tr></table>";
@@ -2462,6 +2533,10 @@ public class EpsUserData
             stSql = "delete FROM " + this.ebEnt.dbEnterprise.getDbName() + ".X25User where RecId = \"" + stPk + "\"";
             this.ebEnt.dbDyn.ExecuteUpdate(stSql);
             return adminUsers(rsTable, "users"); //----------------------------------------->
+          }
+          if (rsTable.getString("stDbTableName").equals("Projects")) {
+          	stSql = "delete FROM teb_baseline where nmProjectId = \"" + stPk + "\"";
+          	this.ebEnt.dbDyn.ExecuteUpdate(stSql);
           }
         } else
         {
@@ -4559,7 +4634,40 @@ public class EpsUserData
       Calendar c = Calendar.getInstance();
 	  c.add(Calendar.DATE, 10);  // number of days to add
 	  String dateEnd = fmt.format(c.getTime());  // dt is now the new date
-      runD50D53();
+	  
+	  
+	  //backup databases.
+	  String mysqlpath = "D:/working/xampp/mysql/bin";
+	  String mysqldumppath = "D:/";
+//	  if (!this.ebEnt.dbEnterprise.getConnect().exportTo(mysqlpath, mysqldumppath)) {
+//	  	this.stError += this.ebEnt.dbEnterprise.getConnect().getError(); 
+//	  }
+//	  if (!this.ebEnt.dbDyn.getConnect().exportTo(mysqlpath, mysqldumppath)) {
+//	  	this.stError += this.ebEnt.dbDyn.getConnect().getError(); 
+//	  }
+//	  if (!this.ebEnt.dbEb.getConnect().exportTo(mysqlpath, mysqldumppath)) {
+//	  	this.stError += this.ebEnt.dbEb.getConnect().getError(); 
+//	  }
+//	  if (!this.ebEnt.dbCommon.getConnect().exportTo(mysqlpath, mysqldumppath)) {
+//	  	this.stError += this.ebEnt.dbCommon.getConnect().getError(); 
+//	  }
+	  
+	  //update ExchangeRate for divisions.
+	  String answer = "";
+		String stSql = "select nmDivision,stCurrency from dbeps01.teb_division";
+		ResultSet rs = this.ebEnt.dbEnterprise.ExecuteSql(stSql);
+		while(rs.next())
+		{
+			String countrycode = rs.getString(2);
+			URL convert = new URL("http://www.exchangerate-api.com/"+countrycode+"/usd/1?k=eBMtn-V4U6g-fiLRp");
+			BufferedReader in = new BufferedReader(new InputStreamReader(convert.openStream()));
+			answer = in.readLine();
+			String insertsql = "update dbeps01.teb_division set nmExchangeRate="+answer+" where nmDivision="+rs.getInt(1);
+			this.ebEnt.dbEnterprise.ExecuteUpdate(insertsql);
+			in.close();
+		}
+	  
+    runD50D53();
 	  
       //Delete all users previous tasks #19
 	  this.ebEnt.dbEnterprise.ExecuteUpdate("update X25Task set nmTaskFlag=4 where nmTaskFlag=1");
@@ -4567,10 +4675,10 @@ public class EpsUserData
 	  this.ebEnt.dbEnterprise.ExecuteUpdate("update X25Task set nmTaskFlag=4 where nmTaskFlag=2");
       
       // Check Criteria Assignment
-      String stSql = "SELECT count(*) as cnt ,c.nmDivision, d.stDivisionName FROM Criteria c, teb_division d "
+      stSql = "SELECT count(*) as cnt ,c.nmDivision, d.stDivisionName FROM Criteria c, teb_division d "
         + "where c.nmDivision=d.nmDivision and (Responsibilities is null or Responsibilities = '') "
         + "and WeightImportance != 0 group by c.nmDivision,stDivisionName";
-      ResultSet rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
+      rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
       rs.last();
       int iMax = rs.getRow();
       for (int iR = 1; iR <= iMax; iR++)
@@ -4591,6 +4699,12 @@ public class EpsUserData
 	    if(rs.getInt("cnt") < 1)
 	    	makeMessage("All", getUsers(rs.getInt("nmDivision"), getPriviledge("ppm")), "Criteria Requirement", "Missing non-zero for Division: " + rs.getString("stDivisionName"), dateEnd);
 	  }
+	  
+	  //compute project ranking
+	  EpsReport epsReport = new EpsReport();
+    epsReport.doProjectRanking(this);
+    makeMessage("All", getAllUsers(getPriviledge("ppm"))+","+getAllUsers(getPriviledge("ex")), "Projects", "The ranking of the active projects has been updated", dateEnd);
+	  
 	  
       //Missing Divisions
       //verify atleast one division exists #19
@@ -4625,6 +4739,23 @@ public class EpsUserData
       if(lcCount < 1){
 	      //send message to ppm
 		  makeMessage("All", getAllUsers(getPriviledge("ppm")), "Labor Category", "Missing Labor Category", dateEnd);
+      }
+      
+      //check lc 'Business Analyst', 'Project Manager', 'Project Portfolio Manager' exist
+      stSql = "select count(lc.nmLcId) as cats from LaborCategory lc where lc.LaborCategory='Project Manager'";
+      lcCount = this.ebEnt.dbDyn.ExecuteSql1n(stSql);
+      if (lcCount < 1) {
+      	makeMessage("All", getAllUsers(getPriviledge("ppm")), "Labor Category", "Missing Labor Category: 'Project Manager'", dateEnd);
+      }
+      stSql = "select count(lc.nmLcId) as cats from LaborCategory lc where lc.LaborCategory='Project Portfolio Manager'";
+      lcCount = this.ebEnt.dbDyn.ExecuteSql1n(stSql);
+      if (lcCount < 1) {
+      	makeMessage("All", getAllUsers(getPriviledge("ppm")), "Labor Category", "Missing Labor Category: 'Project Portfolio Manager'", dateEnd);
+      }
+      stSql = "select count(lc.nmLcId) as cats from LaborCategory lc where lc.LaborCategory='Business Analyst'";
+      lcCount = this.ebEnt.dbDyn.ExecuteSql1n(stSql);
+      if (lcCount < 1) {
+      	makeMessage("All", getAllUsers(getPriviledge("ppm")), "Labor Category", "Missing Labor Category: 'Business Analyst'", dateEnd);
       }
       //update high, low, avg salary for each labor category #19
       this.epsEf.processUsersInLaborCategory();
@@ -4662,6 +4793,19 @@ public class EpsUserData
         	rs.absolute(iR);
         	if(!rs.getString("FirstName").isEmpty() && !rs.getString("LastName").isEmpty())
         		makeMessage("All", getAllUsers(getPriviledge("ppm")), "Missing User Labor Category", rs.getString("FirstName")+" "+rs.getString("LastName"), dateEnd);
+          }
+      }
+      //Verify Each User has atleast 1 Division #19
+      stSql = "SELECT u.FirstName, u.LastName FROM users as u LEFT JOIN teb_refdivision as d ON u.nmUserId=d.nmRefId WHERE d.nmRefId IS NULL";
+      rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
+      rs.last();
+      iMax = rs.getRow();
+      if(iMax > 0){
+    	  for (int iR = 1; iR <= iMax; iR++)
+          {
+        	rs.absolute(iR);
+        	if(!rs.getString("FirstName").isEmpty() && !rs.getString("LastName").isEmpty())
+        		makeMessage("All", getAllUsers(getPriviledge("ppm")), "Missing User Division", rs.getString("FirstName")+" "+rs.getString("LastName"), dateEnd);
           }
       }
       //Verify User has Telephone #19
@@ -4731,6 +4875,70 @@ public class EpsUserData
         stReturn += makeTask(12, stMissing);
       }
       rs.close();
+   
+      // Missing Missing Project Portfolio Manager
+      stMissing = "";
+      stSql = "select * from Projects where ProjectPortfolioManagerAssignment=''";
+      rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
+      rs.last();
+      iMax = rs.getRow();
+      for (int iR = 1; iR <= iMax; iR++)
+      {
+        rs.absolute(iR);
+        stMissing += "<tr><td>" + rs.getString("ProjectName") + "</td></tr>";
+      }
+      if (stMissing.length() > 0)
+      {
+        stMissing = "<table border=1>"
+          + "<tr><th>Project Name</th></tr>" + stMissing;
+        stMissing += "</table>";
+        stReturn += makeTask(13, stMissing);
+      }
+      rs.close();
+      
+      // Missing Missing Business Analyst
+      stMissing = "";
+      stSql = "select * from Projects where BusinessAnalystAssignment=''";
+      rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
+      rs.last();
+      iMax = rs.getRow();
+      for (int iR = 1; iR <= iMax; iR++)
+      {
+        rs.absolute(iR);
+        stMissing += "<tr><td>" + rs.getString("ProjectName") + "</td></tr>";
+      }
+      if (stMissing.length() > 0)
+      {
+        stMissing = "<table border=1>"
+          + "<tr><th>Project Name</th></tr>" + stMissing;
+        stMissing += "</table>";
+        stReturn += makeTask(23, stMissing);
+      }
+      rs.close();
+
+      // Missing Sponsor
+      stMissing = "";
+      stSql = "select * from Projects where Sponsor=''";
+      rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
+      rs.last();
+      iMax = rs.getRow();
+      for (int iR = 1; iR <= iMax; iR++)
+      {
+        rs.absolute(iR);
+        stMissing += "<tr><td>" + rs.getString("ProjectName") + "</td></tr>";
+      }
+      if (stMissing.length() > 0)
+      {
+        stMissing = "<table border=1>"
+          + "<tr><th>Project Name</th></tr>" + stMissing;
+        stMissing += "</table>";
+        stReturn += makeTask(14, stMissing);
+      }
+      rs.close();
+      endTime = System.nanoTime();
+      elapsedTime = endTime - startTime;
+      seconds = elapsedTime / 1.0E09;
+      stReturn += "<br>Missing pm,ppm,sponsor " + seconds;
       
       //Lookup missing project information and send message #19
       stSql = "select * from Projects";
@@ -4765,7 +4973,7 @@ public class EpsUserData
       rs.close();
       
       //Missing Requirements Info #19
-      stSql = "SELECT r.*, p.ProjectName, p.ProjectPortfolioManagerAssignment, p.ProjectManagerAssignment, p.BusinessAnalystAssignment FROM requirements as r INNER JOIN projects as p ON r.nmProjectId=p.RecId";
+      stSql = "SELECT r.*, p.ProjectName, p.ProjectPortfolioManagerAssignment, p.ProjectManagerAssignment, p.BusinessAnalystAssignment, (select count(*) from requirements r1 where r1.nmProjectId=r.nmProjectId and r1.nmBaseLine=r.nmBaseLine and r1.ReqParentRecId=r.RecId) as cntChildren FROM requirements as r INNER JOIN projects as p ON r.nmProjectId=p.RecId";
       rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
       rs.last();
       iMax = rs.getRow();
@@ -4774,18 +4982,42 @@ public class EpsUserData
         rs.absolute(iR);
         //Verify Requirement Description Containts Shall
         if(rs.getString("ReqDescription") == null) continue;
+        if (rs.getInt("cntChildren")==0) continue;
         if(!rs.getString("ReqDescription").contains("shall")){
-        	makeMessage("All", rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), rs.getString("ReqTitle"), rs.getString("ProjectName")+": Requirements must contain the word <em>shall</em>", dateEnd);
+        	makeMessage("All", rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), "Requirement Warning", rs.getString("ProjectName")+": Requirements must contain the word <em>shall</em>", dateEnd);
         }
         //Verify Description does not exceed max word count
         if(!rs.getString("ReqDescription").isEmpty()){
         	iWords = rs.getString("ReqDescription").split(" ");
 	        iWordCount = iWords.length;
 	        if(iWordCount > this.rsMyDiv.getInt("ReqtsSpecificationMaximumWords")){
-	        	makeMessage("All", rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), rs.getString("ReqTitle"), rs.getString("ProjectName")+": Requirements cannot exceed "+this.rsMyDiv.getInt("ReqtsSpecificationMaximumWords")+" words", dateEnd);
+	        	makeMessage("All", rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), "Requirement Warning", rs.getString("ProjectName")+": Requirements cannot exceed "+this.rsMyDiv.getInt("ReqtsSpecificationMaximumWords")+" words", dateEnd);
+	        }
+	        
+	        if(iWordCount>0) {
+	        	String wordList = "";
+	        	for (String w : iWords) {
+	            if (!w.isEmpty()) wordList += "'"+w.replace(".", "")+"',";
+            }
+	        	if (wordList.length()>0) wordList = wordList.substring(0, wordList.length()-1);
+	        	if (this.ebEnt.dbDyn.ExecuteSql1n("select count(*) from teb_dictionary where stKeywordType='A' and stKeyword IN ("+wordList+")")>0) {
+	        		makeMessage("All", rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), "Requirement Warning", "Project "+rs.getString("ProjectName")+" requirement ID "+rs.getString("RecId")+" has an adjective or adverb as part of its description", dateEnd);
+	        	}
+	        	if (this.ebEnt.dbDyn.ExecuteSql1n("select count(*) from teb_dictionary where stKeywordType='C' and stKeyword IN ("+wordList+")")>0) {
+	        		makeMessage("All", rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), "Requirement Warning", "Project "+rs.getString("ProjectName")+" requirement ID "+rs.getString("RecId")+" is a compound statement", dateEnd);
+	        	}
 	        }
 	        iWordCount = 0;
 	        iWords = null;
+        }
+        //VerifyMapping
+        stSql = "SELECT count(*) FROM teb_link tl, schedule s where s.nmProjectId=tl.nmToProject and s.nmBaseLine=tl.nmBaseline and tl.nmToId=s.RecId and s.lowlvl=1 and tl.nmFromId="+rs.getString("RecId")+" AND tl.nmProjectId="+rs.getString("nmProjectId")+" AND tl.nmBaseLine="+rs.getString("nmBaseLine");
+        if (this.ebEnt.dbDyn.ExecuteSql1n(stSql) == 0) {
+        	makeMessage("All", rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), "Requirement Warning", "Project "+rs.getString("ProjectName")+" requirement ID "+rs.getString("RecId")+" is not mapped to any low-level tasks.", dateEnd);
+        }
+        stSql = "SELECT count(*) FROM test where ReqMap="+rs.getString("RecId")+" AND nmProjectId="+rs.getString("nmProjectId");
+        if (this.ebEnt.dbDyn.ExecuteSql1n(stSql) == 0) {
+        	makeMessage("All", rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), "Requirement Warning", "Project "+rs.getString("ProjectName")+" requirement ID "+rs.getString("RecId")+" is a low-level requirement and needs to be linked to one or more test cases.", dateEnd);
         }
       }
       
@@ -4809,58 +5041,57 @@ public class EpsUserData
 	    	  rs2 = this.ebEnt.dbDyn.ExecuteSql(stSql);
 	          rs2.absolute(1);
 	          if (rs2.getRow()>0) {
-	          	makeMessage("All", rs2.getString("ProjectPortfolioManagerAssignment")+","+rs2.getString("ProjectManagerAssignment"), "Schdule Warning", rs2.getString("ProjectName")+": Schedules should be updated daily", dateEnd);
+	          	makeMessage("All", rs2.getString("ProjectPortfolioManagerAssignment")+","+rs2.getString("ProjectManagerAssignment"), "Schedule Warning", rs2.getString("ProjectName")+": Schedules should be updated daily", dateEnd);
 	          }
+	          
+	          
+	        stSql = "SELECT s.*, p.ProjectName, p.ProjectPortfolioManagerAssignment, p.ProjectManagerAssignment, p.BusinessAnalystAssignment, (select count(*) from schedule s1 where s1.nmProjectId=s.nmProjectId and s1.nmBaseLine=s.nmBaseLine and s1.SchParentRecId=s.RecId) as cntChildren FROM schedule as s INNER JOIN projects as p ON s.nmProjectId=p.RecId WHERE nmProjectId="+rs.getString("nmProjectId")+" ORDER BY s.RecId";
+	        rs2 = this.ebEnt.dbDyn.ExecuteSql(stSql);
+	        int iMax2 = rs2.getRow();
+	        for (int iR2 = 1; iR2 <= iMax2; iR2++) {
+	          rs2.absolute(iR2);
+	          //check start with verb;
+	          iWords = rs2.getString("SchDescription").split(" ");
+	          iWordCount = iWords.length;
+	          if(rs2.getInt("cntChildren")==0) {
+		          if (iWordCount>0) {
+			          if (this.ebEnt.dbDyn.ExecuteSql1n("SELECT count(*) FROM teb_dictionary where stKeyWord='"+iWords[0]+"' AND stKeywordType!='V'")>0) {
+			          	makeMessage("All", rs2.getString("ProjectPortfolioManagerAssignment")+","+rs2.getString("ProjectManagerAssignment"), "Schedule Warning", "Project "+rs2.getString("ProjectName")+" schedule low-level task ID "+rs2.getString("RecId")+"’s description needs to start with a verb.", dateEnd);
+			          }
+		          }
+		          //Verify low-level has labor categories
+		          if (rs2.getString("SchLaborCategories") == null || rs2.getString("SchLaborCategories").isEmpty()) {
+		          	makeMessage("All", rs2.getString("ProjectPortfolioManagerAssignment")+","+rs2.getString("ProjectManagerAssignment"), "Schedule Warning", "Project "+rs2.getString("ProjectName")+" schedule low-level task ID "+rs2.getString("RecId")+" does not have a labor category assigned.", dateEnd);
+		          }
+		          //Verify low-level has no resources over 40 effort
+		          if ((rs2.getString("SchOtherResources") == null || rs2.getString("SchOtherResources").isEmpty()) && rs2.getInt("nmEffort40Flag")>0) {
+		          	makeMessage("All", rs2.getString("ProjectPortfolioManagerAssignment")+","+rs2.getString("ProjectManagerAssignment"), "Schedule Warning", "Project "+rs2.getString("ProjectName")+" schedule low-level task ID "+rs2.getString("RecId")+" has a resource assigned over the maximum recommended hours (default is 40)", dateEnd);
+		          }
+		          
+		          //VerifyMapping
+		          stSql = "SELECT sum(nmPercent) FROM teb_link WHERE nmToId="+rs.getString("RecId")+" AND nmProjectId="+rs.getString("nmProjectId")+" AND nmBaseLine="+rs.getString("nmBaseLine");
+		          String percent = this.ebEnt.dbDyn.ExecuteSql1(stSql);
+		          if (percent == null || "NULL".equals(percent) || percent.isEmpty()) {
+		          	makeMessage("All", rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), "Schedule Warning", "Project "+rs.getString("ProjectName")+" schedule low-level task ID "+rs.getString("RecId")+" is not mapped to any requirements.", dateEnd);
+		          }
+		          if (Integer.parseInt(percent) < 100) {
+		          	makeMessage("All", rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), "Schedule Warning", "Project "+rs.getString("ProjectName")+" schedule low-level task ID "+rs.getString("RecId")+" is not 100% mapped.", dateEnd);
+		          }
+	          } else {
+	          	//Verify high-level has no resources
+	          	if (!(rs2.getString("SchOtherResources") == null || rs2.getString("SchOtherResources").isEmpty())) {
+		          	makeMessage("All", rs2.getString("ProjectPortfolioManagerAssignment")+","+rs2.getString("ProjectManagerAssignment"), "Schedule Warning", "Project "+rs2.getString("ProjectName")+" schedule low-level task ID "+rs2.getString("RecId")+" is a parent task and should not have any resources assigned.", dateEnd);
+		          }
+	          }
+	          
+	          iWordCount = 0;
+		        iWords = null;
+          }
     	  }
       }
       
     	  
       
-      
-      // Missing Missing Project Portfolio Manager
-      // Missing Project Manager	EOB	EPPORA Message	Rob Eder
-      stMissing = "";
-      stSql = "select * from Projects where ProjectPortfolioManagerAssignment=''";
-      rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
-      rs.last();
-      iMax = rs.getRow();
-      for (int iR = 1; iR <= iMax; iR++)
-      {
-        rs.absolute(iR);
-        stMissing += "<tr><td>" + rs.getString("ProjectName") + "</td></tr>";
-      }
-      if (stMissing.length() > 0)
-      {
-        stMissing = "<table border=1>"
-          + "<tr><th>Project Name</th></tr>" + stMissing;
-        stMissing += "</table>";
-        stReturn += makeTask(13, stMissing);
-      }
-      rs.close();
-
-      // Missing Sponsor
-      stMissing = "";
-      stSql = "select * from Projects where Sponsor=''";
-      rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
-      rs.last();
-      iMax = rs.getRow();
-      for (int iR = 1; iR <= iMax; iR++)
-      {
-        rs.absolute(iR);
-        stMissing += "<tr><td>" + rs.getString("ProjectName") + "</td></tr>";
-      }
-      if (stMissing.length() > 0)
-      {
-        stMissing = "<table border=1>"
-          + "<tr><th>Project Name</th></tr>" + stMissing;
-        stMissing += "</table>";
-        stReturn += makeTask(14, stMissing);
-      }
-      rs.close();
-      endTime = System.nanoTime();
-      elapsedTime = endTime - startTime;
-      seconds = elapsedTime / 1.0E09;
-      stReturn += "<br>Missing pm,ppm,sponsor " + seconds;
       
       //Missing Inventory #19
       stSql = "SELECT * FROM inventory";
@@ -4944,6 +5175,7 @@ public class EpsUserData
     {
       this.stError += "<BR>ERROR runEOB " + e;
     }
+    System.out.println("Finish runEOB");
     return stReturn;
   }
   

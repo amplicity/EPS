@@ -1,8 +1,19 @@
 package com.ederbase.model;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 public class EbConnect
 {
@@ -125,5 +136,43 @@ public class EbConnect
   public String getError()
   {
     return this.stError;
+  }
+  
+  public boolean exportTo(String mysqlpath, String dumppath) {
+  	try {
+  		if (!mysqlpath.endsWith("\\") && !mysqlpath.endsWith("/")) mysqlpath += "/";
+  		if (!dumppath.endsWith("\\") && !dumppath.endsWith("/")) dumppath += "/";
+  		Date aDate = Calendar.getInstance().getTime();
+  		SimpleDateFormat formatter = new SimpleDateFormat("ddMMyy");
+	    Runtime rt = Runtime.getRuntime();
+	    switch (iDbType)
+      {
+	      case 0:
+			    Process p = rt.exec(mysqlpath+"mysqldump.exe "+stDbName+" -hlocalhost -ueps -peps");
+			    
+			    InputStream is = p.getInputStream();
+			    File f = new File(dumppath, "EPPORA-BACKUP-"+stDbName+"-"+formatter.format(aDate)+".sql");
+			    if (!f.exists()) f.createNewFile();
+			    BufferedReader br = new BufferedReader(new InputStreamReader(is));
+			    BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+			    int i;
+			    do {
+			      i = br.read();
+			      if (i != -1) {
+			          bw.write((char) i);
+			      }
+			    } while (i != -1);
+			    bw.close();
+			    br.close();
+			    return true;
+			  default:
+			  	this.stError = "ERROR: ERROR EbConnect: Dumpdata not support with database type";
+			  	break;
+      }
+    } catch (Exception e) {
+    	e.printStackTrace();
+	    this.stError = "ERROR: ERROR EbConnect: Dumpdata "+ stDbName;
+    }
+  	return false;
   }
 }
