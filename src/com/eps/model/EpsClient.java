@@ -13,7 +13,7 @@ import java.sql.ResultSet;
  */
 public class EpsClient
 {
-  public String stVersion = "Version: 5/1/12 08:07PM";
+  public String stVersion = "Version: 5/2/12 08:07PM";
   private int iUserId = -1;
   private int nmPrivUser = 0;
   private String stAction = "";

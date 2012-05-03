@@ -2907,8 +2907,8 @@ public class EpsEditField
       {
         ResultSet rsC = this.ebEnt.dbDyn.ExecuteSql("select p.ProjectName,pTo.ProjectName as ExternalProjectName,l.*,s.*"
           + " from Schedule s, teb_link l, Projects p, Projects pTo where l.nmLinkFlags=1 and pTo.RecId=l.nmToProject"
-          + " and s.nmProjectId=l.nmProjectId and s.nmBaseline=l.nmBaseline and s.SchId=l.nmToId"
-          + " and p.RecId=s.nmProjectId and p.CurrentBaseline=s.nmBaseline and l.nmFromId =" + rsD.getString("ReqId")
+          + " and s.nmProjectId=l.nmProjectId and s.nmBaseline=l.nmBaseline and s.RecId=l.nmToId"
+          + " and p.RecId=s.nmProjectId and p.CurrentBaseline=s.nmBaseline and l.nmFromId =" + rsD.getString("nmFromId")
           + " order by p.ProjectName,s.SchId");
         rsC.last();
         int iMaxC = rsC.getRow();

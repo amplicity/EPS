@@ -31,7 +31,7 @@ public class EpsReport
   private int nmCustomReportId = 0;
   private EpsUserData epsUd = null;
 
-  public void EpsReport()
+  public EpsReport()
   {
     this.stError = "";
   }
@@ -871,7 +871,7 @@ public class EpsReport
             	}
         	}
 
-            stSql = "select p.ProjectName,r.*, count(*) cnt, sum(l.nmPercent) nmPercent"
+            stSql = "select p.ProjectName,r.*, count(*) cnt, l.nmFromId, l.nmToId, sum(l.nmPercent) nmPercent, 1 MappingProjectTask"
               + " from Projects p, Requirements r left join teb_link l"
               + " on l.nmLinkFlags=1 and r.nmProjectId=l.nmProjectId and r.nmBaseline=l.nmBaseline and r.RecId=l.nmFromId"
               + " where r.nmProjectId=p.RecId and r.nmBaseline=p.CurrentBaseline" + pIDs
