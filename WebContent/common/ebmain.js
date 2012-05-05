@@ -110,6 +110,7 @@ function getPopupValue4 (DisplayField,IdField,Multi, stList, stLc)
 
 function getPopupValue2 (nmFieldId,id,fAll,f0,f1,f2,f3,f4,f5,f6,stPk)
 {
+	console.log(nmFieldId,id,fAll,f0,f1,f2,f3,f4,f5,f6,stPk);
   dialogMulti = nmFieldId;
   if( nmFieldId == 492 )
   {
@@ -122,6 +123,14 @@ function getPopupValue2 (nmFieldId,id,fAll,f0,f1,f2,f3,f4,f5,f6,stPk)
     dialogF4 = f4;
     dialogF5 = f5;
     dialogF6 = f6;
+    
+    var v0 = f0 ? f0.value : '';
+    var v1 = f1 ? f1.value : '';
+    var v2 = f2 ? f2.value : '';
+    var v3 = f3 ? f3.value : '';
+    var v4 = f4 ? f4.value : '';
+    var v5 = f5 ? f5.value : '';
+    var v6 = f6 ? f6.value : '';
     /*for( iField=0; iField < giNrValidation2 ; iField++ )
     {
       if ( gaValidation[iField] != null )
@@ -132,7 +141,7 @@ function getPopupValue2 (nmFieldId,id,fAll,f0,f1,f2,f3,f4,f5,f6,stPk)
         }
       }
     }*/
-    open ('./?stAction=admin&t=9&do=specialday&h=n&pk='+stPk, 'popup', 'width=600,height=550,scrollbars=1');
+    open ('./?stAction=admin&t=9&do=specialday&h=n&pk='+stPk+'&f0='+v0+'&f1='+v1+'&f2='+v2+'&f3='+v3+'&f4='+v4+'&f5='+v5+'&f6='+v6, 'popup', 'width=600,height=550,scrollbars=1');
   }
   return false;
 }
@@ -188,6 +197,64 @@ function specialDay( stDay )
     window.opener.dialogDisplayField.value += stValue;
   }
   window.close();
+}
+
+function selectSpecialDay2( stDay )
+{
+	var isStartDate = getObject("startdatetype").checked;
+	if (isStartDate) SetTextValue("stStartDate",stDay);
+	else SetTextValue("stFinishDate",stDay);
+}
+
+function specialDay2()
+{
+	var sDate = getTextValue("stStartDate"), eDate = getTextValue("stFinishDate");
+	var stValue =  window.opener.dialogIdField + "~"+ getTextValue( "stType" );
+  stValue += "~" + getTextValue( "stComment" )+"~"+sDate+ "~"+eDate;
+  //alert( " specialDay= " + stValue );
+  if ( window.opener.dialogMulti == 492 )
+  {
+	  if(sDate == null || sDate == "")
+	  {
+			alert("Please select a start date");
+			return;
+	  }
+	  if(eDate == null || eDate == "")
+	  {
+	  	alert("Please select an end date");
+	  	return;
+	  }
+	  var startdate = getDateObject(sDate,"/");
+	  var finishdate = getDateObject(eDate,"/");
+	  if(startdate > finishdate)
+	  {
+			alert ("Please select a date atleast as great as your start date");
+			return;
+    }
+	  window.opener.dialogF1.value = getTextValue( "stType" );
+    window.opener.dialogF2.value = getTextValue( "stComment" );
+    window.opener.dialogF3.value = sDate;
+    window.opener.dialogF4.value = eDate;
+    if ( window.opener.dialogDisplayField.value.toString().length > 0 )
+      window.opener.dialogDisplayField.value += "\n|";
+    window.opener.dialogDisplayField.value += stValue;
+    window.close();
+  }
+  
+  
+  /*var stValue =  window.opener.dialogIdField + "~"+ getTextValue( "stType" );
+  stValue += "~" + getTextValue( "stComment" )+"~"+stDay+ "~Pending";
+  //alert( " specialDay= " + stValue );
+  if ( window.opener.dialogMulti == 492 )
+  {
+    window.opener.dialogF1.value = getTextValue( "stType" );
+    window.opener.dialogF2.value = getTextValue( "stComment" );
+    window.opener.dialogF3.value = stDay;
+    window.opener.dialogF4.value = "Pending";
+    if ( window.opener.dialogDisplayField.value.toString().length > 0 )
+      window.opener.dialogDisplayField.value += "\n|";
+    window.opener.dialogDisplayField.value += stValue;
+  }*/
 }
 
 /* Start of Issue AS -- 12Oct2011 -- Issue # 41 */
@@ -1870,12 +1937,12 @@ function specialDays(  iField )
       {
         aV = stTemp.split("^");
         stEdit  += "<td><input DISABLED type=text name=\"field"+i+"_"+iR+"\" id=\"field"+i+"_"+iR+"\" value='' style='width:"+aV[1]+";'>";
-        if(i==3)
+        if(i==3 || (gaValidation[iField][0]==492 && i==4))
 	  	{
 	  	  stEdit += "<input type=image border=0 src='./common/img/cal.gif' alt='Special Day' class=imageStyle"
 	  	  + " onClick='return getPopupValue2("+gaValidation[iField][0]+","+iR+",this.form.f"+gaValidation[iField][0]+",this.form.field0_"+iR+",this.form.field1_"+iR+",this.form.field2_"+iR+",this.form.field3_"+iR+",this.form.field4_"+iR+",this.form.field5_"+iR+",this.form.field6_"+iR+","+giUser+");'>";
 	  	}
-	    if(i==4)
+	    if(gaValidation[iField][0]!=492 && i==4)
 		{
 		  stEdit += "<input type=image border=0 src='./common/img/cal.gif' alt='Special Day' class=imageStyle"
 		  + " onClick='return getPopupValue3("+gaValidation[iField][0]+","+iR+",this.form.f"+gaValidation[iField][0]+",this.form.field0_"+iR+",this.form.field1_"+iR+",this.form.field2_"+iR+",this.form.field3_"+iR+",this.form.field4_"+iR+",this.form.field5_"+iR+",this.form.field6_"+iR+","+giUser+");'>";

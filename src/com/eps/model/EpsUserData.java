@@ -16,7 +16,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
@@ -3886,7 +3885,8 @@ public class EpsUserData
   {
     String stReturn = "";
     int iYear = 0;
-    String stType = this.ebEnt.ebUd.request.getParameter("stType");
+//    String stType = this.ebEnt.ebUd.request.getParameter("stType");
+    String stType = this.ebEnt.ebUd.request.getParameter("f1");
     if (stType == null)
     {
       stType = "";
@@ -3896,7 +3896,8 @@ public class EpsUserData
     {
       stPk = "0";
     }
-    String stComment = this.ebEnt.ebUd.request.getParameter("stComment");
+//    String stComment = this.ebEnt.ebUd.request.getParameter("stComment");
+    String stComment = this.ebEnt.ebUd.request.getParameter("f2");
     if (stComment == null)
     {
       stComment = "";
@@ -3904,7 +3905,8 @@ public class EpsUserData
     String stYear = this.ebEnt.ebUd.request.getParameter("stYear");
     if (stYear == null)
     {
-      stYear = "2011";
+//      stYear = "2011";
+      stYear = ""+Calendar.getInstance().get(Calendar.YEAR);
     }
     try
     {
@@ -3918,11 +3920,7 @@ public class EpsUserData
         + " where rd.nmRefType=42 and rd.nmRefId=" + stPk + " and (rd.nmFlags & 1) = 1 and rd.nmDivision=d.nmDivision and o.RecId=1");
       rsMyDiv.absolute(1);
       ResultSet rsHoliday = this.ebEnt.dbDyn.ExecuteSql("SELECT * FROM Calendar where dtDay >= '" + iYear + "-01-01' and dtDay <= '" + iYear + "-12-31' and ( nmDivision=" + this.rsMyDiv.getString("nmDivision") + " or nmUser = " + stPk + " ) order by dtDay");
-      stReturn = "</div></div></form><form method=post name=formsd id=formsd><center><h2>Select Special Day</h2><table border=0>";
-      stReturn += "<tr><td>Reason: " + getTypeDay("stType", stType);
-      stReturn += " Comment/Request: <input type=text name=stComment id=stComment value=\"" + stComment + "\"></td></tr>";
-      stReturn += "<tr><td>Click on DATE or select different year: " + getYear("stYear", stYear) + " </td></tr>";
-      stReturn += "</table>";
+      stReturn = "</div></div></form><form method=post name=formsd id=formsd><center><h2>Select Special Day</h2>";
       stReturn += "<table><tr>";
       stReturn += "<td valign=top>" + getCalendarMonth(iYear, 1, rsHoliday) + "</td>";
       stReturn += "<td valign=top>" + getCalendarMonth(iYear, 2, rsHoliday) + "</td>";
@@ -3939,6 +3937,15 @@ public class EpsUserData
       stReturn += "<td valign=top>" + getCalendarMonth(iYear, 11, rsHoliday) + "</td>";
       stReturn += "<td valign=top>" + getCalendarMonth(iYear, 12, rsHoliday) + "</td>";
       stReturn += "</tr>";
+      stReturn += "</table>";
+      stReturn += "<table border=0><tr><td align=center>Year: "+getYear("stYear", stYear)+" Reason: " + getTypeDay("stType", stType);
+      stReturn += " Comment/Request: <input type=text name=stComment id=stComment value=\"" + stComment + "\"></td></tr>";
+      stReturn += "<tr><td align=center><input type='radio' id='startdatetype' name='datetype' value='start' checked=checked />Start<input type='radio' id='enddatetype' name='datetype' value='finish' />Finish&nbsp;&nbsp;&nbsp;&nbsp;";
+      stReturn += "Starting Date: " +
+      		"<input type=text size=12 name=stStartDate id=stStartDate readonly=readonly value=\""+this.ebEnt.ebUd.request.getParameter("f3")+"\">&nbsp;&nbsp;Ending Date: " +
+      		"<input type=text size=12 name=stFinishDate id=stFinishDate readonly=readonly value=\""+this.ebEnt.ebUd.request.getParameter("f4")+"\"></td></tr>";
+      stReturn += "<tr><td align=center>For a date range, select the \"Start\" or \"Finish\" radio button then click on the desired date.</td></tr>";
+      stReturn += "<tr><td align=center><input type=button value='Save' onclick='specialDay2();' /><input type=button value='Cancel' onclick='window.close();' /></td></tr>";
       stReturn += "</table>";
     } catch (Exception e)
     {
@@ -4051,7 +4058,7 @@ public class EpsUserData
           } else
           {
             stEdit += "<td>";
-            stEdit += "\n<a href='#' onClick=\"specialDay( '" + iMonth + "/" + iD + "/" + iYear + "');\">" + iD + "</a></td>";
+            stEdit += "\n<a href='#' onClick=\"selectSpecialDay2( '" + iMonth + "/" + iD + "/" + iYear + "');\">" + iD + "</a></td>";
           }
         }
       }
@@ -4637,20 +4644,20 @@ public class EpsUserData
 	  
 	  
 	  //backup databases.
-	  String mysqlpath = "D:/working/xampp/mysql/bin";
-	  String mysqldumppath = "D:/";
-//	  if (!this.ebEnt.dbEnterprise.getConnect().exportTo(mysqlpath, mysqldumppath)) {
-//	  	this.stError += this.ebEnt.dbEnterprise.getConnect().getError(); 
-//	  }
-//	  if (!this.ebEnt.dbDyn.getConnect().exportTo(mysqlpath, mysqldumppath)) {
-//	  	this.stError += this.ebEnt.dbDyn.getConnect().getError(); 
-//	  }
-//	  if (!this.ebEnt.dbEb.getConnect().exportTo(mysqlpath, mysqldumppath)) {
-//	  	this.stError += this.ebEnt.dbEb.getConnect().getError(); 
-//	  }
-//	  if (!this.ebEnt.dbCommon.getConnect().exportTo(mysqlpath, mysqldumppath)) {
-//	  	this.stError += this.ebEnt.dbCommon.getConnect().getError(); 
-//	  }
+	  String mysqlpath = "C:\\Program Files\\MySQL\\MySQL Server 5.5\\bin";
+	  String mysqldumppath = "C:\\EPS-DB-BACKUP";
+	  if (!this.ebEnt.dbEnterprise.getConnect().exportTo(mysqlpath, mysqldumppath)) {
+	  	this.stError += this.ebEnt.dbEnterprise.getConnect().getError(); 
+	  }
+	  if (!this.ebEnt.dbDyn.getConnect().exportTo(mysqlpath, mysqldumppath)) {
+	  	this.stError += this.ebEnt.dbDyn.getConnect().getError(); 
+	  }
+	  if (!this.ebEnt.dbEb.getConnect().exportTo(mysqlpath, mysqldumppath)) {
+	  	this.stError += this.ebEnt.dbEb.getConnect().getError(); 
+	  }
+	  if (!this.ebEnt.dbCommon.getConnect().exportTo(mysqlpath, mysqldumppath)) {
+	  	this.stError += this.ebEnt.dbCommon.getConnect().getError(); 
+	  }
 	  
 	  //update ExchangeRate for divisions.
 	  String answer = "";

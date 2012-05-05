@@ -874,7 +874,7 @@ public class EpsReport
             stSql = "select p.ProjectName,r.*, count(*) cnt, l.nmFromId, l.nmToId, sum(l.nmPercent) nmPercent, 1 MappingProjectTask"
               + " from Projects p, Requirements r left join teb_link l"
               + " on l.nmLinkFlags=1 and r.nmProjectId=l.nmProjectId and r.nmBaseline=l.nmBaseline and r.RecId=l.nmFromId"
-              + " where r.nmProjectId=p.RecId and r.nmBaseline=p.CurrentBaseline" + pIDs
+              + " where r.nmProjectId=p.RecId and r.nmBaseline=p.CurrentBaseline " + pIDs
               + "  group by p.ProjectName,r.RecId order by p.ProjectName,r.ReqId";
             rsR = this.epsUd.ebEnt.dbDyn.ExecuteSql(stSql);
             rsR.last();
@@ -977,7 +977,7 @@ public class EpsReport
             */
             
         	stSql = "select p.ProjectName,s.* from Projects p, Schedule s"
-              + " where s.nmProjectId=p.RecId and s.nmBaseline=p.CurrentBaseline" + pIDs
+              + " where s.nmProjectId=p.RecId and s.nmBaseline=p.CurrentBaseline " + pIDs
               + " group by p.ProjectName,s.RecId order by p.ProjectName,s.SchId";
             rsR = this.epsUd.ebEnt.dbDyn.ExecuteSql(stSql);
             rsR.last();
@@ -1032,7 +1032,7 @@ public class EpsReport
           	}
         	  
             stSql += "select p.ProjectName,r.*, '' as SuggestedMitigationStrategy from Requirements r, Projects p"
-              + " where r.nmProjectId=p.RecId and r.nmBaseline=p.CurrentBaseline" + pIDs
+              + " where r.nmProjectId=p.RecId and r.nmBaseline=p.CurrentBaseline " + pIDs
               + " and r.nmD50Flags != 0 and (ReqFlags & 0x10) != 0"
               + " order by p.ProjectName, r.ReqId;";
             rsR = this.epsUd.ebEnt.dbDyn.ExecuteSql(stSql);
@@ -1058,7 +1058,7 @@ public class EpsReport
         	}
         	  
             stSql += "select p.ProjectName,s.*, '' as SuggestedMitigationStrategy from Schedule s, Projects p"
-              + " where s.nmProjectId=p.RecId and s.nmBaseline=p.CurrentBaseline" + pIDs
+              + " where s.nmProjectId=p.RecId and s.nmBaseline=p.CurrentBaseline " + pIDs
               + " and s.nmD53Flags != 0 and (SchFlags & 0x10) != 0"
               + " order by p.ProjectName, s.SchId";
             rsR = this.epsUd.ebEnt.dbDyn.ExecuteSql(stSql);
@@ -1329,7 +1329,7 @@ public class EpsReport
             }
             stSqlUser = stSqlUser.replace("u.*,xu.stEMail,xu.nmPriviledge,xu.RecId", "u.nmUserId");
 
-            stSql = "SELECT DISTINCT u.*,lc.*,rlc.*,d.nmExchangeRate,d.stCurrency, d.dtExchangeRate, d.stDivisionName" +
+            stSql = "SELECT DISTINCT u.*,lc.*,rlc.nmEstimatedHours,rlc.nmActualHours,rlc.nmTasksCompleted,FORMAT(rlc.nmEstimatedHours/rlc.nmActualHours,2) AS nmProductiviyFactor,FORMAT(rlc.nmEstimatedHours*lc.AverageHourlySalary/rlc.nmActualHours,2) AS nmCostEffectiveness,d.nmExchangeRate,d.stCurrency, d.dtExchangeRate, d.stDivisionName" +
             		" FROM Users u, LaborCategory lc, teb_reflaborcategory rlc, teb_division d, teb_refdivision rd"
               + " where u.nmUserId in (" + stSqlUser + ") "+(stDivList.length()>0? " and d.nmDivision in ("+stDivList+")":"")
               + " and u.nmUserId=rlc.nmRefId and rlc.nmRefType=42 and rlc.nmLaborCategoryId=lc.nmLcId and u.nmUserId=rd.nmRefId and rd.nmDivision=d.nmDivision"
@@ -1689,7 +1689,7 @@ public class EpsReport
             	  if(rs.first()){
             		  rs.absolute(1);
             		  
-            		  currCost = Double.parseDouble(rs.getString("costSum"));
+            		  if (rs.getString("costSum") != null) currCost = Double.parseDouble(rs.getString("costSum"));
             	  }
 
             	  //look up saved baseline
@@ -1717,7 +1717,7 @@ public class EpsReport
             	  if(rs.first()){
             		  rs.absolute(1);
             		  
-            		  currBL = Double.parseDouble(rs.getString("effSum"));
+            		  if (rs.getString("effSum") != null) currBL = Double.parseDouble(rs.getString("effSum"));
             	  }
 
             	  //look up saved baseline

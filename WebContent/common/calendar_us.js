@@ -158,6 +158,10 @@ function f_tcalHide (n_date) {
 	this.e_icon.title = 'Open Calendar';
 	this.b_visible = false;
 	
+	if(this.a_cfg.updateFieldName != undefined && this.a_cfg.controlname != this.a_cfg.updateFieldName){
+		setEstFinishDate(0, this.a_cfg.controlname, this.a_cfg.updateFieldName);
+	}
+	
 	//trigger change event
 	if(this.a_cfg.endDateName != undefined && this.a_cfg.controlname != this.a_cfg.endDateName){
 		setEstFinishDate(estDays, this.a_cfg.controlname, this.a_cfg.endDateName);

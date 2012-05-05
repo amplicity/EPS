@@ -1548,15 +1548,20 @@ class EpsXlsProject //extends EpsUserData
 	          rs1.last();
 	          int iSch = rs1.getRow();
 	          int iLastLevel = -1;
+	          
+	          String lowlvl = rs1.getString("lowlvl");
+	          if (lowlvl != null && Integer.parseInt(lowlvl)>0 && Integer.parseInt(stValue) > 40) {
+	          	this.ebEnt.ebUd.setPopupMessage("Low level Task ID: "+ rs1.getString("RecId") + " is over 40 hours.");
+	          }
 
 	          for (int i = 1; i <= iSch; i++)
 	          {
 	            rs1.absolute(i);
 	            if (iLastLevel == rs1.getInt("SchLevel") && this.ebEnt.ebUd.request.getParameter("edit").equals(rs1.getString("RecId"))){
 	          	  // same level as before, therefore we are LAST
-	              if(Integer.parseInt(stValue) > 40)
+	              if(Integer.parseInt(stValue) > 40) {
 	            	  stSql += ",nmEffort40Flag=1";	//flag hours
-	              else
+	              } else
 	            	  stSql += ",nmEffort40Flag=0";	//unflag
 	          	  break;
 	            }
@@ -1627,7 +1632,7 @@ class EpsXlsProject //extends EpsUserData
   		  if(rLvl > 0){
 	  		  //edit parent according to level
   			  int rId = this.ebEnt.dbDyn.ExecuteSql1n("SELECT ReqId FROM requirements WHERE RecId = " + this.ebEnt.ebUd.request.getParameter("edit"));
-  			  stSql += ", ReqParentRecId=" + this.ebEnt.dbDyn.fmtDbString(this.ebEnt.dbDyn.ExecuteSql1n("SELECT RecId FROM requirements WHERE ReqId < " + rId + " AND ReqLevel=" + (rLvl-1) + " AND nmProjectId=" + stPk + " ORDER BY ReqId DESC")+"");
+  			  stSql += ", ReqParentRecId=" + this.ebEnt.dbDyn.fmtDbString(this.ebEnt.dbDyn.ExecuteSql1n("SELECT RecId FROM requirements WHERE ReqId < " + rId + " AND ReqLevel=" + (rLvl-1) + " AND nmProjectId=" + stPk + " AND nmBaseLine="+nmBaseline+" ORDER BY ReqId DESC")+"");
   		  }
   	  }
   
@@ -3370,6 +3375,7 @@ class EpsXlsProject //extends EpsUserData
               // Insert NEW
               int iRemainder = Integer.parseInt(nmRemainder);
               linkMap(1, stPk, nmBaseline, stPk, iFromId, stPk, iToId, dPercent, "", 0, iRemainder);
+              this.processRequirementCost(iFromId);
             } else
             {
               if (stChild.equals("21"))
@@ -3379,6 +3385,8 @@ class EpsXlsProject //extends EpsUserData
                   + ",l.nmRemainder=" + nmRemainder
                   + " where l.nmProjectId=p.RecId and l.nmBaseline=p.CurrentBaseline and l.nmLinkFlags=1"
                   + " and l.nmProjectId=" + stPk + " and l.nmFromId=" + stFromOrig + " and l.nmToId=" + stToOrig;
+                
+                this.processRequirementCost(Integer.parseInt(stFrom));
               } else
               {
                 stSql = "update teb_link l, Projects p"
@@ -3444,7 +3452,7 @@ class EpsXlsProject //extends EpsUserData
             int maxIds = taskIds.getRow();
             for (int i=1; i<=maxIds; i++) {
             	taskIds.absolute(i);
-            	sbReturn.append(this.ebEnt.ebUd.addOption2(Integer.toString(taskIds.getInt("SchId")) + ": " + taskIds.getString("SchTitle"), Integer.toString(taskIds.getInt("SchId")), stTo));
+            	sbReturn.append(this.ebEnt.ebUd.addOption2(Integer.toString(taskIds.getInt("SchId")) + ": " + taskIds.getString("SchTitle"), Integer.toString(taskIds.getInt("RecId")), stTo));
             }
             sbReturn.append("</select>");
         } else {
@@ -4657,16 +4665,29 @@ class EpsXlsProject //extends EpsUserData
       Double rCost = 0.00;
       DecimalFormat df = new DecimalFormat("#########0.00");
       
-      //calculate sum of tasks for each requirement cost
-      ResultSet stResult = this.ebEnt.dbDyn.ExecuteSql("select l.nmPercent, l.nmRemainder, l.nmToId, r.ReqCost from teb_link l left join requirements r on l.nmFromId=r.RecId and l.nmProjectId=r.nmProjectId and l.nmBaseline=r.nmBaseline where l.nmLinkFlags=1 and l.nmProjectId=" + stPk + " and l.nmBaseline=" + this.nmBaseline + " and nmFromId=" + reqID);
+      ResultSet rsP = this.ebEnt.dbDyn.ExecuteSql("select count(*) cnt, sum(ReqCost) cost from requirements where nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline + " and ReqParentRecId="+reqID);
+      boolean lowlvl = true;
+      if (rsP.next()) {
+      	if (rsP.getInt("cnt")>0) {
+      		lowlvl = false;
+      		rCost = rsP.getDouble("cost");
+      	}
+      }
       
-      while(stResult.next()){
-    	  if(stResult.getString("l.nmRemainder").equals("1"))
-    		  rCost += Double.parseDouble(this.ebEnt.dbDyn.ExecuteSql1("select SchCost from schedule where nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline + " and RecId=" + stResult.getString("l.nmToId")));
-    	  else
-    		  rCost += Double.parseDouble(this.ebEnt.dbDyn.ExecuteSql1("select SchCost from schedule where nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline + " and RecId=" + stResult.getString("l.nmToId"))) * (Double.parseDouble(stResult.getString("l.nmPercent"))*0.01);
+      if (lowlvl) {
+	      //calculate sum of tasks for each requirement cost
+	      ResultSet stResult = this.ebEnt.dbDyn.ExecuteSql("select l.nmPercent, l.nmRemainder, l.nmToId, r.ReqCost from teb_link l left join requirements r on l.nmFromId=r.RecId and l.nmProjectId=r.nmProjectId and l.nmBaseline=r.nmBaseline where l.nmLinkFlags=1 and l.nmProjectId=" + stPk + " and l.nmBaseline=" + this.nmBaseline + " and nmFromId=" + reqID);
+	      
+	      while(stResult.next()){
+	    	  if(stResult.getString("l.nmRemainder").equals("1"))
+	    		  rCost += Double.parseDouble(this.ebEnt.dbDyn.ExecuteSql1("select SchCost from schedule where nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline + " and RecId=" + stResult.getString("l.nmToId")));
+	    	  else
+	    		  rCost += Double.parseDouble(this.ebEnt.dbDyn.ExecuteSql1("select SchCost from schedule where nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline + " and RecId=" + stResult.getString("l.nmToId"))) * (Double.parseDouble(stResult.getString("l.nmPercent"))*0.01);
+	      }
       }
 	  this.ebEnt.dbDyn.ExecuteUpdate("update requirements set ReqCost='" + df.format(rCost) + "' where nmProjectId=" + stPk + " and RecId=" + reqID + " and nmBaseline=" + this.nmBaseline);
+	  int nmParentId = this.ebEnt.dbDyn.ExecuteSql1n("select ReqParentRecId from requirements where nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline + " and RecId="+reqID);
+	  if (nmParentId>0) processRequirementCost(nmParentId);
   }
   
   /*

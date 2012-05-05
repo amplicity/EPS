@@ -28,5 +28,6 @@ VALUES ('11', '873', 'Y', '8', '', '10', 'null', ''),('11', '884', 'Y', '9', '',
 INSERT INTO `dbeps01`.`triggers` (`RecId` ,`nmTasktype` ,`ContactList` ,`TriggerName` ,`TriggerEvent` ,`Communication`) VALUES (23 , '1', '1,2,3', 'Missing Business Analyst', 'Enabled', 'No');
 
 DELETE FROM `dbeps01`.`teb_reportcolumns` WHERE `teb_reportcolumns`.`nmCustomReportId` = 31 AND `teb_reportcolumns`.`nmFieldId` = 2
+DELETE FROM `dbeps01`.`teb_reportcolumns` WHERE `teb_reportcolumns`.`nmCustomReportId` = 9 AND `teb_reportcolumns`.`nmFieldId` = 116
 UPDATE `dbeps01`.`teb_fields` SET `stDbFieldName` = 'nmPercent' WHERE `teb_fields`.`nmForeignId` =1003
 UPDATE `dbeps01`.`teb_fields` SET `stDbFieldName` = 'ProjectName' WHERE `teb_fields`.`nmForeignId` =1001;

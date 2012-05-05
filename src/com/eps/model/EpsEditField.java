@@ -682,6 +682,7 @@ public class EpsEditField
                 + "\nnew tcal ({"
                 + "\n	'formname': 'form" + rsFields.getInt("nmTabId") + "',"
                 + "\n 'controlname': 'f" + iF + "',"
+                + "\n 'updateFieldName': "+(iF==808 ? "'f827'" : (iF==807 ? "'f818'" : "null"))+","
                 + "\n 'endDateName': 'f807'});"
                 + "\n</script>";
             }
@@ -1979,9 +1980,11 @@ public class EpsEditField
         for (int iL = rs.getInt("ReqLevel") - 1; iL >= 0; iL--)
         {
           ResultSet rs1 = this.ebEnt.dbDyn.ExecuteSql("select * from Requirements where nmProjectId=" + stPk + " and nmBaseline=" + nmBaseline + " and RecId= " + iParent);
-          rs1.absolute(1);
-          aTitle[iL] = rs1.getString("ReqTitle");
-          iParent = rs1.getInt("ReqParentRecId");
+          if (rs1.next()) {
+//		        rs1.absolute(1);
+		        aTitle[iL] = rs1.getString("ReqTitle");
+		        iParent = rs1.getInt("ReqParentRecId");
+          }
           rs1.close();
         }
       }
