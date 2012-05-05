@@ -4284,21 +4284,36 @@ public class EpsUserData
 		  ResultSet rs = this.ebEnt.dbDyn.ExecuteSql("select ProjectName, ProjectManagerAssignment, ProjectPortfolioManagerAssignment, BusinessAnalystAssignment, Sponsor FROM projects where RecId=" + stPk);
 		  rs.absolute(1);
 	
+		  String parentId = "";
 	      for (int i = 1; i <= iSch; i++)
 	      {
 	        rs1.absolute(i);
+	        if (stId.equals(rs1.getString("RecId"))) {
+	        	parentId = rs1.getString("ReqParentRecId");
+	        }
 	        if (iLastLevel == rs1.getInt("ReqLevel") && stValue.length() <= 0 && stId.equals(rs1.getString("RecId"))){
 	      	  // same level as before, therefore we are LAST
 	      	  this.ebEnt.ebUd.setPopupMessage("[ID:" + rs1.getString("RecId") + "] " + rsF.getString("stLabel") + ": Children tasks must have a description specified.");
 	      	  makeMessage("All", rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), rs1.getString("ReqTitle"), rs.getString("ProjectName")+": Children tasks must have a description specified", dateEnd);
 	      	  err = 1;
 	      	  break;
-	        }else if(iLastLevel != rs1.getInt("ReqLevel") && stValue.length() > 0 && stId.equals(rs1.getString("RecId"))){
+	        }
+	        /*else if(iLastLevel != rs1.getInt("ReqLevel") && stValue.length() > 0 && stId.equals(rs1.getString("RecId"))){
 	      	  //parent
 	      	  this.ebEnt.ebUd.setPopupMessage("[ID:" + rs1.getString("RecId") + "] " + rsF.getString("stLabel") + ": Parent tasks cannot have a description.");
 	      	  makeMessage("All", rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), rs1.getString("ReqTitle"), rs.getString("ProjectName")+": Parent tasks cannot have a descriptions", dateEnd);
 	      	  err = 1;
 	      	  break;
+	        }*/
+	        else if (parentId.equals(rs1.getString("RecId"))) {
+		        if(iLastLevel != rs1.getInt("ReqLevel") && rs1.getString("ReqDescription") != null && rs1.getString("ReqDescription").length() > 0){
+		      	  //parent
+		      	  this.ebEnt.ebUd.setPopupMessage("[ID:" + stId + "] " + rsF.getString("stLabel") + ": Parent tasks cannot have a description.");
+		      	  makeMessage("All", rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), rs1.getString("ReqTitle"), rs.getString("ProjectName")+": Parent tasks cannot have a descriptions", dateEnd);
+		      	  err = 1;
+		      	  break;
+		        }
+		        parentId = rs1.getString("ReqParentRecId");
 	        }
 	        iLastLevel = rs1.getInt("ReqLevel");
 	      }
