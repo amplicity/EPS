@@ -4660,7 +4660,7 @@ class EpsXlsProject //extends EpsUserData
   /*
    * Calculate specific requirement's cost for the current requirement
    */
-  private void processRequirementCost(int reqID) throws SQLException{
+  public void processRequirementCost(int reqID) throws SQLException{
 	  //get requirements we need to calculate
       Double rCost = 0.00;
       DecimalFormat df = new DecimalFormat("#########0.00");
@@ -4693,7 +4693,7 @@ class EpsXlsProject //extends EpsUserData
   /*
    * Calculate requirement cost for all requirements linked to this schedule
    */
-  private void processScheduleRequirementCost(int scheduleID) throws SQLException{
+  public void processScheduleRequirementCost(int scheduleID) throws SQLException{
 	  //get requirements we need to calculate
       Double rCost = 0.00;
       DecimalFormat df = new DecimalFormat("#########0.00");

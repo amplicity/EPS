@@ -1689,6 +1689,44 @@ public class EpsUserData
     stReturn += "</center>";
     return stReturn;
   }
+  
+  private void updateScheduleTask(String param) {
+  	try {
+	    String stPrjId = this.ebEnt.ebUd.request.getParameter("nmPrjId");
+	    String stBaseline = this.ebEnt.ebUd.request.getParameter("nmBaseline");
+	    String stSchId = this.ebEnt.ebUd.request.getParameter("nmSchId");
+	    
+	    String stEstimatedHours = this.ebEnt.ebUd.request.getParameter(param+"Estimated-"+stPrjId+"_"+stBaseline+"_"+stSchId);
+	    String stExpendedHours = this.ebEnt.ebUd.request.getParameter(param+"Expended-"+stPrjId+"_"+stBaseline+"_"+stSchId);
+	    String stStatus = this.ebEnt.ebUd.request.getParameter(param+"Status-"+stPrjId+"_"+stBaseline+"_"+stSchId);
+	    try {
+	      Double.parseDouble(stEstimatedHours);
+	    } catch (Exception e) {
+	    	this.ebEnt.ebUd.setPopupMessage("Estimated Hours must be a number");
+	    	return;
+	    }
+	    
+	    try {
+	      Double.parseDouble(stExpendedHours);
+	    } catch (Exception e) {
+	    	this.ebEnt.ebUd.setPopupMessage("Expended Hours must be a number");
+	    	return;
+	    }
+	    
+	    int nmStatus = Integer.parseInt(stStatus);
+	    stStatus = (nmStatus == 0 ? "NULL" : (nmStatus == 1 ? "'N'" : "'Y'"));
+	    String stWhere = " WHERE RecId="+stSchId+ " AND nmProjectId="+stPrjId+" AND nmBaseLine="+stBaseline;
+	    this.ebEnt.dbDyn.ExecuteUpdate("UPDATE Schedule set SchDone="+stStatus+", SchEstimatedEffort="+stEstimatedHours+", SchEfforttoDate="+stExpendedHours+", dtSchLastUpdate=now()" + stWhere);
+	    calculateScheduleCost(stWhere);
+	    EpsXlsProject epsXlsProject = new EpsXlsProject();
+	    epsXlsProject.setEpsXlsProject(this.ebEnt, this);
+	    epsXlsProject.nmBaseline = Integer.parseInt(stBaseline);
+	    epsXlsProject.stPk = stPrjId;
+	    epsXlsProject.processScheduleRequirementCost(Integer.parseInt(stSchId));
+    } catch (Exception e) {
+    	this.stError += "<br>ERROR updateScheduleTask " + e;
+    }
+  }
 
   public String makeHomePage()
   {
@@ -1736,6 +1774,14 @@ public class EpsUserData
               }
             }
           }
+        }
+        
+        if (paramName != null && "workflowtype".equals(paramName)) {
+        	String param = this.ebEnt.ebUd.request.getParameter(paramName);
+        	//update workflow
+        	if ("wf".equals(param) || "wfPTM".equals(param)) {
+        		updateScheduleTask(param);
+        	}
         }
       }
       ResultSet rsP = this.ebEnt.dbDyn.ExecuteSql("select * from Projects order by ProjectName");
@@ -1804,15 +1850,61 @@ public class EpsUserData
           + "</table></center><br /><table><tr><td valign=top>";
       }
 
+      ResultSet rs = null;
+      int iCount = 0;
+      
+      stReturn += "<input type=hidden name=workflowtype value=''><input type=hidden name=nmPrjId value='' /><input type=hidden name=nmBaseline value='' /><input type=hidden name=nmSchId value='' />";
+      //work flow
+      rs = this.ebEnt.dbDyn.ExecuteSql("select p.ProjectName, p.RecId AS ProjectId, s.* from Projects p, Schedule s"
+          + " where p.CurrentBaseline=s.nmBaseline and p.RecId=s.nmProjectId and p.ProjectStatus=0 and s.lowlvl=1"
+          + " and (p.ProjectManagerAssignment=" + this.ebEnt.ebUd.getLoginId() + " or p.ProjectPortfolioManagerAssignment=" + this.ebEnt.ebUd.getLoginId()
+          + " or p.BusinessAnalystAssignment=" + this.ebEnt.ebUd.getLoginId() + " or p.Sponsor=" + this.ebEnt.ebUd.getLoginId() + ")"
+          + " order by p.ProjectName,s.RecId");
+      rs.last();
+      iMax = rs.getRow();
+      
       stReturn += "<table class=l1tablenarrow>"
+      		+ "<tr><th class=l1th colspan=7>Work Flow</th></tr>"
+      		+ "<tr><th class=l1th>Project Name</th><th class=l1th>Task ID</th><th class=l1th>Estimated Hours</th><th class=l1th>Expended Hours</th><th class=l1th>Details</th><th class=l1th>Status</th><th class=l1th>Update</th></tr>";
+    	for (int iR = 1; iR <= iMax; iR++)
+      {
+    		rs.absolute(iR);
+  		  iCount++;
+  		  String stPrjId = rs.getString("ProjectId");
+  		  String recId = rs.getString("RecId");
+  		  String stBaseLine = rs.getString("nmBaseline");
+  		  stReturn += "<tr>";
+  		  stReturn += "<td class=l1td>"+rs.getString("ProjectName")+"</td>";
+  		  stReturn += "<td class=l1td>"+recId+"</td>";
+  		  stReturn += "<td class=l1td><input type=text name='wfEstimated-"+stPrjId+"_"+stBaseLine+"_"+recId+"' style='text-align:right;' value='"+rs.getString("SchEstimatedEffort")+"' /></td>";
+  		  stReturn += "<td class=l1td><input type=text name='wfExpended-"+stPrjId+"_"+stBaseLine+"_"+recId+"' style='text-align:right;' value='"+rs.getString("SchEfforttoDate")+"' /></td>";
+  		  stReturn += "<td class=l1td><input type='button' value='Details' /></td>";
+  		  //Dont know why but name and id must different from "sch"
+  		  String stStatus = (rs.getString("SchDone") == null ? "0" : ("N".equals(rs.getString("SchDone")) ? "1" : "2"));
+  		  stReturn += "<td class=l1td><select name='wfStatus-"+stPrjId+"_"+stBaseLine+"_"+recId+"'>"
+            + this.ebEnt.ebUd.addOption("Wait", "0", stStatus)
+            + this.ebEnt.ebUd.addOption("Progress", "1", stStatus)
+            + this.ebEnt.ebUd.addOption("Done", "2", stStatus)
+            + "</select></td>";
+  		  stReturn += "<td class=l1td><input type='submit' value='Update' " +
+  		  		"onclick='document.form4.workflowtype.value=\"wf\"; document.form4.nmPrjId.value=\""+stPrjId+"\"; document.form4.nmBaseline.value=\""+stBaseLine+"\"; document.form4.nmSchId.value=\""+recId+"\"' /></td>";
+	  		stReturn += "</tr>";
+      }
+      if (iCount == 0)
+      {
+        stReturn += "<tr><td class=l1td colspan=7>No Tasks</td></tr>";
+      }
+      stReturn += "</table>";
+      rs.close();
+      //task
+      /*stReturn += "<table class=l1tablenarrow>"
         + "<tr><th class=l1th>Issue Description</th><th class=l1th>Details</th><th class=l1th>Project</th><th class=l1th>Opened</th><th class=l1th>Status</th></tr>";
-      ResultSet rs = this.ebEnt.dbEnterprise.ExecuteSql("select t.*, rt.nmRefId from  X25RefTask rt, X25Task t "
+      rs = this.ebEnt.dbEnterprise.ExecuteSql("select t.*, rt.nmRefId from  X25RefTask rt, X25Task t "
         + "where t.RecId=rt.nmTaskId and rt.nmRefType=42 and t.nmTaskFlag=1 "
         + "and rt.nmRefId=" + this.ebEnt.ebUd.getLoginId() + " "
         + "order by dtAssignStart desc");
       rs.last();
       iMax = rs.getRow();
-      int iCount = 0;
       if (iMax > 0)
       {
         for (int iR = 1; iR <= iMax; iR++)
@@ -1835,9 +1927,11 @@ public class EpsUserData
               {
 //              	int end = rs.getString("stDescription").indexOf("</td></tr></table>");
 //              	stReturn += "<td class=l1td>"+rs.getString("stDescription").substring(54, end-1);
-              	int start = rs.getString("stDescription").indexOf("<tr><th>");
-              	int end = rs.getString("stDescription").indexOf("</th></tr>");
-              	stReturn += "<td class=l1td>"+rs.getString("stDescription").substring(0,start) + rs.getString("stDescription").substring(end);
+              	int iStart = rs.getString("stDescription").indexOf("<tr><th>");
+              	int iEnd = rs.getString("stDescription").indexOf("</th></tr>");
+              	stReturn += "<td class=l1td>";
+              	stReturn += (iStart>0 ? rs.getString("stDescription").substring(0,iStart) : rs.getString("stDescription"));
+              	stReturn += (iEnd>0 ? rs.getString("stDescription").substring(iEnd) : "");
               }
             } else
             {
@@ -1857,12 +1951,15 @@ public class EpsUserData
       {
         stReturn += "<tr><td class=l1td colspan=5>No Tasks</td></tr>";
       }
-      stReturn += "</table>"
-        + "</td><td valign=top>&nbsp;</td><td valign=top>"
-        + "<table class=l1tablenarrow>"
-        + "<tr><th class=l1th>Date</th><th class=l1th>Time</th><th class=l1th>Message</th><th class=l1th>Details</th><th class=l1th>Delete</th></tr>";
       rs.close();
+      stReturn += "</table>"
+        + "</td><td valign=top>&nbsp;</td>";*/
+      stReturn += "</td><td valign=top>"
+        + "<table class=l1tablenarrow>"
+        + "<tr><th class=l1th colspan=5>Messages</th></tr>"
+        + "<tr><th class=l1th>Date</th><th class=l1th>Time</th><th class=l1th>Message</th><th class=l1th>Details</th><th class=l1th>Delete</th></tr>";
 
+      //message
       rs = this.ebEnt.dbEnterprise.ExecuteSql("select t.* from X25RefTask rt, X25Task t"
         + " where t.RecId=rt.nmTaskId and rt.nmRefType=42 and t.nmTaskFlag=2"
         + " and dtStart >= DATE_ADD(curdate(),INTERVAL -10 DAY)"
@@ -1976,7 +2073,144 @@ public class EpsUserData
         stReturn += "<tr><td class=l1td colspan=5>No Messages</td></tr>";
       }
       stReturn += "</table>"
-        + "</td></tr></table>";
+        + "</td></tr>";
+      
+    //work flow project team members
+      rs = this.ebEnt.dbDyn.ExecuteSql("select p.ProjectName, p.RecId AS ProjectId, s.* from Projects p, Schedule s"
+          + " where p.CurrentBaseline=s.nmBaseline and p.RecId=s.nmProjectId and p.ProjectStatus=0 and s.lowlvl=1"
+          + " and (p.ProjectManagerAssignment=" + this.ebEnt.ebUd.getLoginId() + " or p.ProjectPortfolioManagerAssignment=" + this.ebEnt.ebUd.getLoginId() + ")"
+          + " order by p.ProjectName,s.RecId");
+      
+      rs.last();
+      iCount = 0;
+      iMax = rs.getRow();
+      if (iMax > 0) {
+	      stReturn += "<tr><td>&nbsp;</td></tr><tr><td align='center' colspan=2><table class=l1tablenarrow>"
+	      		+ "<tr><th class=l1th colspan=8>Work Flow of Project Team Members</th></tr>"
+	      		+ "<tr><th class=l1th>Project Name</th><th class=l1th>Task ID</th><th class=l1th>Estimated Hours</th><th class=l1th>Expended Hours</th><th class=l1th>Details</th><th class=l1th>Status</th><th class=l1th>Project Team Member</th><th class=l1th>Response</th></tr>";
+	    	for (int iR = 1; iR <= iMax; iR++)
+	      {
+	    		rs.absolute(iR);
+	  		  iCount++;
+	  		  String stPrjId = rs.getString("ProjectId");
+	  		  String recId = rs.getString("RecId");
+	  		  String stBaseLine = rs.getString("nmBaseline");
+	  		  stReturn += "<tr>";
+	  		  stReturn += "<td class=l1td>"+rs.getString("ProjectName")+"</td>";
+	  		  stReturn += "<td class=l1td>"+rs.getString("RecId")+"</td>";
+	  		  stReturn += "<td class=l1td><input type=text name='wfPTMEstimated-"+stPrjId+"_"+stBaseLine+"_"+recId+"' style='text-align:right;' value='"+rs.getString("SchEstimatedEffort")+"' /></td>";
+	  		  stReturn += "<td class=l1td><input type=text name='wfPTMExpended-"+stPrjId+"_"+stBaseLine+"_"+recId+"' style='text-align:right;' value='"+rs.getString("SchEfforttoDate")+"' /></td>";
+	  		  
+	  		  stReturn += "<td class=l1td><input type='button' value='Details' /></td>";
+	  		  //Dont know why but name and id must different from "sch"
+	  		  String stStatus = (rs.getString("SchDone") == null ? "0" : ("N".equals(rs.getString("SchDone")) ? "1" : "2"));
+	  		  stReturn += "<td class=l1td><select name='wfPTMStatus-"+stPrjId+"_"+stBaseLine+"_"+recId+"'>"
+	            + this.ebEnt.ebUd.addOption("Wait", "0", stStatus)
+	            + this.ebEnt.ebUd.addOption("Progress", "1", stStatus)
+	            + this.ebEnt.ebUd.addOption("Done", "2", stStatus)
+	            + "</select></td>";
+	  		  
+	  		  String stName = this.ebEnt.dbDyn.ExecuteSql1("select CONCAT(u.FirstName, ' ', u.LastName) from Users u" +
+	  		  		" LEFT JOIN teb_reflaborcategory rlc ON u.nmUserId = rlc.nmRefId" +
+	  		  		" LEFT JOIN schedule s ON rlc.nmLaborCategoryId = SUBSTRING_INDEX( s.SchLaborCategories, '~', 1 )" +
+	  		  		" where s.nmBaseline="+rs.getString("nmBaseline") +
+	  		  		" and s.nmProjectId="+rs.getString("nmProjectId") +
+	  		  		" and s.RecId="+rs.getString("RecId") + 
+	  		  		" order by u.HourlyRate DESC");
+	  		  
+	  		  stReturn += "<td class=l1td>"+stName+"</td>";
+	  		  stReturn += "<td class=l1td>" +
+	  		  		"<input type='submit' value='Update' onclick='document.form4.workflowtype.value=\"wfPTM\"; document.form4.nmPrjId.value=\""+stPrjId+"\"; document.form4.nmBaseline.value=\""+stBaseLine+"\"; document.form4.nmSchId.value=\""+recId+"\"' />&nbsp;" +
+	  		  		"<input type='button' value='Reject' /></td>";
+		  		stReturn += "</tr>";
+	      }
+	    	if (iCount == 0)
+	    	{
+	    		stReturn += "<tr><td class=l1td colspan=8>No Tasks</td></tr>";
+	    	}
+	      stReturn += "</table></td></tr>";
+	      rs.close();
+      }
+      
+      //approved project dashboard
+      rs = this.ebEnt.dbDyn.ExecuteSql("select * from Projects p"
+          + " where p.ProjectPortfolioManagerAssignment=" + this.ebEnt.ebUd.getLoginId() + ""
+          + " and p.ProjectStatus=1"
+          + " order by p.ProjectName");
+      
+      rs.last();
+      iCount = 0;
+      iMax = rs.getRow();
+      if (iMax > 0) {
+	    	stReturn += "<tr><td>&nbsp;</td></tr><tr><td align='center' colspan=2><table class=l1tablenarrow>"
+	    			+ "<tr><th class=l1th colspan=7>Approved Project Dashboard</th></tr>"
+	    			+ "<tr><th class=l1th>Project Name</th><th class=l1th>Start Date</th><th class=l1th>End Date</th><th class=l1th>Estimated Hours</th><th class=l1th>Expended Hours</th><th class=l1th>Estimated Cost</th><th class=l1th>Expended to 	Date</th></tr>";
+	    	for (int iR = 1; iR <= iMax; iR++)
+	      {
+	    		rs.absolute(iR);
+	  		  iCount++;
+	  		  
+	  		  int iFirstApprove = this.ebEnt.dbDyn.ExecuteSql1n("SELECT min(nmBaseline)"
+	            + " FROM teb_baseline where nmProjectId=" + rs.getString("RecId") + " and stType='Approve'");
+	        int iIniticalBaseline = this.ebEnt.dbDyn.ExecuteSql1n("SELECT max(nmBaseline)"
+	          + " FROM teb_baseline where nmProjectId=" + rs.getString("RecId") + " and nmBaseline < " + iFirstApprove);
+	        double InitialEstimatedCost = this.ebEnt.dbDyn.ExecuteSql1n("select sum(SchCost) from Schedule"
+	            + " where nmProjectId=" + rs.getInt("RecId") + " and nmBaseline=" + iIniticalBaseline + " and SchLevel=0"); 
+	        double CurrentEstimatedCost = this.ebEnt.dbDyn.ExecuteSql1n("select sum(SchCost) from Schedule"
+	        		+ " where nmProjectId=" + rs.getInt("RecId") + " and nmBaseline=" + rs.getInt("CurrentBaseline") + " and SchLevel=0"); 
+	        
+	  		  
+	  		  stReturn += "<tr>";
+	  		  stReturn += "<td class=l1td>"+rs.getString("ProjectName")+"</td>";
+	  		  stReturn += "<td class=l1td>"+rs.getString("FixedProjectStartDate")+"</td>";
+	  		  stReturn += "<td class=l1td>"+rs.getString("FixedProjectEndDate")+"</td>";
+	  		  stReturn += "<td class=l1td>"+rs.getString("ProjectEstimatedHours")+"</td>";
+	  		  stReturn += "<td class=l1td>"+rs.getString("ProjectEstimatedHours")+"</td>";
+	  		  stReturn += "<td class=l1td>"+InitialEstimatedCost+"</td>";
+	  		  stReturn += "<td class=l1td>"+CurrentEstimatedCost+"</td>";
+		  		stReturn += "</tr>";
+	      }
+	    	if (iCount == 0)
+	    	{
+	    		stReturn += "<tr><td class=l1td colspan=7>No Projects</td></tr>";
+	    	}
+	    	stReturn += "</table></td></tr>";
+    	
+	    	//CPI SPI
+	    	if (iMax > 0) {
+	    		stReturn += "<tr><td>&nbsp;</td></tr>";
+	    		stReturn += "<tr><td align='center' colspan=2><table class=l1tablenarrow>"
+	      			+ "<tr><th class=l1th>Project Name</th>"
+	    				+ "<th class=l1th><table border=0 style='border-collapse:collapse;'><tr><td colspan=10 align=center>Schedule (SPI)</td></tr><tr>";
+	    		for (int i = 0; i < 10; i++) {
+		        stReturn += "<td align=left width='50px' style='padding: 0;'>"+i+"</td>";
+	        }
+	    		stReturn += "</tr></table></th>";
+	    		stReturn += "<th class=l1th><table border=0 style='border-collapse:collapse;'><tr><td colspan=10 align=center>Cost (CPI)</td></tr><tr>";
+	    		for (int i = 0; i < 10; i++) {
+	    			stReturn += "<td align=left width='50px' style='padding: 0;'>"+i+"</td>";
+	    		}
+	    		stReturn += "</tr></table></th></tr>";
+	    		
+	    		for (int iR = 1; iR <= iMax; iR++)
+	        {
+	      		rs.absolute(iR);
+	    		  
+	      		double CPI = 3.5;
+	      		double SPI = 2.0;
+	      		
+	    		  stReturn += "<tr>";
+	    		  stReturn += "<td class=l1td>"+rs.getString("ProjectName")+"</td>";
+	    		  stReturn += "<td class=l1td align=left><div align=center style='background: red;width:"+(SPI*50)+"px'>"+SPI+"</div></td>";
+	    		  stReturn += "<td class=l1td align=left><div align=center style='background: red;width:"+(CPI*50)+"px'>"+CPI+"</div></td>";
+	  	  		stReturn += "</tr>";
+	        }
+	    	}
+	    	
+	      rs.close();
+      }
+      
+      stReturn += "</table></form>";
       stReturn += "<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"
         + "<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"
         + "<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;";
@@ -5329,7 +5563,7 @@ public class EpsUserData
       }
     } catch (Exception e)
     {
-      this.stError += "<BR>ERROR runEOB " + e;
+      this.stError += "<BR>ERROR makeTask " + e;
     }
     stReturn += iU + " users";
     return stReturn;
