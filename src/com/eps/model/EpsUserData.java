@@ -1712,6 +1712,7 @@ public class EpsUserData
 	    	this.ebEnt.ebUd.setPopupMessage("Expended Hours must be a number");
 	    	return;
 	    }
+	    validateEffort(null, stSchId, stExpendedHours, stPrjId, Integer.parseInt(stBaseline));
 	    
 	    int nmStatus = Integer.parseInt(stStatus);
 	    stStatus = (nmStatus == 0 ? "NULL" : (nmStatus == 1 ? "'N'" : "'Y'"));
@@ -1723,6 +1724,7 @@ public class EpsUserData
 	    epsXlsProject.nmBaseline = Integer.parseInt(stBaseline);
 	    epsXlsProject.stPk = stPrjId;
 	    epsXlsProject.processScheduleRequirementCost(Integer.parseInt(stSchId));
+	    makeTask(15, this.epsEf.getScheduleName("" + stSchId, stPrjId, Integer.parseInt(stBaseline)));
     } catch (Exception e) {
     	this.stError += "<br>ERROR updateScheduleTask " + e;
     }
@@ -1809,6 +1811,10 @@ public class EpsUserData
       }
       stReturn += "<br /><table border=0><tr><td valign=top align=center>";
       String stUser = "";
+      
+      SimpleDateFormat dateFormatter = new SimpleDateFormat("ddMMMyy");
+      SimpleDateFormat timeFormatter = new SimpleDateFormat("hh:mm");
+      
       if ((this.ebEnt.ebUd.getLoginPersonFlags() & 0x20) == 0)
         stUser = " and u.nmUserId=" + this.ebEnt.ebUd.getLoginId() + " ";
       ResultSet rsActual = this.ebEnt.dbDyn.ExecuteSql("select * from teb_allocateprj ap, Users u, Projects p, Schedule s"
@@ -1856,7 +1862,7 @@ public class EpsUserData
       stReturn += "<input type=hidden name=workflowtype value=''><input type=hidden name=nmPrjId value='' /><input type=hidden name=nmBaseline value='' /><input type=hidden name=nmSchId value='' />";
       //work flow
       rs = this.ebEnt.dbDyn.ExecuteSql("select p.ProjectName, p.RecId AS ProjectId, s.* from Projects p, Schedule s"
-          + " where p.CurrentBaseline=s.nmBaseline and p.RecId=s.nmProjectId and p.ProjectStatus=0 and s.lowlvl=1"
+          + " where p.CurrentBaseline=s.nmBaseline and p.RecId=s.nmProjectId and p.ProjectStatus=0 and s.lowlvl=1 and (s.SchDone IS NULL OR s.SchDone!='Y')"
           + " and (p.ProjectManagerAssignment=" + this.ebEnt.ebUd.getLoginId() + " or p.ProjectPortfolioManagerAssignment=" + this.ebEnt.ebUd.getLoginId()
           + " or p.BusinessAnalystAssignment=" + this.ebEnt.ebUd.getLoginId() + " or p.Sponsor=" + this.ebEnt.ebUd.getLoginId() + ")"
           + " order by p.ProjectName,s.RecId");
@@ -1878,7 +1884,7 @@ public class EpsUserData
   		  stReturn += "<td class=l1td>"+recId+"</td>";
   		  stReturn += "<td class=l1td><input type=text name='wfEstimated-"+stPrjId+"_"+stBaseLine+"_"+recId+"' style='text-align:right;' value='"+rs.getString("SchEstimatedEffort")+"' /></td>";
   		  stReturn += "<td class=l1td><input type=text name='wfExpended-"+stPrjId+"_"+stBaseLine+"_"+recId+"' style='text-align:right;' value='"+rs.getString("SchEfforttoDate")+"' /></td>";
-  		  stReturn += "<td class=l1td><input type='button' value='Details' /></td>";
+  		  stReturn += "<td class=l1td><input type='button' value='Details' onclick='window.open(\"./?stAction=admin&t=0&h=n&do=scheduledetail&listm=1&lists="+recId+"&listp="+stPrjId+"&listb="+stBaseLine+"\")' /></td>";
   		  //Dont know why but name and id must different from "sch"
   		  String stStatus = (rs.getString("SchDone") == null ? "0" : ("N".equals(rs.getString("SchDone")) ? "1" : "2"));
   		  stReturn += "<td class=l1td><select name='wfStatus-"+stPrjId+"_"+stBaseLine+"_"+recId+"'>"
@@ -1896,64 +1902,7 @@ public class EpsUserData
       }
       stReturn += "</table>";
       rs.close();
-      //task
-      /*stReturn += "<table class=l1tablenarrow>"
-        + "<tr><th class=l1th>Issue Description</th><th class=l1th>Details</th><th class=l1th>Project</th><th class=l1th>Opened</th><th class=l1th>Status</th></tr>";
-      rs = this.ebEnt.dbEnterprise.ExecuteSql("select t.*, rt.nmRefId from  X25RefTask rt, X25Task t "
-        + "where t.RecId=rt.nmTaskId and rt.nmRefType=42 and t.nmTaskFlag=1 "
-        + "and rt.nmRefId=" + this.ebEnt.ebUd.getLoginId() + " "
-        + "order by dtAssignStart desc");
-      rs.last();
-      iMax = rs.getRow();
-      if (iMax > 0)
-      {
-        for (int iR = 1; iR <= iMax; iR++)
-        { //addOption(String stLabel, String stId, String stCurrent)
-          rs.absolute(iR);
-          String stValue = this.ebEnt.ebUd.request.getParameter("tsk" + rs.getString("RecId"));
-          if (stValue != null && stValue.length() > 0 && stValue.equals("2"))
-          {
-            this.ebEnt.dbEnterprise.ExecuteUpdate("update X25Task set nmTaskFlag=4 where RecId=" + rs.getString("RecId"));
-          } else
-          {
-            iCount++;
-            stReturn += "<tr><td class=l1td>" + rs.getString("stTitle") + "</td><td class=l1td>";
-            if (rs.getString("stDescription") != null)
-            {
-              if (rs.getString("stDescription").length() > 200)
-              {
-                stReturn += "<a target=_blank href='./?stAction=admin&t=0&do=taskdetail&h=n&list=" + rs.getString("RecId") + "'>Details</a></td><td class=l1td>";
-              } else
-              {
-//              	int end = rs.getString("stDescription").indexOf("</td></tr></table>");
-//              	stReturn += "<td class=l1td>"+rs.getString("stDescription").substring(54, end-1);
-              	int iStart = rs.getString("stDescription").indexOf("<tr><th>");
-              	int iEnd = rs.getString("stDescription").indexOf("</th></tr>");
-              	stReturn += "<td class=l1td>";
-              	stReturn += (iStart>0 ? rs.getString("stDescription").substring(0,iStart) : rs.getString("stDescription"));
-              	stReturn += (iEnd>0 ? rs.getString("stDescription").substring(iEnd) : "");
-              }
-            } else
-            {
-              stReturn += "&nbsp;</td><td class=l1td>";
-            }
-            stReturn += "</td><td class=l1td>" + this.ebEnt.ebUd.fmtDateFromDb(rs.getString("dtStart"))
-              + "</td><td class=l1td>"
-              + "<select name=tsk" + rs.getString("RecId") + " id=tsk" + rs.getString("RecId")
-              + "  onChange=\"document.form4.submit();\" >"
-              + this.ebEnt.ebUd.addOption("Open", "1", rs.getString("nmTaskFlag"))
-              + this.ebEnt.ebUd.addOption("Completed", "2", rs.getString("nmTaskFlag"))
-              + "</select></td></tr>";
-          }
-        }
-      }
-      if (iCount == 0)
-      {
-        stReturn += "<tr><td class=l1td colspan=5>No Tasks</td></tr>";
-      }
-      rs.close();
-      stReturn += "</table>"
-        + "</td><td valign=top>&nbsp;</td>";*/
+      
       stReturn += "</td><td valign=top>"
         + "<table class=l1tablenarrow>"
         + "<tr><th class=l1th colspan=5>Messages</th></tr>"
@@ -1961,67 +1910,104 @@ public class EpsUserData
 
       //message
       rs = this.ebEnt.dbEnterprise.ExecuteSql("select t.* from X25RefTask rt, X25Task t"
-        + " where t.RecId=rt.nmTaskId and rt.nmRefType=42 and t.nmTaskFlag=2"
-        + " and dtStart >= DATE_ADD(curdate(),INTERVAL -10 DAY)"
+        + " where t.RecId=rt.nmTaskId and rt.nmRefType=42 and (t.nmTaskFlag=1 OR (t.nmTaskFlag=2  and dtStart >= DATE_ADD(curdate(),INTERVAL -10 DAY)))"
         + " and rt.nmRefId=" + this.ebEnt.ebUd.getLoginId()
         //+ " order by dtAssignStart desc limit 30");
-        + " order by dtAssignStart desc");
+        + " order by dtStart desc");
       rs.last();
       iMax = rs.getRow();
       iCount = 0;
-      SimpleDateFormat dateFormatter = new SimpleDateFormat("ddMMMyy");
-      SimpleDateFormat timeFormatter = new SimpleDateFormat("hh:mm");
       if (iMax > 0)
       {
         for (int iR = 1; iR <= iMax; iR++)
         { //addOption(String stLabel, String stId, String stCurrent)
           rs.absolute(iR);
-          String stValue = this.ebEnt.ebUd.request.getParameter("tsk" + rs.getString("RecId"));
-          if (stValue != null && stValue.length() > 0 && stValue.equals("2"))
-          {
-            this.ebEnt.dbEnterprise.ExecuteUpdate("update X25Task set nmTaskFlag=2 where RecId=" + rs.getString("RecId"));
-          } else
-          {
-        	//only trigger if project is approved
-        	String[] prjArr = rs.getString("stDescription").split(" - ");
-        	int approved = 0;
-        	if(!prjArr[0].equals(""))
-        		approved = this.ebEnt.dbDyn.ExecuteSql1n("select ProjectStatus from projects where ProjectName = '" + prjArr[0] + "'");
-        	
-        	Date aDate = rs.getTimestamp("dtStart");
-        	String stDate = (aDate == null ? "&nbsp;" : dateFormatter.format(aDate));
-        	String stTime = (aDate == null ? "&nbsp;" : timeFormatter.format(aDate));
-        	if(approved == 1 || (approved!=1 && prjArr[0].equals("All"))){
-	            iCount++;
-	            stReturn += "<tr>" +
-	            		"<td class=l1td>" + stDate + "</td>" +
-	            		"<td class=l1td>" + stTime + "</td>" +
-	            		"<td class=l1td>" + rs.getString("stTitle") + "</td><td class=l1td>";
-	            if (rs.getString("stDescription") != null)
-	            {
-	                stReturn += "<input type='button' onclick='window.open(\"./?stAction=admin&t=0&do=taskdetail&h=n&list=" + rs.getString("RecId") + "\")' value='Details' />";
-	            } else
-	            {
-	              stReturn += "&nbsp;";
-	            }
-	            stReturn += "</td>" +
-	            		"<td class=l1td><input type='button' onclick='parent.location=\"./?stAction=admin&t=0&do=taskdelete&h=n&list=" + rs.getString("RecId") + "\"' value='Delete' /></td>" +
-	            		"</tr>";
-        	}
-        	/*else if(prjArr[0].equals("All")){	//message from eob #19
-        		iCount++;
-	            stReturn += "<tr><td class=l1td>" + rs.getString("stTitle") + "</td><td class=l1td>";
-	            if (rs.getString("stDescription") != null)
-	            {
-	              stReturn += prjArr[1];
-	            } else
-	            {
-	              stReturn += "&nbsp;";
-	            }
-	            stReturn += "</td><td class=l1td>" + this.ebEnt.ebUd.fmtDateFromDb(rs.getString("dtStart"))
-	              + "</td></tr>";
-        	}*/
-          }
+          int nmTaskFlag = rs.getInt("nmTaskFlag");
+          if (nmTaskFlag == 2) {
+	        	//only trigger if project is approved
+	        	String[] prjArr = rs.getString("stDescription").split(" - ");
+	        	int approved = 0;
+	        	if(!prjArr[0].equals(""))
+	        		approved = this.ebEnt.dbDyn.ExecuteSql1n("select ProjectStatus from projects where ProjectName = '" + prjArr[0] + "'");
+	        	
+	        	Date aDate = rs.getTimestamp("dtStart");
+	        	String stDate = (aDate == null ? "&nbsp;" : dateFormatter.format(aDate));
+	        	String stTime = (aDate == null ? "&nbsp;" : timeFormatter.format(aDate));
+	        	if(approved == 1 || (approved!=1 && prjArr[0].equals("All"))){
+		            iCount++;
+		            stReturn += "<tr>" +
+		            		"<td class=l1td>" + stDate + "</td>" +
+		            		"<td class=l1td>" + stTime + "</td>" +
+		            		"<td class=l1td>" + rs.getString("stTitle") + "</td><td class=l1td>";
+		            if (rs.getString("stDescription") != null)
+		            {
+		                stReturn += "<input type='button' onclick='window.open(\"./?stAction=admin&t=0&do=taskdetail&h=n&list=" + rs.getString("RecId") + "\")' value='Details' />";
+		            } else
+		            {
+		              stReturn += "&nbsp;";
+		            }
+		            stReturn += "</td>" +
+		            		"<td class=l1td><input type='button' onclick='parent.location=\"./?stAction=admin&t=0&do=taskdelete&h=n&list=" + rs.getString("RecId") + "\"' value='Delete' /></td>" +
+		            		"</tr>";
+	        	}
+	        	/*else if(prjArr[0].equals("All")){	//message from eob #19
+	        		iCount++;
+		            stReturn += "<tr><td class=l1td>" + rs.getString("stTitle") + "</td><td class=l1td>";
+		            if (rs.getString("stDescription") != null)
+		            {
+		              stReturn += prjArr[1];
+		            } else
+		            {
+		              stReturn += "&nbsp;";
+		            }
+		            stReturn += "</td><td class=l1td>" + this.ebEnt.ebUd.fmtDateFromDb(rs.getString("dtStart"))
+		              + "</td></tr>";
+	        	}*/
+          } else if (nmTaskFlag == 1) {
+            iCount++;
+            Date aDate = rs.getTimestamp("dtStart");
+	        	String stDate = (aDate == null ? "&nbsp;" : dateFormatter.format(aDate));
+	        	String stTime = (aDate == null ? "&nbsp;" : timeFormatter.format(aDate));
+            stReturn += "<tr>" +
+            		"<td class=l1td>" + stDate + "</td>" +
+            		"<td class=l1td>" + stTime + "</td>" +
+            		"<td class=l1td>" + rs.getString("stTitle") + "</td><td class=l1td>";
+            if (rs.getString("stDescription") != null)
+            {
+                stReturn += "<input type='button' onclick='window.open(\"./?stAction=admin&t=0&do=taskdetail&h=n&list=" + rs.getString("RecId") + "\")' value='Details' />";
+            } else
+            {
+              stReturn += "&nbsp;";
+            }
+            stReturn += "</td>" +
+            		"<td class=l1td><input type='button' onclick='parent.location=\"./?stAction=admin&t=0&do=taskdelete&h=n&list=" + rs.getString("RecId") + "\"' value='Delete' /></td>" +
+            		"</tr>";
+//            stReturn += "<tr><td class=l1td>" + rs.getString("stTitle") + "</td><td class=l1td>";
+//            if (rs.getString("stDescription") != null)
+//            {
+//              if (rs.getString("stDescription").length() > 200)
+//              {
+//                stReturn += "<a target=_blank href='./?stAction=admin&t=0&do=taskdetail&h=n&list=" + rs.getString("RecId") + "'>Details</a></td><td class=l1td>";
+//              } else
+//              {
+//              	int iStart = rs.getString("stDescription").indexOf("<tr><th>");
+//              	int iEnd = rs.getString("stDescription").indexOf("</th></tr>");
+//              	stReturn += "<td class=l1td>";
+//              	stReturn += (iStart>0 ? rs.getString("stDescription").substring(0,iStart) : rs.getString("stDescription"));
+//              	stReturn += (iEnd>0 ? rs.getString("stDescription").substring(iEnd) : "");
+//              }
+//            } else
+//            {
+//              stReturn += "&nbsp;</td><td class=l1td>";
+//            }
+//            stReturn += "</td><td class=l1td>" + this.ebEnt.ebUd.fmtDateFromDb(rs.getString("dtStart"))
+//              + "</td><td class=l1td>"
+//              + "<select name=tsk" + rs.getString("RecId") + " id=tsk" + rs.getString("RecId")
+//              + "  onChange=\"document.form4.submit();\" >"
+//              + this.ebEnt.ebUd.addOption("Open", "1", rs.getString("nmTaskFlag"))
+//              + this.ebEnt.ebUd.addOption("Completed", "2", rs.getString("nmTaskFlag"))
+//              + "</select></td></tr>";
+            }
         }
       }
       
@@ -2077,7 +2063,7 @@ public class EpsUserData
       
     //work flow project team members
       rs = this.ebEnt.dbDyn.ExecuteSql("select p.ProjectName, p.RecId AS ProjectId, s.* from Projects p, Schedule s"
-          + " where p.CurrentBaseline=s.nmBaseline and p.RecId=s.nmProjectId and p.ProjectStatus=0 and s.lowlvl=1"
+          + " where p.CurrentBaseline=s.nmBaseline and p.RecId=s.nmProjectId and p.ProjectStatus=0 and s.lowlvl=1 and (s.SchDone IS NULL OR s.SchDone!='Y')"
           + " and (p.ProjectManagerAssignment=" + this.ebEnt.ebUd.getLoginId() + " or p.ProjectPortfolioManagerAssignment=" + this.ebEnt.ebUd.getLoginId() + ")"
           + " order by p.ProjectName,s.RecId");
       
@@ -2101,7 +2087,7 @@ public class EpsUserData
 	  		  stReturn += "<td class=l1td><input type=text name='wfPTMEstimated-"+stPrjId+"_"+stBaseLine+"_"+recId+"' style='text-align:right;' value='"+rs.getString("SchEstimatedEffort")+"' /></td>";
 	  		  stReturn += "<td class=l1td><input type=text name='wfPTMExpended-"+stPrjId+"_"+stBaseLine+"_"+recId+"' style='text-align:right;' value='"+rs.getString("SchEfforttoDate")+"' /></td>";
 	  		  
-	  		  stReturn += "<td class=l1td><input type='button' value='Details' /></td>";
+	  		  stReturn += "<td class=l1td><input type='button' value='Details' onclick='window.open(\"./?stAction=admin&t=0&h=n&do=scheduledetail&listm=1&lists="+recId+"&listp="+stPrjId+"&listb="+stBaseLine+"\")' /></td>";
 	  		  //Dont know why but name and id must different from "sch"
 	  		  String stStatus = (rs.getString("SchDone") == null ? "0" : ("N".equals(rs.getString("SchDone")) ? "1" : "2"));
 	  		  stReturn += "<td class=l1td><select name='wfPTMStatus-"+stPrjId+"_"+stBaseLine+"_"+recId+"'>"
@@ -2162,8 +2148,8 @@ public class EpsUserData
 	  		  
 	  		  stReturn += "<tr>";
 	  		  stReturn += "<td class=l1td>"+rs.getString("ProjectName")+"</td>";
-	  		  stReturn += "<td class=l1td>"+rs.getString("FixedProjectStartDate")+"</td>";
-	  		  stReturn += "<td class=l1td>"+rs.getString("FixedProjectEndDate")+"</td>";
+	  		  stReturn += "<td class=l1td>"+dateFormatter.format(rs.getDate("FixedProjectStartDate"))+"</td>";
+	  		  stReturn += "<td class=l1td>"+dateFormatter.format(rs.getDate("FixedProjectEndDate"))+"</td>";
 	  		  stReturn += "<td class=l1td>"+rs.getString("ProjectEstimatedHours")+"</td>";
 	  		  stReturn += "<td class=l1td>"+rs.getString("ProjectEstimatedHours")+"</td>";
 	  		  stReturn += "<td class=l1td>"+InitialEstimatedCost+"</td>";
@@ -2280,23 +2266,26 @@ public class EpsUserData
 	            int iM = Integer.parseInt(nmMessage);
 	            if (iM>0) {
 	            	stDesc = "";
-			          if(rs.getString("SchDone") != null && rs.getString("SchDone").equals("Y"))
+			          if(rsSch.getString("SchDone") != null && rsSch.getString("SchDone").equals("Y")) {
 			          	stDesc += "Status: Done<br>";
-			          stDesc += "Estimated Hours: " + rs.getString("SchEstimatedEffort") + "<br>"
-			          		+ "Expended Hours: " + rs.getString("SchEfforttoDate");
+			          	stDesc += "Estimated Hours: " + rsSch.getString("SchEstimatedEffort") + "<br>"
+			          		+ "Expended Hours: " + rsSch.getString("SchEfforttoDate");
+			          } else {
+			          	stDesc = rsSch.getString("SchDescription");
+			          }
 	            	
 	            }
             } catch (Exception e) {
             }
         		Date aDate = rsSch.getDate("dtSchLastUpdate");
         		SimpleDateFormat formatter = new SimpleDateFormat("ddMMMyy hh:mm");
-	        	stReturn += "<h2>" + rsSch.getString("SchTitle") + " per Project Schedule</h2>";
+	        	stReturn += "<h2>&quot;" + rsSch.getString("SchTitle") + "&quot; per Project Schedule</h2>";
 	        	stReturn += "<table border='1'>" +
-	        			"<tr><th>Schedule ID</th><th>Level</th><th>Project Name</th><th>Division</th><th>Time</th><th>Description</th></tr>" +
+	        			"<tr><th>Project Name</th><th>Schedule ID</th><th>Level</th><th>Division</th><th>Time</th><th>Description</th></tr>" +
 	        			"<tr>" +
+	        			"	<td>" + rsSch.getString("ProjectName") + "</td>" +
 	        			"	<td>" + rsSch.getString("RecId") + "</td>" +
 	        			"	<td>" + rsSch.getString("SchLevel") + "</td>" +
-	        			"	<td>" + rsSch.getString("ProjectName") + "</td>" +
 	        			"	<td>" + rsSch.getString("stDivisionName") + "</td>" +
 	        			"	<td>" + (aDate == null ? "&nbsp;" : formatter.format(aDate)) + "</td>" +
 	        			"	<td>" + stDesc +"</td>" +
@@ -4815,15 +4804,15 @@ public class EpsUserData
     String stReturn = stValue;
     Double newEffort = Double.parseDouble(stValue);
     int lowlvl = 0;
-    String stId = "";
+//    String stId = "";
     try
     {
-      stId = this.ebEnt.dbDyn.ExecuteSql1("select RecId from Schedule where nmProjectId=" + stProject + " and nmBaseline=" + nmBaseline + " and RecId=" + stPk);
+      //stId = this.ebEnt.dbDyn.ExecuteSql1("select RecId from Schedule where nmProjectId=" + stProject + " and nmBaseline=" + nmBaseline + " and RecId=" + stPk);
 	  lowlvl = this.ebEnt.dbDyn.ExecuteSql1n("SELECT count(*) FROM Schedule s, Projects p where s.nmProjectId=p.RecId and s.nmBaseline=p.CurrentBaseline and (SchFlags & 0x10 ) != 0 and s.nmProjectId=" + stProject + " and s.RecId=" + stPk);
 	  
 	  if(lowlvl > 0 && newEffort > 40.00)
       {
-		 this.ebEnt.ebUd.setPopupMessage("[ID:" + stId + "] Effort may not exceed 40 hours");
+		 this.ebEnt.ebUd.setPopupMessage("[ID:" + stPk + "] Effort may not exceed 40 hours");
       }
     } catch (Exception e)
     {
