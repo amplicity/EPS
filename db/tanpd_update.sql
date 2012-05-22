@@ -31,3 +31,23 @@ DELETE FROM `dbeps01`.`teb_reportcolumns` WHERE `teb_reportcolumns`.`nmCustomRep
 DELETE FROM `dbeps01`.`teb_reportcolumns` WHERE `teb_reportcolumns`.`nmCustomReportId` = 9 AND `teb_reportcolumns`.`nmFieldId` = 116
 UPDATE `dbeps01`.`teb_fields` SET `stDbFieldName` = 'nmPercent' WHERE `teb_fields`.`nmForeignId` =1003
 UPDATE `dbeps01`.`teb_fields` SET `stDbFieldName` = 'ProjectName' WHERE `teb_fields`.`nmForeignId` =1001;
+
+
+--workflow
+CREATE TABLE `test`.`teb_workflow` (
+`nmProjectId` int( 11 ) NOT NULL ,
+`nmBaseLine` int( 11 ) NOT NULL ,
+`nmSchId` int( 11 ) NOT NULL ,
+`SchEstimatedEffort` double NOT NULL DEFAULT '0',
+`SchEfforttoDate` double NOT NULL DEFAULT '0',
+`SchDone` char( 1 ) DEFAULT NULL ,
+`nmUserId` int( 11 ) NOT NULL ,
+`nmStatus` int( 11 ) NOT NULL ,
+PRIMARY KEY ( `nmProjectId` , `nmBaseLine` , `nmSchId` )
+) ENGINE = InnoDB DEFAULT CHARSET = latin1;
+
+--report name
+ALTER TABLE `teb_reports` ADD `stReportName` VARCHAR( 255 ) NOT NULL DEFAULT '' AFTER `nmCustomReportId`;
+UPDATE `teb_reports` r SET r.stReportName=(SELECT stReportName FROM teb_customreport rc WHERE rc.RecId=r.nmCustomReportId);
+ALTER TABLE `teb_customreport` ADD `nmDefaultReport` INT NOT NULL DEFAULT '0';
+UPDATE `dbeps01`.`teb_customreport` SET `nmDefaultReport` = '1' WHERE `teb_customreport`.`RecId` IN (1,9,15,16,11,25,24,26,10,20,17,27,28,29,19,12,18,14,30,4,2,87);

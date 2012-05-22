@@ -77,7 +77,7 @@ public class EpsReport
         }
       }
       stReturn += "<center><form method=post><h1>" + rsTable.getString("stTableName") + "</h1><table>";
-      ResultSet rsR = epsUd.ebEnt.dbDyn.ExecuteSql("SELECT * FROM teb_customreport where stReportType = '" + rsTable.getString("nmTableId") + "' order by stReportName ");
+      ResultSet rsR = epsUd.ebEnt.dbDyn.ExecuteSql("SELECT * FROM teb_customreport where stReportType = '" + rsTable.getString("nmTableId") + "' order by nmDefaultReport DESC,stReportName ");
       rsR.last();
       int iMaxR = rsR.getRow();
       if (iMaxR <= 0)
@@ -87,7 +87,7 @@ public class EpsReport
         i++;
         epsUd.ebEnt.dbDyn.ExecuteUpdate("replace into teb_customreport (RecId,stReportType,stReportName,nmReportFlags)"
           + " values( " + i + ",'" + rsTable.getString("nmTableId") + "',\"" + rsTable.getString("stTableName") + "\",1)");
-        rsR = epsUd.ebEnt.dbDyn.ExecuteSql("SELECT * FROM teb_customreport where stReportType = '" + rsTable.getString("nmTableId") + "' order by stReportName ");
+        rsR = epsUd.ebEnt.dbDyn.ExecuteSql("SELECT * FROM teb_customreport where stReportType = '" + rsTable.getString("nmTableId") + "' order by nmDefaultReport DESC,stReportName ");
         rsR.last();
         iMaxR = rsR.getRow();
       }
@@ -159,8 +159,8 @@ public class EpsReport
           stReturn += "<td " + stClass + ">" + rs.getString("stReportName") + "</td>";
           stReturn += "<td " + stClass + ">" + rs.getString("dtRun") + "</td>";
           stReturn += "<td " + stClass + "><a target=_blank href='./?stAction=reports&t="+stT+"&reportid=" + rs.getString("RecId") + "&format=html'>HTML</a></td>";
-          stReturn += "<td " + stClass + "><a href='./?stAction=reports&t="+stT+"&reportid=" + rs.getString("RecId") + "&format=excel'>Excel</a></td>";
-          stReturn += "<td " + stClass + "><a href='./?stAction=reports&t="+stT+"&reportid=" + rs.getString("RecId") + "&format=delete'  onclick=\"return confirm('Are you sure you want to delete?')\">Delete</a></td>";
+          stReturn += "<td " + stClass + "><a href='./?stAction=reports&customreport="+stValue+"&t="+stT+"&reportid=" + rs.getString("RecId") + "&format=excel'>Excel</a></td>";
+          stReturn += "<td " + stClass + "><a href='./?stAction=reports&customreport="+stValue+"&t="+stT+"&reportid=" + rs.getString("RecId") + "&format=delete'  onclick=\"return confirm('Are you sure you want to delete?')\">Delete</a></td>";
           stReturn += "</tr>";
         }
         stReturn += "</table>";
@@ -181,11 +181,12 @@ public class EpsReport
     {
       String stTemp = ebEnt.ebUd.request.getParameter("format");
       String stT = ebEnt.ebUd.request.getParameter("t");
+      String stCustomReportId = ebEnt.ebUd.request.getParameter("customreport");
 
       if (stTemp != null && stTemp.equals("delete"))
       {
         ebEnt.dbDyn.ExecuteUpdate("delete from teb_reports where RecId=" + stReportId);
-        ebEnt.ebUd.setRedirect("./?stAction=reports&t="+stT+"&submit2=View");
+        ebEnt.ebUd.setRedirect("./?stAction=reports&customreport="+stCustomReportId+"&t="+stT+"&submit2=View");
         return ""; //----------------------------->
       }
 
@@ -341,6 +342,14 @@ public class EpsReport
       }
       ResultSet rsCr = epsUd.ebEnt.dbDyn.ExecuteSql("SELECT * FROM teb_customreport where RecId=" + nmCustomReportId);
       rsCr.absolute(1);
+      
+      boolean isDefaultReport = (rsCr.getInt("nmDefaultReport") > 0);
+      if (isDefaultReport) {
+      	this.epsUd.ebEnt.ebUd.setRedirect("./?stAction=reports&t="+epsUd.ebEnt.ebUd.request.getParameter("t"));
+      	this.epsUd.ebEnt.ebUd.clearPopupMessage();
+      	this.epsUd.ebEnt.ebUd.setPopupMessage("Default report cannot be customized.");
+      	return "" ;
+      }
 
       // Housekeeping, check if field has been stored.
       switch (rsTable.getInt("nmTableId"))
@@ -651,13 +660,13 @@ public class EpsReport
       if (nmCustomReportId > 3)
       {
         stReturn += "<h2 style=\"font-size: 14pt;\">Report Content</h2>"
-          + "Report Title: <input type=text name=stReportName "
+          + "Report Title: <input type=text name=stReportName " + (isDefaultReport ? "readonly " : "")
           + "value=\"" + epsUd.ebEnt.ebUd.getMyDb("stReportName", rsCr, "stReportName") + "\" size=64>";
       }
       stReturn += "<br/>&nbsp;"
         + "<font color=red>" + stPopupError + "</font><br/><table border=1 style=\"background-color:white\">";
       /* AS -- 19Oct2011 -- Issue # 64 */
-      stReturn += "<tr><th>Order</th><th align=left>Field</th><th>Show <input type=checkbox onclick='checkAllShows(this);' /></th>";
+      stReturn += "<tr><th>Order</th><th align=left>Field</th><th>Show <input type=checkbox onclick='checkAllShows(this);' "+(isDefaultReport?"disabled checked":"")+" /></th>";
       if (nmCustomReportId > 3)
         stReturn += "<th>CSS Format</td>";
       else
@@ -681,14 +690,14 @@ public class EpsReport
         stReturn += "\n<td align=center>" + this.orderSelect("order_" + nmFieldId, iF, iMaxF, rsTable.getInt("nmTableId"), nmFieldId) + "</td>";
         stReturn += "<td align=left>" + rsF.getString("stLabel") + "</td>";
         String stShow = rsF.getString("stShow");
-        if (stShow.equals("Y"))
+        if (stShow.equals("Y")  || isDefaultReport)
         {
           stChecked = " checked ";
         } else
         {
           stChecked = "";
         }
-        stReturn += "<td align=center><input type=checkbox id=show_"+ nmFieldId +" name=show_" + nmFieldId + " value=" + nmFieldId + " " + stChecked + "></td>";
+        stReturn += "<td align=center><input type=checkbox id=show_"+ nmFieldId +" name=show_" + nmFieldId + " value=" + nmFieldId + " " + stChecked + (isDefaultReport? " disabled" : "")+"></td>";
         /* AS -- 19Oct2011 -- Issue # 64 */
         vecshow.add(nmFieldId);
         if (nmCustomReportId <= 3)
@@ -853,6 +862,7 @@ public class EpsReport
           return customReportDesigner(rsTable); //--------------> Must slect fields
         String stFilter = epsUd.ebEnt.dbDyn.ExecuteSql1("select stFilter from teb_customreport where RecId=" + nmCustomReportId);
         String prjFilter = epsUd.ebEnt.dbDyn.ExecuteSql1("select prjFilter from teb_customreport where RecId=" + nmCustomReportId);
+        String stReportName = epsUd.ebEnt.dbDyn.ExecuteSql1("select stReportName from teb_customreport where RecId=" + nmCustomReportId);
         String[] prjArr = null;
         String pIDs = "";
         String stDivList = "";
@@ -1408,8 +1418,8 @@ public class EpsReport
         // Save Report DATA
         int iId = this.epsUd.ebEnt.dbDyn.ExecuteSql1n("select max(RecId) from teb_reports");
         iId++;
-        this.epsUd.ebEnt.dbDyn.ExecuteUpdate("replace into teb_reports (RecId,nmCustomReportId,dtRun,stReportRaw)"
-          + "values( " + iId + "," + nmCustomReportId + ",now(),"
+        this.epsUd.ebEnt.dbDyn.ExecuteUpdate("replace into teb_reports (RecId,nmCustomReportId,stReportName,dtRun,stReportRaw)"
+          + "values( " + iId + "," + nmCustomReportId + ",'"+stReportName+"',now(),"
           + this.epsUd.ebEnt.dbDyn.fmtDbString(getFields(rsF, iMaxF) + "|\n" + stReport) + ")");
         return viewReport(rsTable);
       } catch (Exception e)

@@ -2240,7 +2240,7 @@ class EpsXlsProject //extends EpsUserData
       {
         sbReturn.append("<td colspan=2 style='color:red;'>No requirements found</td><td style='color:red;'>fail</td>");
         iAnalyzeStatus |= 0x1;
-        this.epsUd.makeMessage("All", ppm+","+pm+","+ba+","+sp, stProjectName, "No requirements found", new SimpleDateFormat("MM/dd/yyyy").format(Calendar.getInstance().getTime()));
+        this.epsUd.makeMessage(stProjectName, ppm+","+pm+","+ba+","+sp, "Requirement Warning", "No requirements found", new SimpleDateFormat("MM/dd/yyyy").format(Calendar.getInstance().getTime()));
       }
       // 4) Process Low-leves, Rollups, check LC
       // in Req -> must get from Schecule
@@ -2420,7 +2420,7 @@ class EpsXlsProject //extends EpsUserData
       {
         sbReturn.append("<td colspan=2 style='color:red;'>No Schedules found</td><td style='color:red;'>fail</td>");
         iAnalyzeStatus |= 0x4;
-        this.epsUd.makeMessage("All", ppm+","+pm+","+ba+","+sp, prjname, "No Schedules found", new SimpleDateFormat("MM/dd/yyyy").format(Calendar.getInstance().getTime()));
+        this.epsUd.makeMessage(prjname, ppm+","+pm+","+ba+","+sp, "Schedule Warning", "No Schedules found", new SimpleDateFormat("MM/dd/yyyy").format(Calendar.getInstance().getTime()));
       }
       // 4) Process Low-leves, Rollups, check LC
       // in Sch -> must get from Schecule

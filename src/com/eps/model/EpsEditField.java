@@ -2781,13 +2781,16 @@ public class EpsEditField
         + " and rl.nmLaborCategoryId=lc.nmLcId order by LaborCategory");
       rsC.last();
       int iMaxC = rsC.getRow();
+      
+      double hourlyRate = rsD.getDouble("HourlyRate");
 
       for (int iC = 1; iC <= iMaxC; iC++)
       {
         rsC.absolute(iC);
         if (iC > 1)
           stReturn += "<br>";
-        stReturn += rsC.getString("nmCostEffectiveness");
+//        stReturn += rsC.getString("nmCostEffectiveness");
+        stReturn += rsC.getString("LaborCategory") + ": <strong>" + 1.0*Math.round(hourlyRate*100*rsC.getDouble("nmProductiviyFactor"))/100+"</strong>";
       }
     } catch (Exception e)
     {
@@ -2812,7 +2815,7 @@ public class EpsEditField
         rsC.absolute(iC);
         if (iC > 1)
           stReturn += "<br>";
-        stReturn += rsC.getString("nmProductiviyFactor");
+        stReturn += rsC.getString("LaborCategory") + ": <strong>" +rsC.getString("nmProductiviyFactor")+"</strong>";
       }
     } catch (Exception e)
     {
