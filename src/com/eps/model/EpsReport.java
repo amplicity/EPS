@@ -129,7 +129,8 @@ public class EpsReport
   {
     String stReturn = "";
     String stT = epsUd.ebEnt.ebUd.request.getParameter("t");
-    String stValue = epsUd.ebEnt.ebUd.request.getParameter("customreport");
+//    String stValue = epsUd.ebEnt.ebUd.request.getParameter("customreport");
+    String stValue ="0";
     int iValue = -1 ;
     if (stValue != null && !"".equals(stValue)) iValue = Integer.parseInt(stValue);
     try
@@ -344,12 +345,12 @@ public class EpsReport
       rsCr.absolute(1);
       
       boolean isDefaultReport = (rsCr.getInt("nmDefaultReport") > 0);
-      if (isDefaultReport) {
-      	this.epsUd.ebEnt.ebUd.setRedirect("./?stAction=reports&t="+epsUd.ebEnt.ebUd.request.getParameter("t"));
-      	this.epsUd.ebEnt.ebUd.clearPopupMessage();
-      	this.epsUd.ebEnt.ebUd.setPopupMessage("Default report cannot be customized.");
-      	return "" ;
-      }
+//      if (isDefaultReport) {
+//      	this.epsUd.ebEnt.ebUd.setRedirect("./?stAction=reports&t="+epsUd.ebEnt.ebUd.request.getParameter("t"));
+//      	this.epsUd.ebEnt.ebUd.clearPopupMessage();
+//      	this.epsUd.ebEnt.ebUd.setPopupMessage("Default report cannot be customized.");
+//      	return "" ;
+//      }
 
       // Housekeeping, check if field has been stored.
       switch (rsTable.getInt("nmTableId"))
@@ -666,7 +667,7 @@ public class EpsReport
       stReturn += "<br/>&nbsp;"
         + "<font color=red>" + stPopupError + "</font><br/><table border=1 style=\"background-color:white\">";
       /* AS -- 19Oct2011 -- Issue # 64 */
-      stReturn += "<tr><th>Order</th><th align=left>Field</th><th>Show <input type=checkbox onclick='checkAllShows(this);' "+(isDefaultReport?"disabled checked":"")+" /></th>";
+      stReturn += "<tr><th>Order</th><th align=left>Field</th><th>Show <input type=checkbox onclick='checkAllShows(this);' /></th>";
       if (nmCustomReportId > 3)
         stReturn += "<th>CSS Format</td>";
       else
@@ -690,14 +691,14 @@ public class EpsReport
         stReturn += "\n<td align=center>" + this.orderSelect("order_" + nmFieldId, iF, iMaxF, rsTable.getInt("nmTableId"), nmFieldId) + "</td>";
         stReturn += "<td align=left>" + rsF.getString("stLabel") + "</td>";
         String stShow = rsF.getString("stShow");
-        if (stShow.equals("Y")  || isDefaultReport)
+        if (stShow.equals("Y"))
         {
           stChecked = " checked ";
         } else
         {
           stChecked = "";
         }
-        stReturn += "<td align=center><input type=checkbox id=show_"+ nmFieldId +" name=show_" + nmFieldId + " value=" + nmFieldId + " " + stChecked + (isDefaultReport? " disabled" : "")+"></td>";
+        stReturn += "<td align=center><input type=checkbox id=show_"+ nmFieldId +" name=show_" + nmFieldId + " value=" + nmFieldId + " " + stChecked + "></td>";
         /* AS -- 19Oct2011 -- Issue # 64 */
         vecshow.add(nmFieldId);
         if (nmCustomReportId <= 3)
@@ -1009,6 +1010,17 @@ public class EpsReport
             	        	 }
             	          }
 	            	  }
+            	  } else if (userArr.length > 0) {
+            	  	String stUsers = "";
+            	  	for (int i = 0; i < userArr.length; i++) {
+	                  if (i>0) 
+	                  	stUsers +=",";
+	                  stUsers += userArr[i];
+                  }
+            	  	stSql = "select count(*) from users u, teb_reflaborcategory rlc where rlc.nmRefType=42 and rlc.nmRefId=u.nmUserId and rlc.nmLaborCategoryId="+aFields[0]+" and rlc.nmRefId IN ("+stUsers+")";
+            	  	if (this.epsUd.ebEnt.dbDyn.ExecuteSql1n(stSql) > 0) {
+            	  		stReport += getReportFields(rsR, rsF, iMaxF) + "|";
+            	  	}
             	  }
               }
             }
@@ -1196,12 +1208,13 @@ public class EpsReport
           /* End of Issue AS -- 12Oct2011 -- Issue # 50 */
             this.epsUd.epsEf.processUsersInDivision();
             //stSql += "SELECT * FROM Criteria c, teb_division d where c.nmDivision = d.nmDivision order by stDivisionName,c.CriteriaName";
-            stSql +="select c.RecId,c.nmDivision,c.nmFlags,c.CriteriaName,c.WeightImportance,d.stDivisionName, CONCAT(u.FirstName, ' ', u.LastName) as Responsibilities" +
-            		" from Criteria c, teb_division d, teb_refdivision rd, users u" +
-            		" where d.nmDivision=c.nmDivision and rd.nmRefType=42 and rd.nmRefId=2 and rd.nmDivision=d.nmDivision " +
-            		" and u.nmUserId=CAST(c.Responsibilities AS UNSIGNED)" +
+            stSql +="select c.RecId,c.nmDivision,c.nmFlags,c.CriteriaName,c.WeightImportance,IFNULL(d.stDivisionName,'') AS stDivisionName, IFNULL(GROUP_CONCAT(DISTINCT CONCAT(u.FirstName, ' ', u.LastName) SEPARATOR '<br>'),'') as Responsibilities" +
+            		" from Criteria c" +
+            		" LEFT JOIN users u ON ((INSTR(c.Responsibilities, ',')>0 AND FIND_IN_SET(u.nmUserId, c.Responsibilities)>0) OR (INSTR(c.Responsibilities, ',')=0 AND u.nmUserId=c.Responsibilities))" +
+            		" STRAIGHT_JOIN teb_division d ON d.nmDivision=c.nmDivision " +
             		(stDivList.length()>0? " and d.nmDivision in ("+stDivList+")":"") +
-            		" order by stDivisionName,CriteriaName";
+            		" GROUP BY c.CriteriaName,d.nmDivision" + 
+            		" order by c.CriteriaName,d.nmDivision";
             rsR = this.epsUd.ebEnt.dbDyn.ExecuteSql(stSql);
             rsR.last();
             iMaxR = rsR.getRow();

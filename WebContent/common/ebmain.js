@@ -1267,7 +1267,13 @@ function myValidation(form1)
         case 32:  // Long Text
           if  ( (gaValidation[i][4] & 0x2 ) != 0 && thisCtrl.value.length <= 0 ) // Mandatory
           {
-            stAlert += "\n" +gaValidation[i][2] + " cannot be blank.";
+          	//hard code for login page validation
+          	if (gaValidation[0][1] == 'UserName' && gaValidation[0][2] == 'E-Mail') {
+          		var stMsg = "\nE-Mail or Password cannot be blank.";
+          		if (stAlert.indexOf(stMsg) < 0)	stAlert += stMsg;
+          	} else {
+          		stAlert += "\n" +gaValidation[i][2] + " cannot be blank.";
+          	}
             bReturn = false;
           }else if ( gaValidation[i][5] > 0 ) // have MIN
           {

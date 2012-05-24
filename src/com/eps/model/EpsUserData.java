@@ -70,7 +70,8 @@ class ExchangeRateTask implements Runnable {
 					while(rs1.next())
 					{
 						String countrycode = rs1.getString(2);
-					URL convert = new URL("http://www.exchangerate-api.com/"+countrycode+"/usd/1?k=eBMtn-V4U6g-fiLRp");
+//					URL convert = new URL("http://www.exchangerate-api.com/"+countrycode+"/usd/1?k=eBMtn-V4U6g-fiLRp");
+					URL convert = new URL("http://www.exchangerate-api.com/"+countrycode+"/usd/1?k=puupy-nZ3tU-rHeQe");
 					BufferedReader in = new BufferedReader(new InputStreamReader(convert.openStream()));
 					answer = in.readLine();
 					String insertsql = "update dbeps01.teb_division set nmExchangeRate="+answer+" where nmDivision="+rs1.getInt(1);
@@ -4948,7 +4949,8 @@ public class EpsUserData
 		while(rs.next())
 		{
 			String countrycode = rs.getString(2);
-			URL convert = new URL("http://www.exchangerate-api.com/"+countrycode+"/usd/1?k=eBMtn-V4U6g-fiLRp");
+//			URL convert = new URL("http://www.exchangerate-api.com/"+countrycode+"/usd/1?k=eBMtn-V4U6g-fiLRp");
+			URL convert = new URL("http://www.exchangerate-api.com/"+countrycode+"/usd/1?k=puupy-nZ3tU-rHeQe");
 			BufferedReader in = new BufferedReader(new InputStreamReader(convert.openStream()));
 			answer = in.readLine();
 			String insertsql = "update dbeps01.teb_division set nmExchangeRate="+answer+" where nmDivision="+rs.getInt(1);
