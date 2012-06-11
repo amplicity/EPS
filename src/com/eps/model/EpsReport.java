@@ -1352,7 +1352,7 @@ public class EpsReport
             }
             stSqlUser = stSqlUser.replace("u.*,xu.stEMail,xu.nmPriviledge,xu.RecId", "u.nmUserId");
 
-            stSql = "SELECT DISTINCT u.*,lc.*,rlc.nmEstimatedHours,rlc.nmActualHours,rlc.nmTasksCompleted,FORMAT(rlc.nmEstimatedHours/rlc.nmActualHours,2) AS nmProductiviyFactor,FORMAT(rlc.nmEstimatedHours*lc.AverageHourlySalary/rlc.nmActualHours,2) AS nmCostEffectiveness,d.nmExchangeRate,d.stCurrency, d.dtExchangeRate, d.stDivisionName" +
+            stSql = "SELECT DISTINCT u.*,lc.*,rlc.nmEstimatedHours,rlc.nmActualHours,rlc.nmTasksCompleted,FORMAT(rlc.nmEstimatedHours/rlc.nmActualHours,2) AS nmProductiviyFactor,CONCAT('$ ',FORMAT(rlc.nmEstimatedHours*lc.AverageHourlySalary/rlc.nmActualHours,2)) AS nmCostEffectiveness,d.nmExchangeRate,d.stCurrency, d.dtExchangeRate, d.stDivisionName" +
             		" FROM Users u, LaborCategory lc, teb_reflaborcategory rlc, teb_division d, teb_refdivision rd"
               + " where u.nmUserId in (" + stSqlUser + ") "+(stDivList.length()>0? " and d.nmDivision in ("+stDivList+")":"")
               + " and u.nmUserId=rlc.nmRefId and rlc.nmRefType=42 and rlc.nmLaborCategoryId=lc.nmLcId and u.nmUserId=rd.nmRefId and rd.nmDivision=d.nmDivision"
@@ -1368,23 +1368,23 @@ public class EpsReport
               val = "";
               //if money value, calculate exchange rate
               for (int i=1; i<fieldArr.length; i++){
-	              if(fieldArr[i].contains("$")){
-	            	  //get exchange rate with id and division #
-	            	  int divid = this.epsUd.ebEnt.dbDyn.ExecuteSql1n("select nmDivision from teb_refdivision where nmRefType=42 and nmRefId=" + rsR.getString("nmUserId"));
-	                  ResultSet rs2 = this.epsUd.ebEnt.dbDyn.ExecuteSql("select stCurrency, stMoneySymbol from teb_division where nmDivision=" + divid);
-	                  rs2.last();
-	                
-	                  //calculate exchange rate if this is not in usd
-	                  if(!rs2.getString("stCurrency").equals("USD")){
-	                	  String rate = getExchangeRate("http://finance.yahoo.com/d/quotes.csv?e=.csv&f=sl1d1t1&s=USD"+rs2.getString("stCurrency")+"=X");
-	                	  String[] resp = rate.split(",");
-  
-  						  DecimalFormat df = new DecimalFormat(" #,###,###,##0.00");
-	                	  Double vald = Double.parseDouble(fieldArr[i].substring(2)) * Double.parseDouble(resp[1]);
-	                	  fieldArr[i] = rs2.getString("stMoneySymbol") + df.format(vald);
-	                  System.out.println(rate);
-	                  }
-	              }
+//	              if(fieldArr[i].contains("$")){
+//	            	  //get exchange rate with id and division #
+//	            	  int divid = this.epsUd.ebEnt.dbDyn.ExecuteSql1n("select nmDivision from teb_refdivision where nmRefType=42 and nmRefId=" + rsR.getString("nmUserId"));
+//	                  ResultSet rs2 = this.epsUd.ebEnt.dbDyn.ExecuteSql("select stCurrency, stMoneySymbol from teb_division where nmDivision=" + divid);
+//	                  rs2.last();
+//	                
+//	                  //calculate exchange rate if this is not in usd
+//	                  if(!rs2.getString("stCurrency").equals("USD")){
+//	                	  String rate = getExchangeRate("http://finance.yahoo.com/d/quotes.csv?e=.csv&f=sl1d1t1&s=USD"+rs2.getString("stCurrency")+"=X");
+//	                	  String[] resp = rate.split(",");
+//  
+//	                	  DecimalFormat df = new DecimalFormat(" #,###,###,##0.00");
+//	                	  Double vald = Double.parseDouble(fieldArr[i].substring(2)) * Double.parseDouble(resp[1]);
+//	                	  fieldArr[i] = rs2.getString("stMoneySymbol") + df.format(vald);
+//	                  System.out.println(rate);
+//	                  }
+//	              }
             	  val += "~" + fieldArr[i];
             	  //System.out.println(fieldArr[i]);
               }

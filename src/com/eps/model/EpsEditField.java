@@ -379,8 +379,8 @@ public class EpsEditField
               	for(int i=0; i<Integer.parseInt(stValue); i++){
               		stEdit += "<option value=\"" + i + "\">" + i + "</option>";
               	}
-              	stEdit += "<option value=\"" + stValue + "\" selected='selected'>" + stValue + "</option>" +
-            		  	"<option value=\"" + (Integer.parseInt(stValue)+1) + "\">" + (Integer.parseInt(stValue)+1) + "</option>";
+              	stEdit += "<option value=\"" + stValue + "\" selected='selected'>" + stValue + "</option>";
+//            		  	"<option value=\"" + (Integer.parseInt(stValue)+1) + "\">" + (Integer.parseInt(stValue)+1) + "</option>";
               } else {
 	              for (iN = 0; iN < aV.length; iN++)
 	              {
@@ -2783,6 +2783,7 @@ public class EpsEditField
       int iMaxC = rsC.getRow();
       
       double hourlyRate = rsD.getDouble("HourlyRate");
+      DecimalFormat df = new DecimalFormat("$ #,###,###,##0.00");
 
       for (int iC = 1; iC <= iMaxC; iC++)
       {
@@ -2790,7 +2791,7 @@ public class EpsEditField
         if (iC > 1)
           stReturn += "<br>";
 //        stReturn += rsC.getString("nmCostEffectiveness");
-        stReturn += rsC.getString("LaborCategory") + ": <strong>" + 1.0*Math.round(hourlyRate*100*rsC.getDouble("nmProductiviyFactor"))/100+"</strong>";
+        stReturn += rsC.getString("LaborCategory") + ": <strong>" + df.format(hourlyRate*rsC.getDouble("nmProductiviyFactor"))+"</strong>";
       }
     } catch (Exception e)
     {

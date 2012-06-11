@@ -7,6 +7,8 @@ import java.net.URLConnection;
 import java.sql.ResultSet;
 import java.util.Calendar;
 import java.util.Enumeration;
+import java.util.Set;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -236,24 +238,31 @@ public class EbUserData
         }
         else if ((!this.aLogin[2].equals("")) && (!this.aLogin[3].equals("")))
         {
-        	int logged = this.ebEnt.dbEnterprise.ExecuteSql1n("select RecId from X25User where nmLastLoginTime>0 and stEMail='" + this.ebEnt.ebUd.aLogin[2] + "'");
-          if (logged > 0) {
-          	iReturn = -5;
-          } else 
-          {
+//        	int logged = this.ebEnt.dbEnterprise.ExecuteSql1n("select RecId from X25User where nmLastLoginTime>0 and stEMail='" + this.ebEnt.ebUd.aLogin[2] + "'");
+//        	int logged = this.ebEnt.dbEnterprise.ExecuteSql1n("select RecId from X25User where and stEMail='" + this.ebEnt.ebUd.aLogin[2] + "'");
+//        	List<Integer> ids = (List<Integer>) this.ebEnt.ebUd.request.getSession().getServletContext().getAttribute("LOG_IN_USERS");
+//          if (ids.contains(logged)) {
+//          	iReturn = -5;
+//          } else 
+//          {
 	          iReturn = this.ebEnt.dbEnterprise.ExecuteSql1n("select RecId from X25User where stEMail='" + this.aLogin[2] + "' and ( stPassword=password('" + this.aLogin[3] + "') or stPassword=old_password('" + this.aLogin[3] + "') )");
 	          if (iReturn > 0)
 	          {
-	            this.ebEnt.dbEnterprise.ExecuteUpdate("update X25User set SuccessLoginTime = " + now + ", nmLastLoginTime=" + now + ", nmLoginCount=(nmLoginCount+1) where RecId=" + iReturn);
-	            this.ebEnt.dbEb.ExecuteUpdate("insert into t_session (dtStart,dtLast,nmUserId,stIp,nmLastTime,stReferer) values( now(), now(), " + iReturn + ",'" + stIp + "'," + now + ",\"" + stReferer + "\")");
-	            this.aLogin[4] = this.ebEnt.dbEb.ExecuteSql1("select max(nmSessionId) from t_session where nmUserId=" + iReturn);
-	            this.aLogin[1] = ("" + now);
-	            this.aLogin[0] = ("" + iReturn);
+	          	Set<Integer> ids = (Set<Integer>) this.ebEnt.ebUd.request.getSession().getServletContext().getAttribute("LOG_IN_USERS");
+	          	if (ids != null && ids.contains(iReturn)) {
+	          		iReturn = -5;
+	          	} else {
+		            this.ebEnt.dbEnterprise.ExecuteUpdate("update X25User set SuccessLoginTime = " + now + ", nmLastLoginTime=" + now + ", nmLoginCount=(nmLoginCount+1) where RecId=" + iReturn);
+		            this.ebEnt.dbEb.ExecuteUpdate("insert into t_session (dtStart,dtLast,nmUserId,stIp,nmLastTime,stReferer) values( now(), now(), " + iReturn + ",'" + stIp + "'," + now + ",\"" + stReferer + "\")");
+		            this.aLogin[4] = this.ebEnt.dbEb.ExecuteSql1("select max(nmSessionId) from t_session where nmUserId=" + iReturn);
+		            this.aLogin[1] = ("" + now);
+		            this.aLogin[0] = ("" + iReturn);
+	          	}
 	          }
 	          else {
 	            //this.ebEnt.dbEnterprise.ExecuteUpdate("update X25User set nmLastLoginTime=" + now + ", nmErrorCount=(nmErrorCount+1) where stEMail='" + this.aLogin[2] + "' ");
 	          }
-          }
+//          }
         }
       }
     }
