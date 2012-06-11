@@ -8,6 +8,7 @@ import it.sauronsoftware.cron4j.Scheduler;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -20,11 +21,21 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.ss.usermodel.Row;
 
 import com.ederbase.model.EbDatabase;
 import com.ederbase.model.EbEnterprise;
@@ -150,7 +161,7 @@ class MonthlyEOBTask implements Runnable {
 	    epsud.ebEnt.dbEnterprise.ExecuteUpdate("DELETE FROM x25audittrail WHERE nmUserId NOT IN ("+uids+")");
 	    epsud.ebEnt.dbEnterprise.ExecuteUpdate("DELETE FROM x25user WHERE RecId NOT IN ("+uids+")");
 	    epsud.ebEnt.dbEnterprise.ExecuteUpdate("DELETE FROM x25refuser WHERE nmUserId NOT IN ("+uids+")");
-	    epsud.ebEnt.dbEnterprise.ExecuteUpdate("UPDATE x25refuser SET nmApproveUserId=0 WHERE nmApproveUserId NOT IN ("+uids+")");
+//	    epsud.ebEnt.dbEnterprise.ExecuteUpdate("UPDATE x25refuser SET nmApproveUserId=0 WHERE nmApproveUserId NOT IN ("+uids+")");
 	    System.out.println("Finish Monthly EOB");
     } catch (SQLException e) {
 	    System.out.println("Finish Monthly EOB with ERROR: " + e.getMessage());
@@ -314,7 +325,15 @@ public class EpsUserData
       String stLogout = this.ebEnt.ebUd.request.getParameter("Logout");
       if (stLogout != null && stLogout.equals("Logout"))
       {
-        this.ebEnt.dbEnterprise.ExecuteUpdate("update X25User set nmLastLoginTime=0 where RecId = " + this.ebEnt.ebUd.aLogin[0]);
+      	
+//        this.ebEnt.dbEnterprise.ExecuteUpdate("update X25User set nmLastLoginTime=0 where RecId = " + this.ebEnt.ebUd.aLogin[0]);
+      	@SuppressWarnings("unchecked")
+        Set<Integer> ids = (Set<Integer>) this.ebEnt.ebUd.request.getSession().getServletContext().getAttribute("LOG_IN_USERS");
+      	Object userId = this.ebEnt.ebUd.request.getSession().getAttribute("userId");
+      	if (ids != null && userId!=null && ids.contains(userId)) {
+      		ids.remove(userId);
+      	}
+      	this.ebEnt.ebUd.request.getSession().getServletContext().setAttribute("LOG_IN_USERS", ids);
         this.ebEnt.ebUd.aLogin[1] = "0";
         Cookie userCookie2 = new Cookie("ut", this.ebEnt.ebUd.aLogin[1]);
         response.addCookie(userCookie2);
@@ -332,7 +351,13 @@ public class EpsUserData
         iRecId = this.ebEnt.ebUd.checkLogin(); 
         if (iRecId > 0)
         {
-        	request.getSession(true).setAttribute("userId", iRecId);
+        	this.ebEnt.ebUd.request.getSession().setAttribute("userId", iRecId);
+        	@SuppressWarnings("unchecked")
+          Set<Integer> ids = (Set<Integer>) this.ebEnt.ebUd.request.getSession().getServletContext().getAttribute("LOG_IN_USERS");
+        	if (ids == null) ids = new HashSet<Integer>();
+        	ids.add(iRecId);
+        	this.ebEnt.ebUd.request.getSession().getServletContext().setAttribute("LOG_IN_USERS", ids);
+        	
           if (stTemp != null && !stTemp.equals(""))
           {
             if (this.rsMyDiv != null && this.rsMyDiv.getInt("UserQuestionsOnOff") > 0)
@@ -361,21 +386,29 @@ public class EpsUserData
                 makeTask(5, "Answer not found / Email: " + this.ebEnt.ebUd.aLogin[2]); // 5	1	Failed Login	Enabled	Yes
               }
             }
-            Cookie userCookie1 = new Cookie("ui", this.ebEnt.ebUd.aLogin[0]);
-            response.addCookie(userCookie1);
-            Cookie userCookie2 = new Cookie("ut", this.ebEnt.ebUd.aLogin[1]);
-            response.addCookie(userCookie2);
-            Cookie userCookie3 = new Cookie("email", this.ebEnt.ebUd.aLogin[2]);
-            response.addCookie(userCookie3);
-            //Cookie userCookie4 = new Cookie("sid", this.ebEnt.EBEncrypt(this.ebEnt.ebUd.aLogin[4]));
-            Cookie userCookie4 = new Cookie("sid", this.ebEnt.ebUd.aLogin[4]);
-            response.addCookie(userCookie4);
+            this.ebEnt.ebUd.setCookie("ui", this.ebEnt.ebUd.aLogin[0], 30);
+            this.ebEnt.ebUd.setCookie("ut", this.ebEnt.ebUd.aLogin[1], 30);
+            this.ebEnt.ebUd.setCookie("email", this.ebEnt.ebUd.aLogin[2], 30);
+            this.ebEnt.ebUd.setCookie("sid", this.ebEnt.ebUd.aLogin[4], 30);
+//            Cookie userCookie1 = new Cookie("ui", this.ebEnt.ebUd.aLogin[0]);
+//            userCookie1.setMaxAge(24*60*60);
+//            response.addCookie(userCookie1);
+//            Cookie userCookie2 = new Cookie("ut", this.ebEnt.ebUd.aLogin[1]);
+//            userCookie2.setMaxAge(24*60*60);
+//            response.addCookie(userCookie2);
+//            Cookie userCookie3 = new Cookie("email", this.ebEnt.ebUd.aLogin[2]);
+//            userCookie3.setMaxAge(24*60*60);
+//            response.addCookie(userCookie3);
+//            //Cookie userCookie4 = new Cookie("sid", this.ebEnt.EBEncrypt(this.ebEnt.ebUd.aLogin[4]));
+//            Cookie userCookie4 = new Cookie("sid", this.ebEnt.ebUd.aLogin[4]);
+//            userCookie4.setMaxAge(24*60*60);
+//            response.addCookie(userCookie4);
             this.epsEf.addAuditTrail(5, "0", this.ebEnt.ebUd.aLogin[2]); // This is to LOG the LOGIN event for reporting
           }
         } else
         {
         	if (iRecId == -5) {
-        		this.ebEnt.ebUd.setPopupMessage("E-Mail/Password is being used.");
+        		this.ebEnt.ebUd.setPopupMessage("E-Mail/Password is being used. \nPlease try again after " + (request.getSession().getMaxInactiveInterval()/60) + " minutes.");
         	} 
         	else if (stTemp != null && !stTemp.equals(""))
           {
@@ -867,13 +900,15 @@ public class EpsUserData
     } else if (stAction.equals("home"))
     {
       return makeHomePage();
-    } else
+    } else if (stAction.equals("load")) {
+    	return loadDataFromXLS();
+    } else 
     {
       return "NOT YET IMPLEMENTED: stAction=" + stAction;
     }
   }
 
-  private String epsHelp()
+	private String epsHelp()
   {
     String stReturn = "<center><table border=1 width='100%'><tr><td>";
     String stHelp = "";
@@ -3851,7 +3886,7 @@ public class EpsUserData
     }
     /* AS -- 2Oct2011  -- Issue #18*/
     //stReturn += "<input type='checkbox' name='nmType' value='1024' " + stChecked + " /> Administrator ";
-    stReturn += "<input type='checkbox' name='nmType' value='1024' " + stChecked + " onclick='checkAll(document.forms[1].nmType, this)'/> Administrator ";
+    stReturn += "<input type='checkbox' name='nmType' value='1024' " + stChecked + (iBr == 0 ? " onclick='checkAll(document.forms[1].nmType, this)'": "") + "/> Administrator ";
     if ((nmType & 128) != 0)
     {
       stChecked = " checked ";
@@ -3860,7 +3895,7 @@ public class EpsUserData
       stChecked = "";
     }
     /* AS -- 2Oct2011  -- Issue #18*/
-    stReturn += "<input type='checkbox' name='nmType' value='128' " + stChecked + " onclick='checkAll(document.forms[1].nmType, this)'/> Business Analyst ";
+    stReturn += "<input type='checkbox' name='nmType' value='128' " + stChecked + (iBr == 0 ? " onclick='checkAll(document.forms[1].nmType, this)'": "") + "/> Business Analyst ";
     //stReturn += "<input type='checkbox' name='nmType' value='128' " + stChecked + " /> Business Analyst ";
 
     if ((nmType & 512) != 0)
@@ -3871,7 +3906,7 @@ public class EpsUserData
       stChecked = "";
     }
     /* AS -- 2Oct2011  -- Issue #18*/
-    stReturn += "<input type='checkbox' name='nmType' value='512' " + stChecked + " onclick='checkAll(document.forms[1].nmType, this)'/> Executive ";
+    stReturn += "<input type='checkbox' name='nmType' value='512' " + stChecked + (iBr == 0 ? " onclick='checkAll(document.forms[1].nmType, this)'": "") + "/> Executive ";
     //stReturn += "<input type='checkbox' name='nmType' value='512' " + stChecked + " /> Executive ";
     if ((nmType & 64) != 0)
     {
@@ -3885,7 +3920,7 @@ public class EpsUserData
       stReturn += "<br>";
     }
     /* AS -- 2Oct2011  -- Issue #18*/
-    stReturn += "<input type='checkbox' name='nmType' value='64' " + stChecked + " onclick='checkAll(document.forms[1].nmType,this)'/> Project Manager ";
+    stReturn += "<input type='checkbox' name='nmType' value='64' " + stChecked + (iBr == 0 ? " onclick='checkAll(document.forms[1].nmType, this)'": "") + "/> Project Manager ";
     //stReturn += "<input type='checkbox' name='nmType' value='64' " + stChecked + " /> Project Manager ";
     if ((nmType & 32) != 0)
     {
@@ -3895,7 +3930,7 @@ public class EpsUserData
       stChecked = "";
     }
     /* AS -- 2Oct2011  -- Issue #18*/
-    stReturn += "<input type='checkbox' name='nmType' value='32' " + stChecked + " onclick='checkAll(document.forms[1].nmType,this)'/> Project Portfolio Manager ";
+    stReturn += "<input type='checkbox' name='nmType' value='32' " + stChecked + (iBr == 0 ? " onclick='checkAll(document.forms[1].nmType, this)'": "") + "/> Project Portfolio Manager ";
     //stReturn += "<input type='checkbox' name='nmType' value='32' " + stChecked + " /> Project Portfolio Manager ";
     if ((nmType & 1) != 0)
     {
@@ -3907,7 +3942,7 @@ public class EpsUserData
     //if (iBr > 0)
     stReturn += "<br>";
     /* AS -- 2Oct2011  -- Issue #18*/
-    stReturn += "<input type='checkbox' name='nmType' value='1' " + stChecked + " onclick='checkAll(document.forms[1].nmType,this)'/> Project Team Member ";
+    stReturn += "<input type='checkbox' name='nmType' value='1' " + stChecked + (iBr == 0 ? " onclick='checkAll(document.forms[1].nmType, this)'": "") + "/> Project Team Member ";
     //stReturn += "<input type='checkbox' name='nmType' value='1' " + stChecked + " /> Project Team Member ";
     return stReturn;
   }
@@ -4562,7 +4597,7 @@ public class EpsUserData
 	        if (iLastLevel == rs1.getInt("ReqLevel") && stValue.length() <= 0 && stId.equals(rs1.getString("RecId"))){
 	      	  // same level as before, therefore we are LAST
 	      	  this.ebEnt.ebUd.setPopupMessage("[ID:" + rs1.getString("RecId") + "] " + rsF.getString("stLabel") + ": Children tasks must have a description specified.");
-	      	  makeMessage("All", rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), rs1.getString("ReqTitle"), rs.getString("ProjectName")+": Children tasks must have a description specified", dateEnd);
+	      	  makeMessage(rs.getString("ProjectName"), rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), rs1.getString("ReqTitle"), "Children tasks must have a description specified", dateEnd);
 	      	  err = 1;
 	      	  break;
 	        }
@@ -4577,7 +4612,7 @@ public class EpsUserData
 		        if(iLastLevel != rs1.getInt("ReqLevel") && rs1.getString("ReqDescription") != null && rs1.getString("ReqDescription").length() > 0){
 		      	  //parent
 		      	  this.ebEnt.ebUd.setPopupMessage("[ID:" + stId + "] " + rsF.getString("stLabel") + ": Parent tasks cannot have a description.");
-		      	  makeMessage("All", rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), rs1.getString("ReqTitle"), rs.getString("ProjectName")+": Parent tasks cannot have a descriptions", dateEnd);
+		      	  makeMessage(rs.getString("ProjectName"), rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), rs1.getString("ReqTitle"), "Parent tasks cannot have a descriptions", dateEnd);
 		      	  err = 1;
 		      	  break;
 		        }
@@ -4912,6 +4947,7 @@ public class EpsUserData
     int iWordCount = 0;
     int iLc = 0;
     int iLcNumUsers = 0;
+    Map<String, String> exchangeRatesMap = new HashMap<String, String>();
     
     try
     {
@@ -4949,13 +4985,18 @@ public class EpsUserData
 		while(rs.next())
 		{
 			String countrycode = rs.getString(2);
-//			URL convert = new URL("http://www.exchangerate-api.com/"+countrycode+"/usd/1?k=eBMtn-V4U6g-fiLRp");
-			URL convert = new URL("http://www.exchangerate-api.com/"+countrycode+"/usd/1?k=puupy-nZ3tU-rHeQe");
-			BufferedReader in = new BufferedReader(new InputStreamReader(convert.openStream()));
-			answer = in.readLine();
+			if (!exchangeRatesMap.containsKey(countrycode)) {
+//				URL convert = new URL("http://www.exchangerate-api.com/"+countrycode+"/usd/1?k=eBMtn-V4U6g-fiLRp");
+				URL convert = new URL("http://www.exchangerate-api.com/"+countrycode+"/usd/1?k=puupy-nZ3tU-rHeQe");
+				BufferedReader in = new BufferedReader(new InputStreamReader(convert.openStream()));
+				answer = in.readLine();
+				exchangeRatesMap.put(countrycode, answer);
+				in.close();
+			} else {
+				answer = exchangeRatesMap.get(countrycode);
+			}
 			String insertsql = "update dbeps01.teb_division set nmExchangeRate="+answer+" where nmDivision="+rs.getInt(1);
 			this.ebEnt.dbEnterprise.ExecuteUpdate(insertsql);
-			in.close();
 		}
 	  
     runD50D53();
@@ -5156,7 +5197,7 @@ public class EpsUserData
         stMissing += "<tr><td>" + rs.getString("ProjectName") + "</td></tr>";
         //Send message to PPM in this project if Project Manager is missing
         if(!rs.getString("ProjectPortfolioManagerAssignment").isEmpty())
-        	makeMessage("All", rs.getString("ProjectPortfolioManagerAssignment"), rs.getString("ProjectName"), "Missing Project Manager", dateEnd);
+        	makeMessage(rs.getString("ProjectName"), rs.getString("ProjectPortfolioManagerAssignment"), "Missing Project Manager", "Please assign Project Manager", dateEnd);
       }
       if (stMissing.length() > 0)
       {
@@ -5275,14 +5316,14 @@ public class EpsUserData
         if(rs.getString("ReqDescription") == null) continue;
         if (rs.getInt("cntChildren")==0) continue;
         if(!rs.getString("ReqDescription").contains("shall")){
-        	makeMessage("All", rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), "Requirement Warning", rs.getString("ProjectName")+": Requirements must contain the word <em>shall</em>", dateEnd);
+        	makeMessage(rs.getString("ProjectName"), rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), "Requirement Warning", "Requirements must contain the word <em>shall</em>", dateEnd);
         }
         //Verify Description does not exceed max word count
         if(!rs.getString("ReqDescription").isEmpty()){
         	iWords = rs.getString("ReqDescription").split(" ");
 	        iWordCount = iWords.length;
 	        if(iWordCount > this.rsMyDiv.getInt("ReqtsSpecificationMaximumWords")){
-	        	makeMessage("All", rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), "Requirement Warning", rs.getString("ProjectName")+": Requirements cannot exceed "+this.rsMyDiv.getInt("ReqtsSpecificationMaximumWords")+" words", dateEnd);
+	        	makeMessage(rs.getString("ProjectName"), rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), "Requirement Warning", "Requirements cannot exceed "+this.rsMyDiv.getInt("ReqtsSpecificationMaximumWords")+" words", dateEnd);
 	        }
 	        
 	        if(iWordCount>0) {
@@ -5292,10 +5333,10 @@ public class EpsUserData
             }
 	        	if (wordList.length()>0) wordList = wordList.substring(0, wordList.length()-1);
 	        	if (this.ebEnt.dbDyn.ExecuteSql1n("select count(*) from teb_dictionary where stKeywordType='A' and stKeyword IN ("+wordList+")")>0) {
-	        		makeMessage("All", rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), "Requirement Warning", "Project "+rs.getString("ProjectName")+" requirement ID "+rs.getString("RecId")+" has an adjective or adverb as part of its description", dateEnd);
+	        		makeMessage(rs.getString("ProjectName"), rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), "Requirement Warning", "Project "+rs.getString("ProjectName")+" requirement ID "+rs.getString("RecId")+" has an adjective or adverb as part of its description", dateEnd);
 	        	}
 	        	if (this.ebEnt.dbDyn.ExecuteSql1n("select count(*) from teb_dictionary where stKeywordType='C' and stKeyword IN ("+wordList+")")>0) {
-	        		makeMessage("All", rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), "Requirement Warning", "Project "+rs.getString("ProjectName")+" requirement ID "+rs.getString("RecId")+" is a compound statement", dateEnd);
+	        		makeMessage(rs.getString("ProjectName"), rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), "Requirement Warning", "Project "+rs.getString("ProjectName")+" requirement ID "+rs.getString("RecId")+" is a compound statement", dateEnd);
 	        	}
 	        }
 	        iWordCount = 0;
@@ -5304,11 +5345,11 @@ public class EpsUserData
         //VerifyMapping
         stSql = "SELECT count(*) FROM teb_link tl, schedule s where s.nmProjectId=tl.nmToProject and s.nmBaseLine=tl.nmBaseline and tl.nmToId=s.RecId and s.lowlvl=1 and tl.nmFromId="+rs.getString("RecId")+" AND tl.nmProjectId="+rs.getString("nmProjectId")+" AND tl.nmBaseLine="+rs.getString("nmBaseLine");
         if (this.ebEnt.dbDyn.ExecuteSql1n(stSql) == 0) {
-        	makeMessage("All", rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), "Requirement Warning", "Project "+rs.getString("ProjectName")+" requirement ID "+rs.getString("RecId")+" is not mapped to any low-level tasks.", dateEnd);
+        	makeMessage(rs.getString("ProjectName"), rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), "Requirement Warning", "Project "+rs.getString("ProjectName")+" requirement ID "+rs.getString("RecId")+" is not mapped to any low-level tasks.", dateEnd);
         }
         stSql = "SELECT count(*) FROM test where ReqMap="+rs.getString("RecId")+" AND nmProjectId="+rs.getString("nmProjectId");
         if (this.ebEnt.dbDyn.ExecuteSql1n(stSql) == 0) {
-        	makeMessage("All", rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), "Requirement Warning", "Project "+rs.getString("ProjectName")+" requirement ID "+rs.getString("RecId")+" is a low-level requirement and needs to be linked to one or more test cases.", dateEnd);
+        	makeMessage(rs.getString("ProjectName"), rs.getString("ProjectPortfolioManagerAssignment")+","+rs.getString("ProjectManagerAssignment")+","+rs.getString("BusinessAnalystAssignment"), "Requirement Warning", "Project "+rs.getString("ProjectName")+" requirement ID "+rs.getString("RecId")+" is a low-level requirement and needs to be linked to one or more test cases.", dateEnd);
         }
       }
       
@@ -5332,7 +5373,7 @@ public class EpsUserData
 	    	  rs2 = this.ebEnt.dbDyn.ExecuteSql(stSql);
 	          rs2.absolute(1);
 	          if (rs2.getRow()>0) {
-	          	makeMessage("All", rs2.getString("ProjectPortfolioManagerAssignment")+","+rs2.getString("ProjectManagerAssignment"), "Schedule Warning", rs2.getString("ProjectName")+": Schedules should be updated daily", dateEnd);
+	          	makeMessage(rs2.getString("ProjectName"), rs2.getString("ProjectPortfolioManagerAssignment")+","+rs2.getString("ProjectManagerAssignment"), "Schedule Warning", "Schedules should be updated daily", dateEnd);
 	          }
 	          
 	          
@@ -5504,7 +5545,7 @@ public class EpsUserData
       if (rsTrigger.getString("TriggerEvent").equals("Enabled") && rsTrigger.getString("ContactList").length() > 0)
       {
         int iTaskId = this.ebEnt.dbEnterprise.ExecuteSql1n("select max(RecId) from X25Task"
-          + " where stTitle=\"" + stTitle + "\" and stDescription = "
+          + " where stTitle=" + this.ebEnt.dbEnterprise.fmtDbString(stTitle) + " and stDescription = "
           + this.ebEnt.dbEnterprise.fmtDbString(stTaskDetail) + " and nmTaskFlag=" + rsTrigger.getString("nmTasktype"));
         if (iTaskId <= 0)
         {
@@ -5568,7 +5609,7 @@ public class EpsUserData
     int iU = 0;
     try
     {
-      int iSchId = this.ebEnt.dbEnterprise.ExecuteSql1n("select max(RecId) from X25Task where stTitle=\"" + stTask + "\" ");
+      int iSchId = this.ebEnt.dbEnterprise.ExecuteSql1n("select max(RecId) from X25Task where stTitle=" + this.ebEnt.dbEnterprise.fmtDbString(stTask) + " ");
       if (iSchId <= 0)
       {
         iSchId = this.ebEnt.dbEnterprise.ExecuteSql1n("select max(RecId) from X25Task");
@@ -5615,7 +5656,8 @@ public class EpsUserData
     int iU = 0;
     try
     {
-      int iSchId = this.ebEnt.dbEnterprise.ExecuteSql1n("select max(RecId) from X25Task where stTitle=\"" + stTask + "\" and stDescription like '%" + stTaskDetail + "%'");
+      int iSchId = this.ebEnt.dbEnterprise.ExecuteSql1n("select max(RecId) from X25Task where stTitle=" + this.ebEnt.dbEnterprise.fmtDbString(stTask) + 
+      		" and stDescription like '%" + this.ebEnt.dbEnterprise.fmtDbString(stTaskDetail) + "%'");
       if (iSchId <= 0)
       {
         iSchId = this.ebEnt.dbEnterprise.ExecuteSql1n("select max(RecId) from X25Task");
@@ -5732,7 +5774,7 @@ public class EpsUserData
       rs.last();
       int iMax = rs.getRow();
       stReturn += "<center><h2>" + rs.getString("ProjectName") + "</h2></center>";
-      stReturn += "</form><form method=post><table border=0><tr><th class=l1th>Criteria</th><th class=l1th>Weight (importance)</th>"
+      stReturn += "</form><form method=post><table border=0><tr><th class=l1th>Criteria</th><th class=l1th>Division</th><th class=l1th>Weight (importance)</th>"
         + "<th class=l1th>Score</th><th class=l1th>Last Responder</th><th class=l1th>Response Date</th></tr>";
       String stTemp = this.ebEnt.ebUd.request.getParameter("savescore");
       if (stTemp != null && stTemp.length() > 0)
@@ -5750,7 +5792,7 @@ public class EpsUserData
               {
                 nmScore = "-1";
               }
-              //if (!stTemp.equals(nmScore))
+              if (!stTemp.equals(nmScore))
               {
                 try
                 {
@@ -5781,88 +5823,92 @@ public class EpsUserData
         {
           rs.absolute(iR);
           //WeightImportance
-          ResultSet rsCriteria = this.ebEnt.dbDyn.ExecuteSql("select * from Criteria where CriteriaName "
-            + "= '" + rs.getString("stLabel") + "' and nmDivision=" + rs.getString("nmDivision"));
-          rsCriteria.absolute(1);
-          stTemp = rsCriteria.getString("Responsibilities");
-          if (stTemp != null)
-          {
-            stTemp = stTemp.replace("~", ",");
-          } else
-          {
-            stTemp = "";
+          ResultSet rsCriteria = this.ebEnt.dbDyn.ExecuteSql("select c.*, d.stDivisionName from Criteria c, teb_division d where c.CriteriaName "
+            + "= '" + rs.getString("stLabel") + "' and c.nmDivision=d.nmDivision and c.nmDivision=" + rs.getString("nmDivision"));
+          rsCriteria.last();
+          if (rsCriteria != null && rsCriteria.getRow() > 0) {
+	          rsCriteria.absolute(1);
+	          stTemp = rsCriteria.getString("Responsibilities");
+	          if (stTemp != null)
+	          {
+	            stTemp = stTemp.replace("~", ",");
+	          } else
+	          {
+	            stTemp = "";
+	          }
+	          if (stTemp.length() > 1 && stTemp.startsWith("0"))
+	          {
+	            stTemp = stTemp.substring(1);
+	          }
+	          String stResponsibilities = "," + stTemp + ",";
+	          if (stResponsibilities.contains("," + this.ebEnt.ebUd.getLoginId() + ","))
+	          {
+	            int iWeight = rsCriteria.getInt("WeightImportance");
+	            if (iWeight != 0)
+	            {
+	              stReturn += "<tr>";
+	              stReturn += "<td class=l1td>" + rs.getString("stLabel") + "</td>";
+	              stReturn += "<td class=l1td>" + rsCriteria.getString("stDivisionName") + "</td>";
+	              stReturn += "<td class=l1td style='text-align:center;'>"
+	                + iWeight
+	                + "</td>";
+	              if (rs.getString("nmProjectId") == null)
+	              {
+	                stSql = "INSERT INTO teb_project "
+	                  + "(nmProjectId,nmBaseline,nmFieldId,iValue,nmValue,stValue,nmUserId,dtLastChanged) VALUES("
+	                  + stPrj + ",1," + rs.getString("nmForeignId") + ","
+	                  + "0,0,''," + this.ebEnt.ebUd.getLoginId() + ",now())";
+	                this.ebEnt.dbDyn.ExecuteUpdate(stSql);
+	                nmScore = "";
+	                nmResponder = "";
+	                dtResponder = "";
+	              } else
+	              {
+	                nmScore = rs.getString("stValue");
+	                dtResponder = rs.getString("dtLastChanged");
+	                nmResponder = rs.getString("nmUserId");
+	                if (nmScore == null)
+	                {
+	                  nmScore = "";
+	                }
+	                if (dtResponder == null)
+	                {
+	                  dtResponder = "";
+	                }
+	                if (nmResponder == null)
+	                {
+	                  nmResponder = "";
+	                }
+	              }
+	              stReturn += "<td class=l1td'><select name=score" + rs.getString("nmForeignId") + ">";
+	              for (int ii = -1; ii
+	                <= 10; ii++)
+	              {
+	                if (ii == -1)
+	                {
+	                  stTemp = "--";
+	                } else
+	                {
+	                  stTemp = "" + ii;
+	                }
+	                stReturn += this.ebEnt.ebUd.addOption2(stTemp, "" + ii, nmScore);
+	              }
+	              stReturn += "</select></td>";
+	              if (nmResponder.length() > 0)
+	              {
+	                stTemp = this.ebEnt.dbDyn.ExecuteSql1("select concat(FirstName,' ',LastName) as nm from Users where nmUserId=" + nmResponder);
+	              } else
+	              {
+	                stTemp = "";
+	              }
+	              stReturn += "<td>" + stTemp + "</td>";
+	              stReturn += "<td>" + dtResponder + "</td>";
+	              stReturn += "</tr>";
+	            } //else
+	            //stError += "<br> WEIGHT = 0 " + rs.getString("stLabel");
+	          } //else
+	          //stError += "<BR> NOT RESPONSIBLE " + rs.getString("stLabel");
           }
-          if (stTemp.length() > 1 && stTemp.startsWith("0"))
-          {
-            stTemp = stTemp.substring(1);
-          }
-          String stResponsibilities = "," + stTemp + ",";
-          if (stResponsibilities.contains("," + this.ebEnt.ebUd.getLoginId() + ","))
-          {
-            int iWeight = rsCriteria.getInt("WeightImportance");
-            if (iWeight != 0)
-            {
-              stReturn += "<tr>";
-              stReturn += "<td class=l1td>" + rs.getString("stLabel") + "</td>";
-              stReturn += "<td class=l1td style='text-align:center;'>"
-                + iWeight
-                + "</td>";
-              if (rs.getString("nmProjectId") == null)
-              {
-                stSql = "INSERT INTO teb_project "
-                  + "(nmProjectId,nmBaseline,nmFieldId,iValue,nmValue,stValue,nmUserId,dtLastChanged) VALUES("
-                  + stPrj + ",1," + rs.getString("nmForeignId") + ","
-                  + "0,0,''," + this.ebEnt.ebUd.getLoginId() + ",now())";
-                this.ebEnt.dbDyn.ExecuteUpdate(stSql);
-                nmScore = "";
-                nmResponder = "";
-                dtResponder = "";
-              } else
-              {
-                nmScore = rs.getString("stValue");
-                dtResponder = rs.getString("dtLastChanged");
-                nmResponder = rs.getString("nmUserId");
-                if (nmScore == null)
-                {
-                  nmScore = "";
-                }
-                if (dtResponder == null)
-                {
-                  dtResponder = "";
-                }
-                if (nmResponder == null)
-                {
-                  nmResponder = "";
-                }
-              }
-              stReturn += "<td class=l1td'><select name=score" + rs.getString("nmForeignId") + ">";
-              for (int ii = -1; ii
-                <= 10; ii++)
-              {
-                if (ii == -1)
-                {
-                  stTemp = "--";
-                } else
-                {
-                  stTemp = "" + ii;
-                }
-                stReturn += this.ebEnt.ebUd.addOption2(stTemp, "" + ii, nmScore);
-              }
-              stReturn += "</select></td>";
-              if (nmResponder.length() > 0)
-              {
-                stTemp = this.ebEnt.dbDyn.ExecuteSql1("select concat(FirstName,' ',LastName) as nm from Users where nmUserId=" + nmResponder);
-              } else
-              {
-                stTemp = "";
-              }
-              stReturn += "<td>" + stTemp + "</td>";
-              stReturn += "<td>" + dtResponder + "</td>";
-              stReturn += "</tr>";
-            } //else
-            //stError += "<br> WEIGHT = 0 " + rs.getString("stLabel");
-          } //else
-          //stError += "<BR> NOT RESPONSIBLE " + rs.getString("stLabel");
         }
         stReturn += "<tr><td colspan=5 align=center><input type=submit name=savescore value='Save'>&nbsp;&nbsp;&nbsp;"
           + "<input type=submit name=savescore value='Cancel'></td></tr>";
@@ -6527,5 +6573,151 @@ public class EpsUserData
     }
     this.ebEnt.ebUd.clearPopupMessage();
     return stReturn;
+  }
+  
+  private String loadDataFromXLS() {
+  	try {
+	    InputStream is = this.ebEnt.ebUd.request.getSession().getServletContext().getResourceAsStream("WEB-INF/classes/DatabaseInfo.xls");
+	    
+	    POIFSFileSystem filesys = new POIFSFileSystem(is);
+	    HSSFWorkbook workbook = new HSSFWorkbook(filesys);
+	    HSSFSheet userSheet = workbook.getSheet("Users");
+	    Iterator<Row> rows = userSheet.rowIterator();
+
+	    //clear user data
+	    String stSql = "";
+	    ResultSet rs = null;
+	    String uids = "";
+	    if (rows.hasNext()) {
+	    	ebEnt.dbDyn.ExecuteUpdate("Delete from users where nmUserId>10");
+	    	stSql = "SELECT nmUserId FROM users";
+		    rs = ebEnt.dbDyn.ExecuteSql(stSql);
+		    while (rs.next()) {
+		    	uids += rs.getString("nmUserId") + ",";
+		    }
+		    if (uids.length()>0) uids = uids.substring(0,uids.length()-1);
+		    rs.close();
+		    //clean up for deleted users
+		    ebEnt.dbDyn.ExecuteUpdate("UPDATE projects SET nmLockUserId=0 WHERE nmLockUserId NOT IN ("+uids+")");
+		    ebEnt.dbDyn.ExecuteUpdate("DELETE FROM teb_refdivision WHERE nmRefType=42 AND nmRefId NOT IN ("+uids+")");
+		    ebEnt.dbDyn.ExecuteUpdate("DELETE FROM teb_reflaborcategory WHERE nmRefType=42 AND nmRefId NOT IN ("+uids+")");
+//		    ebEnt.dbDyn.ExecuteUpdate("UPDATE teb_project SET nmUserId=0 WHERE nmUserId NOT IN ("+uids+")");
+//		    ebEnt.dbDyn.ExecuteUpdate("DELETE FROM teb_allocate WHERE nmUserId NOT IN ("+uids+")");
+//		    ebEnt.dbDyn.ExecuteUpdate("DELETE FROM v_allocate WHERE nmUserId NOT IN ("+uids+")");
+		    ebEnt.dbEnterprise.ExecuteUpdate("DELETE FROM x25audittrail WHERE nmUserId NOT IN ("+uids+")");
+		    ebEnt.dbEnterprise.ExecuteUpdate("DELETE FROM x25user WHERE RecId NOT IN ("+uids+")");
+		    ebEnt.dbEnterprise.ExecuteUpdate("DELETE FROM x25refuser WHERE nmUserId NOT IN ("+uids+")");
+	    }
+	    
+	    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	    
+	    String stSqlUser = "INSERT INTO Users (nmUserId, LastName, FirstName, JobTitle, HourlyRate, ProductivityFactor, Supervisor, StartDate, SpecialDays," +
+	    		" Telephone, Facsimile, CellPhone, NrTasksCompleted, AccumPrjHours, AccumEstPrjHours, NonPrjHours, SickDaysToDate, VacDaysToDate, Answers, WeeklyWorkHours, ActivityHours) VALUES ";
+	    String stSqlX25User = "INSERT INTO x25User (RecId, stEmail, stPassword, dtPasswordChangeDate, nmPriviledge) VALUES ";
+	    String stSqlDivision = "INSERT INTO teb_refdivision VALUES ";
+	    String stSqlLC = "INSERT INTO teb_reflaborcategory (nmLaborCategoryId, nmRefType, nmRefId, nmFlags, nmActualHours, nmEstimatedHours) VALUES ";
+	    int iCount = 0;
+	    int iCountDivision = 0;
+	    int iCountLC = 0;
+	    while (rows.hasNext()) {
+	    	Row row = (Row) rows.next();
+	    	if (row.getRowNum() < 2) continue;
+	    	iCount ++;
+	      String stLastName = row.getCell(0).getStringCellValue();
+	      String stFirstName = row.getCell(1).getStringCellValue();
+	      double nmUserId = row.getCell(2).getNumericCellValue();
+	      String stJobTitle = row.getCell(3).getStringCellValue();
+	      
+	      double nmHourlyRate = row.getCell(6).getNumericCellValue();
+	      double nmProductivityFactor = 1.0*Math.round(row.getCell(7).getNumericCellValue()*100)/100;
+	      
+	      String stSupervisor = row.getCell(9).getStringCellValue();
+	      int nmSVUserId = ebEnt.dbDyn.ExecuteSql1n("SELECT nmUserId FROM Users WHERE CONCAT(FirstName, ' ', LastName)='"+stSupervisor+"' LIMIT 1");
+	      
+	      Date dtStartDate = row.getCell(10).getDateCellValue();
+	      String stSpecialDays = row.getCell(11).getStringCellValue();
+	      String stTel = row.getCell(12).getStringCellValue();
+	      String stFax = row.getCell(14).getStringCellValue();
+	      String stCellphone = row.getCell(15).getStringCellValue();
+	      double nmTasksCompleted = row.getCell(16).getNumericCellValue();
+	      double nmAccumProjectHours = 1.0*Math.round(row.getCell(17).getNumericCellValue()*100)/100;
+	      double nmAccumEstimatedProjectHours = 1.0*Math.round(row.getCell(18).getNumericCellValue()*100)/100;
+	      double nmNoneProjectHours = 1.0*Math.round(row.getCell(19).getNumericCellValue()*100)/100;
+	      
+	      double nmSickDayToDate = row.getCell(21).getNumericCellValue();
+	      double nmVacationDayToDate = row.getCell(22).getNumericCellValue();
+	      String stAnswer = row.getCell(24).getStringCellValue();
+	      
+	      double nmMonWorkHours= row.getCell(25).getNumericCellValue();
+	      double nmTueWorkHours= row.getCell(26).getNumericCellValue();
+	      double nmWedWorkHours= row.getCell(27).getNumericCellValue();
+	      double nmThuWorkHours= row.getCell(28).getNumericCellValue();
+	      double nmFriWorkHours= row.getCell(29).getNumericCellValue();
+	      double nmSatWorkHours= row.getCell(30).getNumericCellValue();
+	      double nmSunWorkHours= row.getCell(31).getNumericCellValue();
+	      String stWorkHours = "~"+nmMonWorkHours+"~"+nmTueWorkHours+"~"+nmWedWorkHours+"~"+nmThuWorkHours+"~"+nmFriWorkHours+"~"+nmSatWorkHours+"~"+nmSunWorkHours;
+	      double nmMonActWorkHours= row.getCell(32).getNumericCellValue();
+	      double nmTueActWorkHours= row.getCell(33).getNumericCellValue();
+	      double nmWedActWorkHours= row.getCell(34).getNumericCellValue();
+	      double nmThuActWorkHours= row.getCell(35).getNumericCellValue();
+	      double nmFriActWorkHours= row.getCell(36).getNumericCellValue();
+	      double nmSatActWorkHours= row.getCell(37).getNumericCellValue();
+	      double nmSunActWorkHours= row.getCell(38).getNumericCellValue();
+	      String stActWorkHours = "~"+nmMonActWorkHours+"~"+nmTueActWorkHours+"~"+nmWedActWorkHours+"~"+nmThuActWorkHours+"~"+nmFriActWorkHours+"~"+nmSatActWorkHours+"~"+nmSunActWorkHours;
+	      
+	      if (iCount > 1) {
+	      	stSqlUser += ",";
+	      	stSqlX25User += ",";
+	      }
+	      
+//	      (nmUserId, LastName, FirstName, JobTitle, HourlyRate, ProductivityFactor, Supervisor, StartDate, SpecialDays," +
+//		    		" Telephone, Facsimile, CellPhone, NrTasksCompleted, AccumPrjHours, AccumEstPrjHours, NonPrjHours, 
+//	      SickDaysToDate, VacDaysToDate, Answers, WeeklyWorkHours, ActivityHours
+	      stSqlUser += " ("+nmUserId+",'"+stLastName+"','"+stFirstName+"','"+stJobTitle+"',"+nmHourlyRate+","+nmProductivityFactor+","+nmSVUserId+",'"+sdf.format(dtStartDate)+"','"+stSpecialDays+"'," +
+	      		"'"+stTel+"','"+stFax+"','"+stCellphone+"',"+nmTasksCompleted+","+nmAccumProjectHours+","+nmAccumEstimatedProjectHours+","+nmNoneProjectHours+"," +
+    				""+nmSickDayToDate+","+nmVacationDayToDate+",'"+stAnswer+"','"+stWorkHours+"','"+stActWorkHours+"')";
+	      
+	      String stEmail = row.getCell(13).getStringCellValue();
+	      String stPassword = row.getCell(23).getStringCellValue();
+	      String stUserTypes = row.getCell(4).getStringCellValue();
+	      
+//	      (RecId, stEmail, stPassword, dtPasswordChangeDate, nmPriviledge)
+	      stSqlX25User += " ("+nmUserId+",'"+stEmail+"',password('"+stPassword+"'),sysdate(),"+getPriviledge(stUserTypes)+")";
+	      
+	      String stDivisionName = row.getCell(8).getStringCellValue();
+	      int nmDivisionId = ebEnt.dbDyn.ExecuteSql1n("SELECT nmDivision FROM teb_division WHERE stDivisionName='"+stDivisionName+"' LIMIT 1");
+	      if (nmDivisionId > 0) {
+	      	if (++iCountDivision>1) {
+	      		stSqlDivision += ",";
+	      	}
+	      	stSqlDivision += "("+nmDivisionId+",42,"+nmUserId+",1)";
+	      }
+	      
+	      String[] stLaborCategories = row.getCell(5).getStringCellValue().split(",");
+	      String stLC = "";
+	      for (String lc : stLaborCategories) {
+	      	if ("QA Director".equals(lc)) lc = "Quality Assurance Director";
+//	      	(nmLaborCategoryId, nmRefType, nmRefId, nmFlags, nmActualHours, nmEstimatedHours)
+	      	if (++iCountLC>1) {
+	      		stSqlLC += ",";
+	      	}
+	      	stSqlLC += "((SELECT nmLCId From LaborCategory WHERE LaborCategory='"+lc+"'),42,"+nmUserId+",0,40,40)";
+        }
+	      
+	      //TODO: not use
+	      @SuppressWarnings("unused")
+	      double nmWorkHours = row.getCell(20).getNumericCellValue();
+      }
+	    
+	    ebEnt.dbDyn.ExecuteUpdate(stSqlUser);
+	    ebEnt.dbEnterprise.ExecuteUpdate(stSqlX25User);
+	    ebEnt.dbDyn.ExecuteUpdate(stSqlDivision);
+	    ebEnt.dbDyn.ExecuteUpdate(stSqlLC);
+	    this.epsEf.processUsersInDivision();
+	    this.epsEf.processUsersInLaborCategory();
+    } catch (Exception e) {
+	    e.printStackTrace();
+    }
+	  return "";
   }
 }

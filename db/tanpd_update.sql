@@ -51,3 +51,9 @@ ALTER TABLE `teb_reports` ADD `stReportName` VARCHAR( 255 ) NOT NULL DEFAULT '' 
 UPDATE `teb_reports` r SET r.stReportName=(SELECT stReportName FROM teb_customreport rc WHERE rc.RecId=r.nmCustomReportId);
 ALTER TABLE `teb_customreport` ADD `nmDefaultReport` INT NOT NULL DEFAULT '0';
 UPDATE `dbeps01`.`teb_customreport` SET `nmDefaultReport` = '1' WHERE `teb_customreport`.`RecId` IN (1,9,15,16,11,25,24,26,10,20,17,27,28,29,19,12,18,14,30,4,2,87);
+
+--dump users in xls
+INSERT INTO `dbeps01`.`teb_division` (`nmDivision`, `nmUsersInDivision`, `nmHoursPerDay`, `dtStartTime`, `nmExchangeRate`, `stCountry`, `stHolidays`, `stMoneySymbol`, `nmBurdenFactor`, `stDivisionName`, `dtExchangeRate`, `stCurrency`, `stWorkDays`) 
+									VALUES (NULL, '0', '8', '07:00', '1', 'US', '', '$', '1', 'San Francisco', sysdate(), 'USD', 'Mon,Tue,Wed,Thu,Fri');
+									
+UPDATE  `dbeps01`.`teb_fields` SET  `nmFlags` =  '0' WHERE  `teb_fields`.`nmForeignId` =816;

@@ -716,6 +716,7 @@ class EpsXlsProject //extends EpsUserData
             iEditId = 1;
             this.ebEnt.dbDyn.ExecuteUpdate("insert into Schedule (RecId,nmProjectId,SchId,nmBaseline,SchLevel) "
               + "values(" + iRecMax + "," + stPk + "," + iEditId + "," + nmBaseline + ",0)");
+            iRecIdDo = iRecMax;
           }
           this.epsUd.makeTask(16, this.epsUd.epsEf.getScheduleName("" + iRecIdDo, stPk, nmBaseline)); // New Project Schedule
           this.ebEnt.ebUd.setRedirect(stLink + "&edit=" + iRecMax + "&new=y#row" + iEditId);
@@ -1411,6 +1412,7 @@ class EpsXlsProject //extends EpsUserData
       //this.rsFields
       String stStyle = getStyle(1.7);
       String s1 = "";
+      String stNew = ebEnt.ebUd.request.getParameter("new");
       switch (rsFields.getInt("nmDataType"))		//create editable fields for inline schedule and requirements
       {
         case 4:
@@ -1421,12 +1423,14 @@ class EpsXlsProject //extends EpsUserData
     	  if((rsFields.getString("nmForeignId").equals("231") && Integer.parseInt(this.ebEnt.ebUd.request.getParameter("child")) == 19)
     	  		|| (rsFields.getString("nmForeignId").equals("271") && Integer.parseInt(this.ebEnt.ebUd.request.getParameter("child")) == 21)){
     		  //drop down for req level 0-x+1
-    		  s1 = "<select '" + stStyle + "' type=text name=f" + rsFields.getString("nmForeignId") + " id=f" + rsFields.getString("nmForeignId") + ">";
+    		  s1 = "<select " + stStyle + " type=text name=f" + rsFields.getString("nmForeignId") + " id=f" + rsFields.getString("nmForeignId") + ">";
     		  for(int i=0; i<Integer.parseInt(stValue); i++){
     			  s1 += "<option value=\"" + i + "\">" + i + "</option>";
     		  }
-    		  s1 += "<option value=\"" + stValue + "\" selected='selected'>" + stValue + "</option>" +
-    		  	"<option value=\"" + (Integer.parseInt(stValue)+1) + "\">" + (Integer.parseInt(stValue)+1) + "</option>";
+    		  s1 += "<option value=\"" + stValue + "\" selected='selected'>" + stValue + "</option>";
+    		  if (stNew != null && "y".equals(stNew)) {
+    		  	s1 += "<option value=\"" + (Integer.parseInt(stValue)+1) + "\">" + (Integer.parseInt(stValue)+1) + "</option>";
+    		  }
     		  s1 += "</select>";
               sbReturn.append(s1);
           }else if(rsFields.getString("stDbFieldName").equals("SchDone")){
@@ -1589,6 +1593,7 @@ class EpsXlsProject //extends EpsUserData
       }
       
       //build labor category string
+      double nmEffort = 0;
   	  if(this.ebEnt.ebUd.request.getParameter("lc_0") != null && Integer.parseInt(this.ebEnt.ebUd.request.getParameter("child")) == 21 && Integer.parseInt(this.ebEnt.ebUd.request.getParameter("imax")) > 0){
   		  String lcfields = "";
 	      for (int iR = 0; iR < Integer.parseInt(this.ebEnt.ebUd.request.getParameter("imax")); iR++){
@@ -1596,11 +1601,15 @@ class EpsXlsProject //extends EpsUserData
 	    		  stSql += ", SchLaborCategories=";
 	    	  else if(!this.ebEnt.ebUd.request.getParameter("lc_"+iR).equals("0"))		//don't add | to new row fields
 	    		  lcfields += "|";
-	    	  if(!this.ebEnt.ebUd.request.getParameter("lc_"+iR).equals("0"))	//skip the add new labor category row
-	    		  lcfields += this.ebEnt.ebUd.request.getParameter("lc_"+iR) + "~" + this.ebEnt.ebUd.request.getParameter("nr_"+iR) + "~" + this.ebEnt.ebUd.request.getParameter("est_"+iR) + "~" + this.ebEnt.ebUd.request.getParameter("f9001_must_"+iR) + "~" + this.ebEnt.ebUd.request.getParameter("f9002_most_"+iR) + "~" + this.ebEnt.ebUd.request.getParameter("f9003_least_"+iR) + "~" + this.ebEnt.ebUd.request.getParameter("f9004_not_"+iR) + "~";
+	    	  if(!this.ebEnt.ebUd.request.getParameter("lc_"+iR).equals("0")) {	//skip the add new labor category row 
+	    	  	String stEffort = this.ebEnt.ebUd.request.getParameter("est_"+iR);
+	    	  	if (stEffort != null && !"".equals(stEffort)) nmEffort += Double.parseDouble(stEffort);
+	    		  lcfields += this.ebEnt.ebUd.request.getParameter("lc_"+iR) + "~" + this.ebEnt.ebUd.request.getParameter("nr_"+iR) + "~" + stEffort + "~" + this.ebEnt.ebUd.request.getParameter("f9001_must_"+iR) + "~" + this.ebEnt.ebUd.request.getParameter("f9002_most_"+iR) + "~" + this.ebEnt.ebUd.request.getParameter("f9003_least_"+iR) + "~" + this.ebEnt.ebUd.request.getParameter("f9004_not_"+iR) + "~";
+	    	  }
 	      }
 	      stSql += this.ebEnt.dbDyn.fmtDbString(lcfields);
       }
+  	  stSql += ", SchEstimatedEffort="+(new DecimalFormat("#0.0").format(nmEffort));
   	  
   	  
   	  //build dependencies string
@@ -2061,9 +2070,10 @@ class EpsXlsProject //extends EpsUserData
     try
     {
       this.iMaxPath = 0;
-      if (stChild.length() <= 0 || stChild.equals("19"))
+      if (stChild.length() <= 0 || stChild.equals("19")) {
         sbReturn.append(analyzeRequirements("19"));
-      if (stChild.length() <= 0 || stChild.equals("21"))
+        processAllRequirementCost();
+      } if (stChild.length() <= 0 || stChild.equals("21"))
         sbReturn.append(analyzeSchedules("21"));
       if (stChild.length() <= 0 || stChild.equals("34"))
         sbReturn.append(analyzeTest("34"));
@@ -2376,10 +2386,17 @@ class EpsXlsProject //extends EpsUserData
           rs1.absolute(iR);
           if (iLastLevel == rs1.getInt("Schlevel")){ // same level as before, therefore we are LAST
             SchFlags = 0x10;
-          } else if (iLastLevel > rs1.getInt("Schlevel"))
+          } else if (iLastLevel > rs1.getInt("Schlevel")) {
             SchFlags = 0;
-          else if (iLastLevel < rs1.getInt("Schlevel"))
+          } else if (iLastLevel < rs1.getInt("Schlevel"))
             SchFlags = 0x10;
+          	if (iLastLevel >= 0) {
+		          for (int i = iLastLevel; i < rs1.getInt("Schlevel"); i++)
+		          {
+		          	aHours[i] = 0;
+		          	aCost[i] = 0;
+		          }
+          	}
           if (iR == 1 || (SchFlags == 0x10))
           {
             dCost = this.epsUd.calculateScheduleCost(rs1);
@@ -3059,7 +3076,7 @@ class EpsXlsProject //extends EpsUserData
 	      	  // same level as before, therefore we are low level
 	          linkHit = this.ebEnt.dbDyn.ExecuteSql1n("SELECT COUNT(*) as c FROM teb_link WHERE nmProjectId=" + this.stPk + " and nmBaseline=" + this.nmBaseline + " and nmLinkFlags=1 and nmFromId=" + rs.getInt("RecId"));
 	          if(linkHit <= 0){
-	        	  this.epsUd.makeMessage("All", ppm+","+pm+","+ba+","+sp, "Requirement Mapping", prjname+": Please Assign a Task to Requirement("+rs.getString("ReqTitle")+")", dateEnd);
+	        	  this.epsUd.makeMessage(prjname, ppm+","+pm+","+ba+","+sp, "Requirement Mapping", "Please Assign a Task to Requirement("+rs.getString("ReqTitle")+")", dateEnd);
 	          }
 	        }
 	        iLastLevel = rs.getInt("ReqLevel");
@@ -3077,7 +3094,7 @@ class EpsXlsProject //extends EpsUserData
 	      	  // same level as before, therefore we are low level
 	          linkHit = this.ebEnt.dbDyn.ExecuteSql1n("SELECT COUNT(*) as c FROM teb_link WHERE nmProjectId=" + this.stPk + " and nmBaseline=" + this.nmBaseline + " and nmLinkFlags=1 and nmToId=" + rs.getInt("RecId"));
 	          if(linkHit <= 0){
-	        	  this.epsUd.makeMessage("All", ppm+","+pm+","+ba+","+sp, "Schedule Mapping", prjname+": Please Assign a Requirement to Task("+rs.getString("SchTitle")+")", dateEnd);
+	        	  this.epsUd.makeMessage(prjname, ppm+","+pm+","+ba+","+sp, "Schedule Mapping", "Please Assign a Requirement to Task("+rs.getString("SchTitle")+")", dateEnd);
 	          }
 	        }
 	        iLastLevel = rs.getInt("SchLevel");
@@ -3148,7 +3165,7 @@ class EpsXlsProject //extends EpsUserData
       {
         this.iAnalyzeStatus |= 0x10; // No schedule mapped 100%
         sbReturn.append("<td style='color:red;'>Requirement Mapping</td><td align=right>" + iMax + "</td><td style='color:red;'>fail</td>");
-        this.epsUd.makeMessage("All", ppm+","+pm+","+ba+","+sp, prjname, "Requirement Mapping", dateEnd);
+        this.epsUd.makeMessage(prjname, ppm+","+pm+","+ba+","+sp, "Requirement Mapping", "Please Assign Tasks to Requirements", dateEnd);
       }
       sbReturn.append(this.getElapsed());
       rs1.close();
@@ -3163,7 +3180,7 @@ class EpsXlsProject //extends EpsUserData
       {
         //Process EOB mapping messages #19
         if(this.ebEnt.ebUd.request.getParameter("stAction").equals("runeob")){
-    	  this.epsUd.makeMessage("All", ppm+","+pm+","+ba+","+sp, "Schedule Mapping", prjname+": Schedules Mapped &lt; 100%", dateEnd);
+    	  this.epsUd.makeMessage(prjname, ppm+","+pm+","+ba+","+sp, "Schedule Mapping", "Schedules Mapped &lt; 100%", dateEnd);
         }
         
         sbReturn.append(stHead + "<td>Requirements to Schedules</td><td>Schedules Mapped &lt; 100% <br>");
@@ -3189,7 +3206,7 @@ class EpsXlsProject //extends EpsUserData
       {
     	//Process EOB mapping messages #19
         if(this.ebEnt.ebUd.request.getParameter("stAction").equals("runeob")){
-      	  this.epsUd.makeMessage("All", ppm+","+pm+","+ba+","+sp, "Schedule Mapping", prjname+": Schedules Mapped &gt; 100%", dateEnd);
+      	  this.epsUd.makeMessage(prjname, ppm+","+pm+","+ba+","+sp, "Schedule Mapping", "Schedules Mapped &gt; 100%", dateEnd);
         }
     	  
         sbReturn.append(stHead + "<td>Requirements to Schedules</td><td>Schedules Mapped &gt; 100% <br>");
@@ -4735,28 +4752,38 @@ class EpsXlsProject //extends EpsUserData
    */
   public void processAllRequirementCost(){
 	  try{
-		  ResultSet stResult = this.ebEnt.dbDyn.ExecuteSql("select nmProjectId, nmBaseline, RecId from requirements");
+		  ResultSet stResult = this.ebEnt.dbDyn.ExecuteSql("select nmProjectId, nmBaseline, RecId, ReqFlags from requirements order by ReqLevel desc");
 		  while(stResult.next()){
 			  String reqID = stResult.getString("RecId");
 			  String projID = stResult.getString("nmProjectId");
 			  String bsline = stResult.getString("nmBaseline");
-		      Double rCost = 0.00;
-		      DecimalFormat df = new DecimalFormat("#########0.00");
+			  boolean lowlvl = (stResult.getInt("ReqFlags") & 0x10) != 0;
+	      Double rCost = 0.00;
+	      String stCost = "";
+	      DecimalFormat df = new DecimalFormat("#########0.00");
 		      
 		      //calculate sum of tasks for each requirement cost
+	      if (lowlvl) {
 		      ResultSet rResult = this.ebEnt.dbDyn.ExecuteSql("select l.nmPercent, l.nmRemainder, l.nmToId, r.ReqCost from teb_link l left join requirements r on l.nmFromId=r.RecId and l.nmProjectId=r.nmProjectId and l.nmBaseline=r.nmBaseline where l.nmLinkFlags=1 and l.nmProjectId=" + projID + " and l.nmBaseline=" + bsline + " and nmFromId=" + reqID);
 		      
 		      while(rResult.next()){
+		      	stCost = this.ebEnt.dbDyn.ExecuteSql1("select SchCost from schedule where nmProjectId=" + projID + " and nmBaseline=" + bsline + " and RecId=" + rResult.getString("l.nmToId"));
+		      	if (stCost == null || stCost.equals("")) stCost = "0";
 		    	  if(rResult.getString("l.nmRemainder").equals("1"))
-		    		  rCost += Double.parseDouble(this.ebEnt.dbDyn.ExecuteSql1("select SchCost from schedule where nmProjectId=" + projID + " and nmBaseline=" + bsline + " and RecId=" + rResult.getString("l.nmToId")));
+		    	  	rCost += Double.parseDouble(stCost);
 		    	  else
-		    		  rCost += Double.parseDouble(this.ebEnt.dbDyn.ExecuteSql1("select SchCost from schedule where nmProjectId=" + projID + " and nmBaseline=" + bsline + " and RecId=" + rResult.getString("l.nmToId"))) * (Double.parseDouble(rResult.getString("l.nmPercent"))*0.01);
+		    	  	rCost += Double.parseDouble(stCost) * (Double.parseDouble(rResult.getString("l.nmPercent"))*0.01);
 		      }
-			  this.ebEnt.dbDyn.ExecuteUpdate("update requirements set ReqCost='" + df.format(rCost) + "' where nmProjectId=" + projID + " and RecId=" + reqID + " and nmBaseline=" + bsline);  
+		      this.ebEnt.dbDyn.ExecuteUpdate("update requirements set ReqCost='" + df.format(rCost) + "' where nmProjectId=" + projID + " and RecId=" + reqID + " and nmBaseline=" + bsline);
+	      } else {
+	      	stCost = ebEnt.dbDyn.ExecuteSql1("select sum(ReqCost) from requirements where nmProjectId=" + projID + " and ReqParentRecId=" + reqID + " and nmBaseline=" + bsline);
+	      	rCost = Double.parseDouble(stCost == null || "".equals(stCost) ? "0" : stCost);
+	      	this.ebEnt.dbDyn.ExecuteUpdate("update requirements set ReqCost='" + df.format(rCost) + "' where nmProjectId=" + projID + " and RecId=" + reqID + " and nmBaseline=" + bsline);
+	      }
 		  }
 	  } catch (Exception e)
 	  {
-	      stError += "ERROR makeListValue: " + e;
+	      stError += "ERROR processAllRequirementCost: " + e;
 	  }
   }
   
