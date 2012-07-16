@@ -9,14 +9,14 @@ package com.eps.model;
  *
  * @author Robert Eder
  */
-import com.ederbase.model.EbEnterprise;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
+
+import com.ederbase.model.EbEnterprise;
 
 class EpsXlsProject //extends EpsUserData
 {
@@ -3285,24 +3285,32 @@ class EpsXlsProject //extends EpsUserData
       iMaxFields = 5;
       String stSql = "";
       String stFrom = "";
+      String stFromRecId = "-1";
       String stTo = "";
+      String stToRecId = "-1";
       if (stChild.equals("21"))
       {
         stFrom = this.ebEnt.ebUd.request.getParameter("rid");
-        stTo = stR;
+        stToRecId = stR;
+        if (stFrom != null && stFrom.length() > 0 && Integer.parseInt(stFrom) > 0)
+        	stFromRecId = ebEnt.dbDyn.ExecuteSql1("SELECT RecId FROM requirements WHERE nmProjectId="+stPk+" AND nmBaseline="+this.nmBaseline+" AND ReqId="+stFrom);
+        stTo = ebEnt.dbDyn.ExecuteSql1("SELECT SchId FROM schedule WHERE RecId="+stR);
       } else
       {
         stTo = this.ebEnt.ebUd.request.getParameter("rid");
-        stFrom = stR;
+        stFromRecId = stR;
+        if (stTo != null && stTo.length() > 0 && Integer.parseInt(stTo) > 0)
+        	stToRecId = ebEnt.dbDyn.ExecuteSql1("SELECT RecId FROM schedule WHERE nmProjectId="+stPk+" AND nmBaseline="+this.nmBaseline+" AND SchId="+stTo);
+        stFrom = ebEnt.dbDyn.ExecuteSql1("SELECT ReqId FROM requirements WHERE RecId="+stR);
       }
       if (stDo2 != null && stDo2.equals("del"))
       {
         this.ebEnt.dbDyn.ExecuteUpdate("delete l.* from teb_link l, Projects p"
           + " where l.nmProjectId=p.RecId and l.nmBaseline=p.CurrentBaseline and l.nmLinkFlags=1"
-          + " and l.nmProjectId=" + stPk + " and l.nmFromId=" + stFrom + " and l.nmToId=" + stTo);
+          + " and l.nmProjectId=" + stPk + " and l.nmFromId=" + stFromRecId + " and l.nmToId=" + stToRecId);
         analyzeLink();
         //calculate the requirement cost
-        this.processRequirementCost(Integer.parseInt(stFrom));
+        this.processRequirementCost(Integer.parseInt(stFromRecId));
       }
       String s1 = "</form><form method=post name='form" + stChild + "' id='form" + stChild + "' onsubmit='return myValidation(this)'>"
         + "<input type=hidden name=from value='" + iFrom + "'><table><tr><td align=center><h2>"
@@ -3336,15 +3344,16 @@ class EpsXlsProject //extends EpsUserData
           {
             try
             {
-              iFromId = Integer.parseInt(stFrom);
+            	stFromRecId = ebEnt.dbDyn.ExecuteSql1("SELECT RecId FROM requirements WHERE nmProjectId="+stPk+" AND nmBaseline="+this.nmBaseline+" AND ReqId="+stFrom);
+              iFromId = Integer.parseInt(stFromRecId);
               iCount = this.ebEnt.dbDyn.ExecuteSql1n("SELECT count(*) FROM Requirements r, Projects p"
                 + " where r.nmProjectId=p.RecId and r.nmBaseline=p.CurrentBaseline"
-                + " and (ReqFlags & 0x10 ) != 0 and r.nmProjectId=" + stPk + " and r.RecId=" + stFrom);
+                + " and (ReqFlags & 0x10 ) != 0 and r.nmProjectId=" + stPk + " and r.RecId=" + stFromRecId);
               if (iCount <= 0)
-                this.ebEnt.ebUd.setPopupMessage("Invalid low level Requirement ID: " + stFrom);
+                this.ebEnt.ebUd.setPopupMessage("Invalid low level Requirement ID: " + stFromRecId);
             } catch (Exception e)
             {
-              this.ebEnt.ebUd.setPopupMessage("Invalid low level Requirement ID: " + stFrom);
+              this.ebEnt.ebUd.setPopupMessage("Invalid low level Requirement ID: " + stFromRecId);
               stFrom = "";
             }
           }
@@ -3356,15 +3365,16 @@ class EpsXlsProject //extends EpsUserData
           {
             try
             {
-              iToId = Integer.parseInt(stTo);
+            	stToRecId = ebEnt.dbDyn.ExecuteSql1("SELECT RecId FROM schedule WHERE nmProjectId="+stPk+" AND nmBaseline="+this.nmBaseline+" AND SchId="+stTo);
+              iToId = Integer.parseInt(stToRecId);
               iCount = this.ebEnt.dbDyn.ExecuteSql1n("SELECT count(*) FROM Schedule s, Projects p"
                 + " where s.nmProjectId=p.RecId and s.nmBaseline=p.CurrentBaseline"
-                + " and (SchFlags & 0x10 ) != 0 and s.nmProjectId=" + stPk + " and s.RecId=" + stTo);
+                + " and (SchFlags & 0x10 ) != 0 and s.nmProjectId=" + stPk + " and s.RecId=" + stToRecId);
               if (iCount <= 0)
-                this.ebEnt.ebUd.setPopupMessage("Invalid low level Task Id: " + stTo);
+                this.ebEnt.ebUd.setPopupMessage("Invalid low level Task Id: " + stToRecId);
             } catch (Exception e)
             {
-              this.ebEnt.ebUd.setPopupMessage("Invalid low level Task Id: " + stTo);
+              this.ebEnt.ebUd.setPopupMessage("Invalid low level Task Id: " + stToRecId);
               stTo = "";
             }
           }
@@ -3399,24 +3409,23 @@ class EpsXlsProject //extends EpsUserData
               if (stChild.equals("21"))
               {
                 stSql = "update teb_link l, Projects p"
-                  + " set l.nmFromId=" + stFrom + ",l.nmToId=" + stTo + ",l.nmPercent=" + nmPercent
+                  + " set l.nmFromId=" + stFromRecId + ",l.nmToId=" + stToRecId + ",l.nmPercent=" + nmPercent
                   + ",l.nmRemainder=" + nmRemainder
                   + " where l.nmProjectId=p.RecId and l.nmBaseline=p.CurrentBaseline and l.nmLinkFlags=1"
                   + " and l.nmProjectId=" + stPk + " and l.nmFromId=" + stFromOrig + " and l.nmToId=" + stToOrig;
                 
-                this.processRequirementCost(Integer.parseInt(stFrom));
               } else
               {
                 stSql = "update teb_link l, Projects p"
-                  + " set l.nmFromId=" + stFrom + ",l.nmToId=" + stTo + ",l.nmPercent=" + nmPercent
+                  + " set l.nmFromId=" + stFromRecId + ",l.nmToId=" + stToRecId + ",l.nmPercent=" + nmPercent
                   + ",l.nmRemainder=" + nmRemainder
                   + " where l.nmProjectId=p.RecId and l.nmBaseline=p.CurrentBaseline and l.nmLinkFlags=1"
                   + " and l.nmProjectId=" + stPk + " and l.nmFromId=" + stFromOrig + " and l.nmToId=" + stToOrig;
                 
                 //calculate the requirement cost
-                this.processRequirementCost(Integer.parseInt(stFrom));
               }
               this.ebEnt.dbDyn.ExecuteUpdate(stSql);
+              this.processRequirementCost(Integer.parseInt(stFromRecId));
             }
             analyzeLink();
             stDo2 = "";
@@ -3432,20 +3441,20 @@ class EpsXlsProject //extends EpsUserData
 
       if (stDo2 != null && stDo2.equals("edit"))
       {
-        if (stFrom.equals("-1"))
+        if (stFromRecId.equals("-1"))
         {
-          stFrom = "";
-          stTo = stR;
+          stFromRecId = "";
+          stToRecId = stR;
           stFromOrig = "-1";
           stToOrig = "-1";
           nmPercent = "0";
         } else if (stFromOrig.length() <= 0)
         {
-          stFromOrig = stFrom;
-          stToOrig = stTo;
+          stFromOrig = stFromRecId;
+          stToOrig = stToRecId;
           ResultSet rsValue = this.ebEnt.dbDyn.ExecuteSql("select * from teb_link l, Projects p"
             + " where l.nmProjectId=p.RecId and l.nmBaseline=p.CurrentBaseline and l.nmLinkFlags=1"
-            + " and l.nmProjectId=" + stPk + " and l.nmFromId=" + stFrom + " and l.nmToId=" + stTo);
+            + " and l.nmProjectId=" + stPk + " and l.nmFromId=" + stFromRecId + " and l.nmToId=" + stToRecId);
           rsValue.last();
           if (rsValue.getRow() > 0)
           {
@@ -3462,15 +3471,15 @@ class EpsXlsProject //extends EpsUserData
         sbReturn.append(stFrom);
        sbReturn.append("\"></td></tr><tr><td>Task ID:<td>");
         
-        if (stTo==null || "".equals(stTo) || "-1".equals(stTo)) {
+        if (stToRecId==null || "".equals(stToRecId) || "-1".equals(stToRecId)) {
         	sbReturn.append("<select name='stTo'>");
-            sbReturn.append(this.ebEnt.ebUd.addOption2("Select Task id", "-1", stTo));
+            sbReturn.append(this.ebEnt.ebUd.addOption2("Select Task id", "-1", stToRecId));
             ResultSet taskIds = this.ebEnt.dbDyn.ExecuteSql("SELECT * FROM Schedule s where (SchFlags & 0x10 ) != 0 and s.nmProjectId="+stPk);
             taskIds.last();
             int maxIds = taskIds.getRow();
             for (int i=1; i<=maxIds; i++) {
             	taskIds.absolute(i);
-            	sbReturn.append(this.ebEnt.ebUd.addOption2(Integer.toString(taskIds.getInt("SchId")) + ": " + taskIds.getString("SchTitle"), Integer.toString(taskIds.getInt("RecId")), stTo));
+            	sbReturn.append(this.ebEnt.ebUd.addOption2(Integer.toString(taskIds.getInt("SchId")) + ": " + taskIds.getString("SchTitle"), Integer.toString(taskIds.getInt("SchId")), stToRecId));
             }
             sbReturn.append("</select>");
         } else {
@@ -3499,8 +3508,8 @@ class EpsXlsProject //extends EpsUserData
       {
         // Requirements Map
         stSql = "select * from Schedule s, teb_link l, Requirements r where l.nmLinkFlags=1 and "
-          + " s.nmProjectId=l.nmProjectId and s.nmBaseline=l.nmBaseline and s.SchId=l.nmToId and"
-          + " r.nmProjectId=s.nmProjectId and r.nmBaseline=s.nmBaseline and r.ReqId=l.nmFromId and"
+          + " s.nmProjectId=l.nmProjectId and s.nmBaseline=l.nmBaseline and s.RecId=l.nmToId and"
+          + " r.nmProjectId=s.nmProjectId and r.nmBaseline=s.nmBaseline and r.RecId=l.nmFromId and"
           + " r.RecId=" + stR + " and s.nmProjectId=" + stPk + " and s.nmBaseline=" + this.nmBaseline
           + " order by r.ReqId";
         ResultSet rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
@@ -3596,8 +3605,8 @@ class EpsXlsProject //extends EpsUserData
         }
         // Schedule Map
         stSql = "select * from Schedule s, teb_link l, Requirements r where l.nmLinkFlags in (1,5) and"
-          + " s.nmProjectId=l.nmProjectId and s.nmBaseline=l.nmBaseline and s.SchId=l.nmToId and"
-          + " r.nmProjectId=s.nmProjectId and r.nmBaseline=s.nmBaseline and r.ReqId=l.nmFromId and"
+          + " s.nmProjectId=l.nmProjectId and s.nmBaseline=l.nmBaseline and s.RecId=l.nmToId and"
+          + " r.nmProjectId=s.nmProjectId and r.nmBaseline=s.nmBaseline and r.RecId=l.nmFromId and"
           + " s.RecId=" + stR + " and s.nmProjectId=" + stPk + " and s.nmBaseline=" + this.nmBaseline
           + " order by r.ReqId";
         ResultSet rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
