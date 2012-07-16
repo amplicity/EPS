@@ -421,6 +421,7 @@ public class EbAdmin
               this.ebEnt.dbEb.ExecuteUpdate("update t_fields set stFieldType='" + stFieldType + "',stDefault='" + stDefault + "',stExtra='" + stExtra + "',nmFieldType=" + aF[0] + ",nmFieldSize=" + aF[1] + ",nmTableOrder=" + iRF + ",nmFieldFlag = ( (nmFieldFlag |" + nmFieldFlag + " )& ~0x40000000) where nmFieldId=" + iFieldId);
             }
           }
+          ebD.ebClose();
           stReturn = stReturn + "<br>DB " + iRD + " of: " + iMaxDatabases;
         }
 
@@ -456,6 +457,7 @@ public class EbAdmin
             this.ebEnt.dbEb.ExecuteUpdate("update t_fields set nmFieldFlag = ( nmFieldFlag | 0x00800000) where nmFieldId=" + nmFieldId);
           }
 
+          ebTemp.ebClose();
         }
 
       }
@@ -787,6 +789,12 @@ public class EbAdmin
       this.stError = (this.stError + "<br>ERROR getImportCompanies: " + e);
       e.printStackTrace();
     }
+    finally 
+    {
+    	if (db != null) {
+    		db.ebClose();
+    	}
+    }
     return stReturn;
   }
 
@@ -891,6 +899,12 @@ public class EbAdmin
     {
       this.stError = (this.stError + "<br>ERROR getImportEnterprise: " + e);
       e.printStackTrace();
+    }
+    finally
+    {
+    	if (db != null) {
+    		db.ebClose();
+    	}
     }
     return stReturn;
   }

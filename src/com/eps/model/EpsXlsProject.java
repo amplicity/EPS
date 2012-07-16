@@ -1609,12 +1609,12 @@ class EpsXlsProject //extends EpsUserData
 	      }
 	      stSql += this.ebEnt.dbDyn.fmtDbString(lcfields);
       }
-  	  stSql += ", SchEstimatedEffort="+(new DecimalFormat("#0.0").format(nmEffort));
+  	  if (stChild.equals("21")) stSql += ", SchEstimatedEffort="+(new DecimalFormat("#0.0").format(nmEffort));
   	  
   	  
   	  //build dependencies string
   	  if(Integer.parseInt(this.ebEnt.ebUd.request.getParameter("child")) == 21 && !this.ebEnt.ebUd.request.getParameter("did_1").equals("") && Integer.parseInt(this.ebEnt.ebUd.request.getParameter("dmax")) > 0){
-  		  String dfields = "";  		  
+  		  String dfields = "";
 	      for (int d = 1; d <= Integer.parseInt(this.ebEnt.ebUd.request.getParameter("dmax")); d++){
 	    	  if(d == 1){
 	    		  stSql += ", SchDependencies=";
@@ -2090,16 +2090,17 @@ class EpsXlsProject //extends EpsUserData
       + "stAnalyzeReport=" + this.ebEnt.dbDyn.fmtDbString(sbReturn.toString()) + " where nmProjectId=" + stPk + " and nmBaseline=" + nmBaseline);
     if (this.ebEnt.ebUd.request.getParameter("pk") != null)
     {
+    	int nmPPM = ebEnt.dbDyn.ExecuteSql1n("select ProjectPortfolioManagerAssignment from Projects where RecId=" + stPk);
       String s1 = "";
       sbReturn.append("</table><br>&nbsp;<br><center>");
-      if (stChild.length() <= 0 && this.iAnalyzeStatus == 0)
+      if (stChild.length() <= 0 && this.iAnalyzeStatus == 0 && ebEnt.ebUd.getLoginId() == nmPPM)
       {
         s1 = "<input type=button onClick=\"parent.location='" + stGoBack + "&pk=" + stPk + "&do=approve'\" value='Approve'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
         sbReturn.append(s1);
       }
       s1 = "<input type=button onClick=\"parent.location='" + stGoBack + "&pk=" + stPk + "&do=edit'\" value='Go Back to Projects'>";
       sbReturn.append(s1);
-      if (stChild.length() <= 0 && this.iAnalyzeStatus == 0)
+      if (stChild.length() <= 0 && this.iAnalyzeStatus == 0 && ebEnt.ebUd.getLoginId() == nmPPM)
       {
         s1 = "<br>&nbsp;<br><b>Note:</b> Selecting the \"Approve\" button will \"freeze\" the existing baseline and will be used for all reports accessing this baseline's attributes.  Without \"approval\" the new baseline will be in \"EDIT\" mode and will not be used for allocation until \"Approved.\"  Clicking on the hyperlink will open a sequential list of requirements or schedule tasks with issues.<br>";
         sbReturn.append(s1);

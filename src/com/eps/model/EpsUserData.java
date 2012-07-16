@@ -216,6 +216,10 @@ class AnnualEOBTask implements Runnable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		finally
+		{
+			ebd.ebClose();
+		}
 	  }
 
 }
@@ -1902,7 +1906,7 @@ public class EpsUserData
       String stUser = "";
       
       SimpleDateFormat dateFormatter = new SimpleDateFormat("ddMMMyy");
-      SimpleDateFormat timeFormatter = new SimpleDateFormat("hh:mm");
+      SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm");
       
       if ((this.ebEnt.ebUd.getLoginPersonFlags() & 0x20) == 0)
         stUser = " and u.nmUserId=" + this.ebEnt.ebUd.getLoginId() + " ";
@@ -2176,16 +2180,17 @@ public class EpsUserData
 	      rs.close();
       }
       
-      //approved project dashboard
-      rs = this.ebEnt.dbDyn.ExecuteSql("select * from Projects p"
-          + " where p.ProjectPortfolioManagerAssignment=" + this.ebEnt.ebUd.getLoginId() + ""
-          + " and p.ProjectStatus=1"
-          + " order by p.ProjectName");
-      
-      rs.last();
-      iCount = 0;
-      iMax = rs.getRow();
-      if (iMax > 0) {
+      int nmPriviledge = this.ebEnt.dbEnterprise.ExecuteSql1n("select nmPriviledge from x25user where RecId=" + this.ebEnt.ebUd.getLoginId());
+      String stPriviledge = getPriviledgeTypes(nmPriviledge);
+      if (stPriviledge.contains("Ex") || stPriviledge.contains("Ppm")) {
+      	//approved project dashboard
+	      rs = this.ebEnt.dbDyn.ExecuteSql("select * from Projects p"
+	          + " where p.ProjectStatus=1"
+	          + " order by p.ProjectName");
+	      
+	      rs.last();
+	      iCount = 0;
+	      iMax = rs.getRow();
 	    	stReturn += "<tr><td>&nbsp;</td></tr><tr><td align='center' colspan=2><table class=l1tablenarrow>"
 	    			+ "<tr><th class=l1th colspan=7>Approved Project Dashboard</th></tr>"
 	    			+ "<tr><th class=l1th>Project Name</th><th class=l1th>Start Date</th><th class=l1th>End Date</th><th class=l1th>Estimated Hours</th><th class=l1th>Expended Hours</th><th class=l1th>Estimated Cost</th><th class=l1th>Expended to 	Date</th></tr>";
@@ -2202,12 +2207,15 @@ public class EpsUserData
 	        double InitialEstimatedCost = this.ebEnt.dbDyn.ExecuteSql1n("select sum(SchCost) from Schedule"
 	            + " where nmProjectId=" + rs.getInt("RecId") + " and nmBaseline=" + iIniticalBaseline + " and SchLevel=0"); 
 	        double CurrentEstimatedCost = this.ebEnt.dbDyn.ExecuteSql1n("select sum(SchCost) from Schedule"
-	        		+ " where nmProjectId=" + rs.getInt("RecId") + " and nmBaseline=" + rs.getInt("CurrentBaseline") + " and SchLevel=0"); 
+	        		+ " where nmProjectId=" + rs.getInt("RecId") + " and nmBaseline=" + rs.getInt("CurrentBaseline") + " and SchLevel=0");
+	        
+	        Date fixedStartDate = rs.getDate("FixedProjectStartDate");
+	        Date fixedEndDate = rs.getDate("FixedProjectEndDate");
 	  		  
 	  		  stReturn += "<tr>";
 	  		  stReturn += "<td class=l1td>"+rs.getString("ProjectName")+"</td>";
-	  		  stReturn += "<td class=l1td>"+dateFormatter.format(rs.getDate("FixedProjectStartDate"))+"</td>";
-	  		  stReturn += "<td class=l1td>"+dateFormatter.format(rs.getDate("FixedProjectEndDate"))+"</td>";
+	  		  stReturn += "<td class=l1td>"+(fixedStartDate!=null ? dateFormatter.format(fixedStartDate) : "")+"</td>";
+	  		  stReturn += "<td class=l1td>"+(fixedEndDate!=null ? dateFormatter.format(fixedEndDate) : "")+"</td>";
 	  		  stReturn += "<td class=l1td align=right>"+rs.getString("ProjectEstimatedHours")+"</td>";
 	  		  stReturn += "<td class=l1td align=right>"+rs.getString("ProjectEstimatedHours")+"</td>";
 	  		  stReturn += "<td class=l1td align=right>&#36; "+InitialEstimatedCost+"</td>";
@@ -2221,58 +2229,63 @@ public class EpsUserData
 	    	stReturn += "</table></td></tr>";
     	
 	    	//CPI SPI
-	    	if (iMax > 0) {
-	    		stReturn += "<tr><td>&nbsp;</td></tr>";
-	    		stReturn += "<tr><td align='center' colspan=2><table class=l1tablenarrow>"
-	      			+ "<tr><th class=l1th>Project Name</th>"
-	    				+ "<th class=l1th><table border=0 style='border-collapse:collapse;'><tr><td colspan=10 align=center>Schedule (SPI)</td></tr><tr>";
-	    		for (int i = 0; i < 10; i++) {
-		        stReturn += "<td align=left width='50px' style='padding: 0;'>"+i+"</td>";
+    		stReturn += "<tr><td>&nbsp;</td></tr>";
+    		stReturn += "<tr><td align='center' colspan=2><table class=l1tablenarrow>"
+      			+ "<tr><th class=l1th>Project Name</th>"
+    				+ "<th class=l1th><table border=0 style='border-collapse:collapse;'><tr><td colspan=10 align=center>Schedule (SPI)</td></tr><tr>";
+    		for (int i = 0; i < 10; i++) {
+	        stReturn += "<td align=left width='50px' style='padding: 0;'>"+i+"</td>";
+        }
+    		stReturn += "</tr></table></th>";
+    		stReturn += "<th class=l1th><table border=0 style='border-collapse:collapse;'><tr><td colspan=10 align=center>Cost (CPI)</td></tr><tr>";
+    		for (int i = 0; i < 10; i++) {
+    			stReturn += "<td align=left width='50px' style='padding: 0;'>"+i+"</td>";
+    		}
+    		stReturn += "</tr></table></th></tr>";
+    		
+    		iCount = 0;
+    		for (int iR = 1; iR <= iMax; iR++)
+        {
+      		rs.absolute(iR);
+      		iCount ++;
+      		
+      		double CPI = 0;
+      		double SPI = 0;
+      		
+      		int iFirstApprove = this.ebEnt.dbDyn.ExecuteSql1n("SELECT min(nmBaseline)"
+	            + " FROM teb_baseline where nmProjectId=" + rs.getString("RecId") + " and stType='Approve'");
+	        int iIniticalBaseline = this.ebEnt.dbDyn.ExecuteSql1n("SELECT max(nmBaseline)"
+	          + " FROM teb_baseline where nmProjectId=" + rs.getString("RecId") + " and nmBaseline < " + iFirstApprove);
+	        
+	        double BCWP = this.ebEnt.dbDyn.ExecuteSql1n("select sum(nmExpenditureToDate) from Schedule"
+	            + " where nmProjectId=" + rs.getInt("RecId") + " and nmBaseline=" + iIniticalBaseline + " and SchEfforttoDate>0 and lowlvl=1");
+	        double ACWP = this.ebEnt.dbDyn.ExecuteSql1n("select sum(SchCost) from Schedule"
+	        		+ " where nmProjectId=" + rs.getInt("RecId") + " and nmBaseline=" + iIniticalBaseline + " and SchEfforttoDate>0 and lowlvl=1");
+	        if (ACWP != 0) {
+	        	CPI = 1.0*Math.round(BCWP*100/ACWP)/100;
 	        }
-	    		stReturn += "</tr></table></th>";
-	    		stReturn += "<th class=l1th><table border=0 style='border-collapse:collapse;'><tr><td colspan=10 align=center>Cost (CPI)</td></tr><tr>";
-	    		for (int i = 0; i < 10; i++) {
-	    			stReturn += "<td align=left width='50px' style='padding: 0;'>"+i+"</td>";
-	    		}
-	    		stReturn += "</tr></table></th></tr>";
-	    		
-	    		for (int iR = 1; iR <= iMax; iR++)
-	        {
-	      		rs.absolute(iR);
-	      		
-	      		double CPI = 0;
-	      		double SPI = 0;
-	      		
-	      		int iFirstApprove = this.ebEnt.dbDyn.ExecuteSql1n("SELECT min(nmBaseline)"
-		            + " FROM teb_baseline where nmProjectId=" + rs.getString("RecId") + " and stType='Approve'");
-		        int iIniticalBaseline = this.ebEnt.dbDyn.ExecuteSql1n("SELECT max(nmBaseline)"
-		          + " FROM teb_baseline where nmProjectId=" + rs.getString("RecId") + " and nmBaseline < " + iFirstApprove);
-		        
-		        double BCWP = this.ebEnt.dbDyn.ExecuteSql1n("select sum(nmExpenditureToDate) from Schedule"
-		            + " where nmProjectId=" + rs.getInt("RecId") + " and nmBaseline=" + iIniticalBaseline + " and SchEfforttoDate>0 and lowlvl=1");
-		        double ACWP = this.ebEnt.dbDyn.ExecuteSql1n("select sum(SchCost) from Schedule"
-		        		+ " where nmProjectId=" + rs.getInt("RecId") + " and nmBaseline=" + iIniticalBaseline + " and SchEfforttoDate>0 and lowlvl=1");
-		        if (ACWP != 0) {
-		        	CPI = 1.0*Math.round(BCWP*100/ACWP)/100;
-		        }
-		        
-		        double EV = BCWP;
-		        double PV = this.ebEnt.dbDyn.ExecuteSql1n("select sum(SchCost) from Schedule"
-		        		+ " where nmProjectId=" + rs.getInt("RecId") + " and nmBaseline=" + iIniticalBaseline + " and lowlvl=1");
-		        if (PV != 0) {
-		        	SPI = 1.0*Math.round(EV*100/PV)/100;
-		        }
-	      		
-		        String cpiColor = (CPI>1.5 ? "red" : (CPI>1.1 ? "yellow" : (CPI>=0.9 ? "lightgreen" : "deepskyblue"))); 
-		        String spiColor = (SPI>1.5 ? "red" : (SPI>1.1 ? "yellow" : (SPI>=0.9 ? "lightgreen" : "deepskyblue"))); 
-	    		  stReturn += "<tr>";
-	    		  stReturn += "<td class=l1td>"+rs.getString("ProjectName")+"</td>";
-	    		  stReturn += "<td class=l1td align=left><div align=center style='background: "+spiColor+";margin-left:5px;width:"+(SPI*50)+"px'>"+SPI+"</div></td>";
-	    		  stReturn += "<td class=l1td align=left><div align=center style='background: "+cpiColor+";margin-left:5px;width:"+(CPI*50)+"px'>"+CPI+"</div></td>";
-	  	  		stReturn += "</tr>";
+	        
+	        double EV = BCWP;
+	        double PV = this.ebEnt.dbDyn.ExecuteSql1n("select sum(SchCost) from Schedule"
+	        		+ " where nmProjectId=" + rs.getInt("RecId") + " and nmBaseline=" + iIniticalBaseline + " and lowlvl=1");
+	        if (PV != 0) {
+	        	SPI = 1.0*Math.round(EV*100/PV)/100;
 	        }
+      		
+	        String cpiColor = (CPI>1.5 ? "red" : (CPI>1.1 ? "yellow" : (CPI>=0.9 ? "lightgreen" : "deepskyblue"))); 
+	        String spiColor = (SPI>1.5 ? "red" : (SPI>1.1 ? "yellow" : (SPI>=0.9 ? "lightgreen" : "deepskyblue"))); 
+    		  stReturn += "<tr>";
+    		  stReturn += "<td class=l1td>"+rs.getString("ProjectName")+"</td>";
+    		  stReturn += "<td class=l1td align=left><div align=center style='background: "+spiColor+";margin-left:5px;width:"+(SPI*50)+"px'>"+SPI+"</div></td>";
+    		  stReturn += "<td class=l1td align=left><div align=center style='background: "+cpiColor+";margin-left:5px;width:"+(CPI*50)+"px'>"+CPI+"</div></td>";
+  	  		stReturn += "</tr>";
+        }
+    		
+    		if (iCount == 0)
+	    	{
+	    		stReturn += "<tr><td class=l1td colspan=3>No Projects</td></tr>";
 	    	}
-	    	
+		    	
 	      rs.close();
       }
       
@@ -2358,7 +2371,7 @@ public class EpsUserData
             } catch (Exception e) {
             }
         		Date aDate = rsSch.getDate("dtSchLastUpdate");
-        		SimpleDateFormat formatter = new SimpleDateFormat("ddMMMyy hh:mm");
+        		SimpleDateFormat formatter = new SimpleDateFormat("ddMMMyy HH:mm");
 	        	stReturn += "<h2>&quot;" + rsSch.getString("SchTitle") + "&quot; per Project Schedule</h2>";
 	        	stReturn += "<table border='1'>" +
 	        			"<tr><th>Project Name</th><th>Schedule ID</th><th>Level</th><th>Division</th><th>Time</th><th>Description</th></tr>" +
@@ -2685,9 +2698,9 @@ public class EpsUserData
               stChildren += aV[i];
               
               if(aV[i].equals("46")){	//analyze project button
-            	  stReturn += "<input type=submit name=child" + aV[i] + " value=\"" + rsC.getString("stTableName") + "\" onClick=\"return setSubmitId4(9990);\">&nbsp;&nbsp;";
+            	  stReturn += "<input type=submit name=child" + aV[i] + " value=\"" + rsC.getString("stTableName") + "\" onClick=\"if (!this.form.submitting) {this.form.submitting=true;return setSubmitId4(9990);} else {return false;}\">&nbsp;&nbsp;";
               }else
-            	  stReturn += "<input type=submit name=child" + aV[i] + " value=\"" + rsC.getString("stTableName") + "\" onClick=\"return setSubmitId(9990);\">&nbsp;&nbsp;";
+            	  stReturn += "<input type=submit name=child" + aV[i] + " value=\"" + rsC.getString("stTableName") + "\" onClick=\"if (!this.form.submitting) {this.form.submitting=true;return setSubmitId(9990);} else {return false;}\">&nbsp;&nbsp;";
             }
           }
         }
@@ -2704,7 +2717,7 @@ public class EpsUserData
       } else
       {
         stReturn += "<input type=hidden name=stChildren value=\"" + stChildren + "\">"
-          + "<input type=submit name=savedata id=savedata value='Save' onClick=\"return setSubmitId(9999);\">&nbsp;&nbsp;<input type=submit name=cancel id=cancel value='Cancel' onClick=\"return setSubmitId(8888);\"></td></tr>";
+          + "<input type=submit name=savedata id=savedata value='Save' onClick=\"if (!this.form.submitting) {this.form.submitting=true;return setSubmitId(9999);} else {return false;}\">&nbsp;&nbsp;<input type=submit name=cancel id=cancel value='Cancel' onClick=\"if (!this.form.submitting) {this.form.submitting=true;return setSubmitId(8888);} else {return false;}\"></td></tr>";
       }
       stReturn += "<input type=hidden name=giSubmitId id=giSubmitId value=\"0\">";
       stReturn += "</td></tr></table>";
@@ -2869,6 +2882,10 @@ public class EpsUserData
             }
             this.ebEnt.ebUd.setXlsProcess(stChild);
             return "";
+          }
+          if (rsTable.getString("stDbTableName").equals("Projects") && stDo.equals("approve")) {
+          	ebEnt.dbDyn.ExecuteUpdate("update Projects set ProjectStatus=1 where RecId="+stPk);
+          	ebEnt.dbDyn.ExecuteUpdate("update teb_baseline b, Projects p set b.stType='Approve' where b.nmBaseline=p.CurrentBaseline and b.nmProjectId=p.RecId and p.RecId="+stPk);
           }
           if (stSave != null || stCancel != null)
           { // DO SAVEDATA()
@@ -4937,6 +4954,30 @@ public class EpsUserData
     }
     return nmPriviledge;
   }
+  
+  public String getPriviledgeTypes(int nmPriviledge)
+  {
+    StringBuilder abReturn = new StringBuilder(255);
+
+    if ((nmPriviledge & 0x400) != 0)
+      abReturn.append(",Ad");
+    if ((nmPriviledge & 0x80) != 0)
+      abReturn.append(",Ba");
+    if ((nmPriviledge & 0x200) != 0)
+      abReturn.append(",Ex");
+    if ((nmPriviledge & 0x800) != 0)
+      abReturn.append(",Su");
+    if ((nmPriviledge & 0x40) != 0)
+      abReturn.append(",Pm");
+    if ((nmPriviledge & 0x20) != 0)
+      abReturn.append(",Ppm");
+    if ((nmPriviledge & 0x1) != 0)
+      abReturn.append(",Ptm");
+    String stReturn = abReturn.toString();
+    if (stReturn != null && stReturn.length() > 0)
+      stReturn = stReturn.substring(1);
+    return stReturn;
+  }
 
   public String runEOB()
   {
@@ -6581,11 +6622,97 @@ public class EpsUserData
 	    
 	    POIFSFileSystem filesys = new POIFSFileSystem(is);
 	    HSSFWorkbook workbook = new HSSFWorkbook(filesys);
-	    HSSFSheet userSheet = workbook.getSheet("Users");
-	    Iterator<Row> rows = userSheet.rowIterator();
+	    Iterator<Row> rows = null;
+	    int iCount = 0;
+	    int iCountDivision = 0;
+	    int iCountLC = 0;
+	    
+	    //TODO: Division sheet
+	    ebEnt.dbDyn.ExecuteUpdate("TRUNCATE TABLE teb_division");
+	    HSSFSheet sheet = workbook.getSheet("Divisions");
+	    rows = sheet.rowIterator();
+	    String stSql = "INSERT INTO teb_division (nmDivision,stDivisionName,stCountry, stCurrency, stMoneySymbol, stHolidays, nmBurdenFactor) VALUES ";
+	    while (rows.hasNext()) {
+	    	Row row = (Row) rows.next();
+	    	if (row.getRowNum() < 2) continue;
+	    	double id;
+	    	try {
+	        id = row.getCell(0).getNumericCellValue();
+        } catch (Exception e) {
+	        continue;
+        }
+	    	if (++iCountDivision > 1) stSql += ",";
+	    	stSql += "("+id+",'"+row.getCell(1).getStringCellValue().trim()+"','"+row.getCell(2).getStringCellValue().trim()+"','"+row.getCell(3).getStringCellValue().trim()+"'," +
+	      		"'"+row.getCell(4).getStringCellValue().trim()+"',\""+(row.getCell(5) == null ? " " : row.getCell(5).getStringCellValue().trim())+"\",1)";
+      }
+	    ebEnt.dbDyn.ExecuteUpdate(stSql);
+	    
+	    
+	    //TODO: LC sheet
+	    ebEnt.dbDyn.ExecuteUpdate("TRUNCATE TABLE laborcategory");
+	    ebEnt.dbDyn.ExecuteUpdate("TRUNCATE TABLE teb_reflaborcategory");
+	    
+	    sheet = workbook.getSheet("Labor Categories");
+	    rows = sheet.rowIterator();
+	    stSql = "INSERT INTO laborcategory (nmLcId, LaborCategory) VALUES ";
+	    String stSqlLC = "INSERT INTO teb_reflaborcategory (nmLaborCategoryId, nmRefType, nmRefId, nmFlags, nmActualHours, nmEstimatedHours) VALUES ";
+	    while (rows.hasNext()) {
+	      Row row = (Row) rows.next();
+	      if (row.getRowNum() < 2) continue;
+	      if (++iCountLC > 1) {
+	      	stSql += ",";
+	      	stSqlLC += ",";
+	      }
+	      stSql += "("+iCountLC+",\""+row.getCell(0).getStringCellValue().trim()+"\")";
+	      stSqlLC += "((SELECT nmLCId From LaborCategory WHERE LaborCategory='"+row.getCell(0).getStringCellValue().trim()+"'),42,2,0,40,40)";
+      }
+	    if (iCountLC > 0) {
+		    ebEnt.dbDyn.ExecuteUpdate(stSql);
+		    ebEnt.dbDyn.ExecuteUpdate(stSqlLC);
+	    }
+	    
+	    //TODO: Inventories sheet
+	    ebEnt.dbDyn.ExecuteUpdate("TRUNCATE TABLE inventory");
+	    ebEnt.dbDyn.ExecuteUpdate("TRUNCATE TABLE teb_refinventory");
+	    
+	    sheet = workbook.getSheet("Inventory Items");
+	    rows = sheet.rowIterator();
+	    stSql = "INSERT INTO inventory (RecId, InventoryName, Quantity, UnitOfMeasure, CostPerUnit, TotalInventoryValue) VALUES ";
+	    iCount = 0;
+	    while (rows.hasNext()) {
+	      Row row = (Row) rows.next();
+	      if (row.getRowNum() < 2) continue;
+	      if (++iCount > 1) stSql += ",";
+	      stSql += "("+iCount+",\""+row.getCell(0).getStringCellValue().trim()+"\","+row.getCell(1).getNumericCellValue()+",'"+row.getCell(2).getStringCellValue().trim()+"',"
+	      		+ row.getCell(3).getNumericCellValue()+","+row.getCell(1).getNumericCellValue()*row.getCell(3).getNumericCellValue()+")";
+      }
+	    if (iCount > 0) ebEnt.dbDyn.ExecuteUpdate(stSql);
+	    
+	    
+	    //TODO: Test case
+	    ebEnt.dbDyn.ExecuteUpdate("TRUNCATE TABLE test");
+	    sheet = workbook.getSheet("Test Plan");
+	    rows = sheet.rowIterator();
+	    iCount = 0;
+	    stSql = "INSERT INTO test (RecId, nmProjectId, nmBaseLine, ReqMap, TstType, TstMethod, TstId, TstTitle, TstDescription) VALUES ";
+	    while (rows.hasNext()) {
+	      Row row = (Row) rows.next();
+	      if (row.getRowNum() < 2) continue;
+	      if (row.getCell(3) == null) continue; 
+	      if (++iCount > 1) stSql += ",";
+	      double id = row.getCell(3).getNumericCellValue();
+	      double pid = row.getCell(0).getNumericCellValue();
+	      stSql += "("+iCount+","+pid+",(SELECT CurrentBaseline FROM projects WHERE RecId="+pid+"),"+row.getCell(1).getNumericCellValue()+"," +
+	      		"'"+row.getCell(4).getStringCellValue().trim()+"','"+row.getCell(5).getStringCellValue().trim()+"',"+id+",'"+row.getCell(2).getStringCellValue().trim()+"','"+row.getCell(6).getStringCellValue().trim()+"')";
+      }
+	    if (iCount>0) ebEnt.dbDyn.ExecuteUpdate(stSql);
+
+	    
+	    //TODO: Users sheet
+	    sheet = workbook.getSheet("Users");
+	    rows = sheet.rowIterator();
 
 	    //clear user data
-	    String stSql = "";
 	    ResultSet rs = null;
 	    String uids = "";
 	    if (rows.hasNext()) {
@@ -6600,10 +6727,6 @@ public class EpsUserData
 		    //clean up for deleted users
 		    ebEnt.dbDyn.ExecuteUpdate("UPDATE projects SET nmLockUserId=0 WHERE nmLockUserId NOT IN ("+uids+")");
 		    ebEnt.dbDyn.ExecuteUpdate("DELETE FROM teb_refdivision WHERE nmRefType=42 AND nmRefId NOT IN ("+uids+")");
-		    ebEnt.dbDyn.ExecuteUpdate("DELETE FROM teb_reflaborcategory WHERE nmRefType=42 AND nmRefId NOT IN ("+uids+")");
-//		    ebEnt.dbDyn.ExecuteUpdate("UPDATE teb_project SET nmUserId=0 WHERE nmUserId NOT IN ("+uids+")");
-//		    ebEnt.dbDyn.ExecuteUpdate("DELETE FROM teb_allocate WHERE nmUserId NOT IN ("+uids+")");
-//		    ebEnt.dbDyn.ExecuteUpdate("DELETE FROM v_allocate WHERE nmUserId NOT IN ("+uids+")");
 		    ebEnt.dbEnterprise.ExecuteUpdate("DELETE FROM x25audittrail WHERE nmUserId NOT IN ("+uids+")");
 		    ebEnt.dbEnterprise.ExecuteUpdate("DELETE FROM x25user WHERE RecId NOT IN ("+uids+")");
 		    ebEnt.dbEnterprise.ExecuteUpdate("DELETE FROM x25refuser WHERE nmUserId NOT IN ("+uids+")");
@@ -6615,30 +6738,30 @@ public class EpsUserData
 	    		" Telephone, Facsimile, CellPhone, NrTasksCompleted, AccumPrjHours, AccumEstPrjHours, NonPrjHours, SickDaysToDate, VacDaysToDate, Answers, WeeklyWorkHours, ActivityHours) VALUES ";
 	    String stSqlX25User = "INSERT INTO x25User (RecId, stEmail, stPassword, dtPasswordChangeDate, nmPriviledge) VALUES ";
 	    String stSqlDivision = "INSERT INTO teb_refdivision VALUES ";
-	    String stSqlLC = "INSERT INTO teb_reflaborcategory (nmLaborCategoryId, nmRefType, nmRefId, nmFlags, nmActualHours, nmEstimatedHours) VALUES ";
-	    int iCount = 0;
-	    int iCountDivision = 0;
-	    int iCountLC = 0;
+	    stSqlLC = "INSERT INTO teb_reflaborcategory (nmLaborCategoryId, nmRefType, nmRefId, nmFlags, nmActualHours, nmEstimatedHours) VALUES ";
+	    iCount = 0;
+	    iCountDivision = 0;
+	    iCountLC = 0;
 	    while (rows.hasNext()) {
 	    	Row row = (Row) rows.next();
 	    	if (row.getRowNum() < 2) continue;
 	    	iCount ++;
-	      String stLastName = row.getCell(0).getStringCellValue();
-	      String stFirstName = row.getCell(1).getStringCellValue();
+	      String stLastName = row.getCell(0).getStringCellValue().trim();
+	      String stFirstName = row.getCell(1).getStringCellValue().trim();
 	      double nmUserId = row.getCell(2).getNumericCellValue();
-	      String stJobTitle = row.getCell(3).getStringCellValue();
+	      String stJobTitle = row.getCell(3).getStringCellValue().trim();
 	      
 	      double nmHourlyRate = row.getCell(6).getNumericCellValue();
 	      double nmProductivityFactor = 1.0*Math.round(row.getCell(7).getNumericCellValue()*100)/100;
 	      
-	      String stSupervisor = row.getCell(9).getStringCellValue();
+	      String stSupervisor = row.getCell(9).getStringCellValue().trim();
 	      int nmSVUserId = ebEnt.dbDyn.ExecuteSql1n("SELECT nmUserId FROM Users WHERE CONCAT(FirstName, ' ', LastName)='"+stSupervisor+"' LIMIT 1");
 	      
 	      Date dtStartDate = row.getCell(10).getDateCellValue();
-	      String stSpecialDays = row.getCell(11).getStringCellValue();
-	      String stTel = row.getCell(12).getStringCellValue();
-	      String stFax = row.getCell(14).getStringCellValue();
-	      String stCellphone = row.getCell(15).getStringCellValue();
+	      String stSpecialDays = row.getCell(11).getStringCellValue().trim();
+	      String stTel = row.getCell(12).getStringCellValue().trim();
+	      String stFax = row.getCell(14).getStringCellValue().trim();
+	      String stCellphone = row.getCell(15).getStringCellValue().trim();
 	      double nmTasksCompleted = row.getCell(16).getNumericCellValue();
 	      double nmAccumProjectHours = 1.0*Math.round(row.getCell(17).getNumericCellValue()*100)/100;
 	      double nmAccumEstimatedProjectHours = 1.0*Math.round(row.getCell(18).getNumericCellValue()*100)/100;
@@ -6646,7 +6769,7 @@ public class EpsUserData
 	      
 	      double nmSickDayToDate = row.getCell(21).getNumericCellValue();
 	      double nmVacationDayToDate = row.getCell(22).getNumericCellValue();
-	      String stAnswer = row.getCell(24).getStringCellValue();
+	      String stAnswer = row.getCell(24).getStringCellValue().trim();
 	      
 	      double nmMonWorkHours= row.getCell(25).getNumericCellValue();
 	      double nmTueWorkHours= row.getCell(26).getNumericCellValue();
@@ -6677,14 +6800,14 @@ public class EpsUserData
 	      		"'"+stTel+"','"+stFax+"','"+stCellphone+"',"+nmTasksCompleted+","+nmAccumProjectHours+","+nmAccumEstimatedProjectHours+","+nmNoneProjectHours+"," +
     				""+nmSickDayToDate+","+nmVacationDayToDate+",'"+stAnswer+"','"+stWorkHours+"','"+stActWorkHours+"')";
 	      
-	      String stEmail = row.getCell(13).getStringCellValue();
-	      String stPassword = row.getCell(23).getStringCellValue();
-	      String stUserTypes = row.getCell(4).getStringCellValue();
+	      String stEmail = row.getCell(13).getStringCellValue().trim();
+	      String stPassword = row.getCell(23).getStringCellValue().trim();
+	      String stUserTypes = row.getCell(4).getStringCellValue().trim();
 	      
 //	      (RecId, stEmail, stPassword, dtPasswordChangeDate, nmPriviledge)
 	      stSqlX25User += " ("+nmUserId+",'"+stEmail+"',password('"+stPassword+"'),sysdate(),"+getPriviledge(stUserTypes)+")";
 	      
-	      String stDivisionName = row.getCell(8).getStringCellValue();
+	      String stDivisionName = row.getCell(8).getStringCellValue().trim();
 	      int nmDivisionId = ebEnt.dbDyn.ExecuteSql1n("SELECT nmDivision FROM teb_division WHERE stDivisionName='"+stDivisionName+"' LIMIT 1");
 	      if (nmDivisionId > 0) {
 	      	if (++iCountDivision>1) {
@@ -6693,9 +6816,10 @@ public class EpsUserData
 	      	stSqlDivision += "("+nmDivisionId+",42,"+nmUserId+",1)";
 	      }
 	      
-	      String[] stLaborCategories = row.getCell(5).getStringCellValue().split(",");
+	      String[] stLaborCategories = row.getCell(5).getStringCellValue().trim().split(",");
 	      String stLC = "";
 	      for (String lc : stLaborCategories) {
+	      	lc = lc.trim();
 	      	if ("QA Director".equals(lc)) lc = "Quality Assurance Director";
 //	      	(nmLaborCategoryId, nmRefType, nmRefId, nmFlags, nmActualHours, nmEstimatedHours)
 	      	if (++iCountLC>1) {
@@ -6708,11 +6832,11 @@ public class EpsUserData
 	      @SuppressWarnings("unused")
 	      double nmWorkHours = row.getCell(20).getNumericCellValue();
       }
-	    
 	    ebEnt.dbDyn.ExecuteUpdate(stSqlUser);
 	    ebEnt.dbEnterprise.ExecuteUpdate(stSqlX25User);
 	    ebEnt.dbDyn.ExecuteUpdate(stSqlDivision);
 	    ebEnt.dbDyn.ExecuteUpdate(stSqlLC);
+	    
 	    this.epsEf.processUsersInDivision();
 	    this.epsEf.processUsersInLaborCategory();
     } catch (Exception e) {
