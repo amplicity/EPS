@@ -1546,6 +1546,7 @@ class EpsXlsProject //extends EpsUserData
           iCount++;
         
           //flag if low level task exceeds 40 #21
+          //unused see SchEstimatedEffort below
 	      if(this.rsFields.getString("stDbFieldName").equals("SchEstimatedEffort") && stChild.equals("21")){
 	    	  String sql = "SELECT * FROM schedule where nmProjectId=" + stPk + " and nmBaseline=" + nmBaseline + " order by RecId desc";
 	          ResultSet rs1 = this.ebEnt.dbDyn.ExecuteSql(sql);
@@ -1609,7 +1610,22 @@ class EpsXlsProject //extends EpsUserData
 	      }
 	      stSql += this.ebEnt.dbDyn.fmtDbString(lcfields);
       }
-  	  if (stChild.equals("21")) stSql += ", SchEstimatedEffort="+(new DecimalFormat("#0.0").format(nmEffort));
+  	  if (stChild.equals("21")) {
+  	  	stSql += ", SchEstimatedEffort="+(new DecimalFormat("#0.0").format(nmEffort));
+  	  	
+  	  	//popup messages for larger 40 hours
+  	  	String sql = "SELECT * FROM schedule where nmProjectId=" + stPk + " and nmBaseline=" + nmBaseline + " and RecId="+this.ebEnt.ebUd.request.getParameter("edit");
+  	  	String lowlvl = this.ebEnt.dbDyn.ExecuteSql1(sql);
+         if (lowlvl != null && Integer.parseInt(lowlvl)>0 && nmEffort > epsUd.rsMyDiv.getDouble("MaximumTaskHours")) {
+        	 this.ebEnt.ebUd.setPopupMessage("Estimate (" + nmEffort + ") exceeds maximum task hours (" + this.epsUd.rsMyDiv.getDouble("MaximumTaskHours") + ")");
+         }
+
+     	  // same level as before, therefore we are LAST
+         if(nmEffort > epsUd.rsMyDiv.getDouble("MaximumTaskHours")) {
+       	  stSql += ",nmEffort40Flag=1";	//flag hours
+         } else
+       	  stSql += ",nmEffort40Flag=0";	//unflag
+  	  }
   	  
   	  
   	  //build dependencies string
@@ -1966,7 +1982,9 @@ class EpsXlsProject //extends EpsUserData
                 {
                   int iMax = Integer.parseInt(stTemp);
                   String SchLaborCategories = "";
+                  NumberFormat df = new DecimalFormat("#0.0");
                   double dEffort = 0;
+                  double dMax = this.epsUd.rsMyDiv.getDouble("MaximumTaskHours");
                   for (int i = 0; i < iMax; i++)
                   {
                     if (i == iDelete)
@@ -1980,16 +1998,10 @@ class EpsXlsProject //extends EpsUserData
                       SchLaborCategories += this.ebEnt.ebUd.request.getParameter("nr_" + i) + "~";
                       stTemp = this.ebEnt.ebUd.request.getParameter("est_" + i);
                       double d = Double.parseDouble(stTemp);
-                      double dMax = this.epsUd.rsMyDiv.getDouble("MaximumTaskHours");
                       int iNr = Integer.parseInt(this.ebEnt.ebUd.request.getParameter("nr_" + i));
-                      NumberFormat df = new DecimalFormat("#0.0");
                       double d2 = d;
                       if (iNr > 0)
                         d2 = d / iNr;
-                      if (d2 > dMax)
-                      {
-                        this.ebEnt.ebUd.setPopupMessage("Estimate (" + df.format(d2) + ") exceeds maximum task hours (" + df.format(this.epsUd.rsMyDiv.getDouble("MaximumTaskHours")) + ")");
-                      }
                       dEffort += d;
                       SchLaborCategories += stTemp + "~";
                       SchLaborCategories += this.ebEnt.ebUd.request.getParameter("f9001_must_" + i) + "~";
@@ -1997,6 +2009,10 @@ class EpsXlsProject //extends EpsUserData
                       SchLaborCategories += this.ebEnt.ebUd.request.getParameter("f9003_least_" + i) + "~";
                       SchLaborCategories += this.ebEnt.ebUd.request.getParameter("f9004_not_" + i) + "~";
                     }
+                  }
+                  if (dEffort > dMax)
+                  {
+                  	this.ebEnt.ebUd.setPopupMessage("Estimate (" + df.format(dEffort) + ") exceeds maximum task hours (" + df.format(this.epsUd.rsMyDiv.getDouble("MaximumTaskHours")) + ")");
                   }
                   this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchLaborCategories = "
                     + this.ebEnt.dbDyn.fmtDbString(SchLaborCategories) + ",SchEstimatedEffort=" + dEffort
@@ -2457,7 +2473,7 @@ class EpsXlsProject //extends EpsUserData
       for (int iR = 1; iR <= iSch; iR++)
       {
         rs1.absolute(iR);
-        if (iLastLevel == rs1.getInt("Schlevel") && rs1.getInt("SchEstimatedEffort") > 40){ // same level as before, therefore we are LAST
+        if (iLastLevel == rs1.getInt("Schlevel") && rs1.getInt("SchEstimatedEffort") > epsUd.rsMyDiv.getDouble("MaximumTaskHours")){ // same level as before, therefore we are LAST
           effortFlag++;
           this.ebEnt.dbDyn.ExecuteUpdate("UPDATE Schedule SET nmEffort40Flag=1 WHERE nmProjectId=" + stPk + " and nmBaseline=" + nmBaseline + " and RecID="+rs1.getInt("RecId"));
         }else{
@@ -2471,7 +2487,7 @@ class EpsXlsProject //extends EpsUserData
       sbReturn.append("<td>Effort</td>");
 
       if(effortFlag > 0){
-    	  sbReturn.append("<td style='color:red;'>Low Level Tasks Exceeding 40 Hours</td><td valign=top align=right>" + effortFlag + "</td><td style='color:red;'>fail</td>");
+    	  sbReturn.append("<td style='color:red;'>Low Level Tasks Exceeding "+epsUd.rsMyDiv.getDouble("MaximumTaskHours")+" Hours</td><td valign=top align=right>" + effortFlag + "</td><td style='color:red;'>fail</td>");
       }else{
     	  sbReturn.append("<td>Complete</td><td align='right'>"+iSch+"</td><td style='color:green;'>ok</td>");
       }

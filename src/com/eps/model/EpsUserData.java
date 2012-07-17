@@ -7,10 +7,8 @@ package com.eps.model;
 import it.sauronsoftware.cron4j.Scheduler;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -41,70 +39,6 @@ import com.ederbase.model.EbDatabase;
 import com.ederbase.model.EbEnterprise;
 import com.ederbase.model.EbMail;
 import com.ederbase.model.EbStatic;
-
-/**
- *
- * @author guest1
- */
-/* AS -- 28Nov2011 -- Issue #  */
-class ExchangeRateTask implements Runnable {
-	public static EbDatabase ebd1 = null;
-	ExchangeRateTask(EbDatabase ebd)
-	{
-		ebd1 = ebd;
-	}
-	@Override
-	public void run() {
-		//System.out.println("Current system time: " + new Date());
-		//System.out.println("Another minute ticked away...");
-		
-		setExchangeRates(ebd1);
-	}
-	
-	 public void setExchangeRates(EbDatabase ebd)
-	  {
-		  String stSql = "select now() as CurrentDateTime";
-		  ResultSet rs = ebd.ExecuteSql(stSql);
-		  if (rs == null) return;
-		  String dttime = "";
-		  try {
-			if(rs.next())
-				   dttime = rs.getString(1);
-			String str[] = dttime.split(" ");
-			String str1[] = str[1].split(":");
-			String answer = "";
-			if(str1[0].equals("18") && str1[1].equals("39"))
-			{
-				try {
-					String exquery = "select nmDivision,stCurrency from dbeps01.teb_division";
-					ResultSet rs1 = ebd.ExecuteSql(exquery);
-					while(rs1.next())
-					{
-						String countrycode = rs1.getString(2);
-//					URL convert = new URL("http://www.exchangerate-api.com/"+countrycode+"/usd/1?k=eBMtn-V4U6g-fiLRp");
-					URL convert = new URL("http://www.exchangerate-api.com/"+countrycode+"/usd/1?k=puupy-nZ3tU-rHeQe");
-					BufferedReader in = new BufferedReader(new InputStreamReader(convert.openStream()));
-					answer = in.readLine();
-					String insertsql = "update dbeps01.teb_division set nmExchangeRate="+answer+" where nmDivision="+rs1.getInt(1);
-					ebd.ExecuteUpdate(insertsql);
-					in.close();
-					}
-					}
-					catch (MalformedURLException mue) {
-					System.exit(1);
-					}
-					catch (IOException ioe) {
-					System.exit(1);
-					} 
-				
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	  }
-
-}
 
 class DailyEOBTask implements Runnable {
 	public static EpsUserData epsud;
@@ -1768,10 +1702,10 @@ public class EpsUserData
 		  
 	    if (rsCheck.next()) {
 	    	int lowlvl = rsCheck.getInt("lowlvl");
-			  if(lowlvl > 0 && newEffort > 40.00)
+			  if(lowlvl > 0 && newEffort > this.rsMyDiv.getDouble("MaximumTaskHours"))
 		    {
-				 this.ebEnt.ebUd.setPopupMessage("[ID:" + stSchId + "] Effort may not exceed 40 hours");
-				 makeMessage(rsCheck.getString("ProjectName"), this.ebEnt.ebUd.getLoginId()+","+rsCheck.getString("ProjectManagerAssignment")+","+rsCheck.getString("ProjectPortfolioManagerAssignment"), "Schedule Warning", "Schedule low-level task ID "+stSchId+" has a resource assigned over the maximum recommended hours (default is 40)", dateEnd);
+				 this.ebEnt.ebUd.setPopupMessage("[ID:" + stSchId + "] Effort may not exceed "+rsMyDiv.getDouble("MaximumTaskHours")+" hours");
+				 makeMessage(rsCheck.getString("ProjectName"), this.ebEnt.ebUd.getLoginId()+","+rsCheck.getString("ProjectManagerAssignment")+","+rsCheck.getString("ProjectPortfolioManagerAssignment"), "Schedule Warning", "Schedule low-level task ID "+stSchId+" has a resource assigned over the maximum recommended hours ("+rsMyDiv.getDouble("MaximumTaskHours")+")", dateEnd);
 	      }
 	    }
 	    
@@ -2354,7 +2288,7 @@ public class EpsUserData
         	String nmMessage = this.ebEnt.ebUd.request.getParameter("listm");
         	ResultSet rsSch = this.ebEnt.dbDyn.ExecuteSql("SELECT s.*,p.ProjectName,d.stDivisionName FROM schedule s, projects p, teb_division d WHERE d.nmDivision=p.nmDivision AND p.RecId=s.nmProjectId AND s.nmProjectId="+nmProjectId+" AND s.nmBaseLine="+nmBaseLineId+" AND s.recID="+nmScheduleId);
         	if (rsSch.next()) {
-        		String stDesc = "Task may not exceed 40 hours";
+        		String stDesc = "Task may not exceed "+rsMyDiv.getDouble("MaximumTaskHours")+" hours";
         		try {
 	            int iM = Integer.parseInt(nmMessage);
 	            if (iM>0) {
@@ -4907,9 +4841,9 @@ public class EpsUserData
       //stId = this.ebEnt.dbDyn.ExecuteSql1("select RecId from Schedule where nmProjectId=" + stProject + " and nmBaseline=" + nmBaseline + " and RecId=" + stPk);
 	  lowlvl = this.ebEnt.dbDyn.ExecuteSql1n("SELECT count(*) FROM Schedule s, Projects p where s.nmProjectId=p.RecId and s.nmBaseline=p.CurrentBaseline and (SchFlags & 0x10 ) != 0 and s.nmProjectId=" + stProject + " and s.RecId=" + stPk);
 	  
-	  if(lowlvl > 0 && newEffort > 40.00)
+	  if(lowlvl > 0 && newEffort > rsMyDiv.getDouble("MaximumTaskHours"))
       {
-		 this.ebEnt.ebUd.setPopupMessage("[ID:" + stPk + "] Effort may not exceed 40 hours");
+		 this.ebEnt.ebUd.setPopupMessage("[ID:" + stPk + "] Effort may not exceed "+rsMyDiv.getDouble("MaximumTaskHours")+" hours");
       }
     } catch (Exception e)
     {
@@ -5021,23 +4955,23 @@ public class EpsUserData
 	  
 	  //update ExchangeRate for divisions.
 	  String answer = "";
-		String stSql = "select nmDivision,stCurrency from dbeps01.teb_division";
-		ResultSet rs = this.ebEnt.dbEnterprise.ExecuteSql(stSql);
+		String stSql = "select nmDivision,stCurrency from teb_division";
+		ResultSet rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
 		while(rs.next())
 		{
-			String countrycode = rs.getString(2);
-			if (!exchangeRatesMap.containsKey(countrycode)) {
-//				URL convert = new URL("http://www.exchangerate-api.com/"+countrycode+"/usd/1?k=eBMtn-V4U6g-fiLRp");
-				URL convert = new URL("http://www.exchangerate-api.com/"+countrycode+"/usd/1?k=puupy-nZ3tU-rHeQe");
+			String currencyCode = rs.getString(2);
+			if (!exchangeRatesMap.containsKey(currencyCode)) {
+//				URL convert = new URL("http://www.exchangerate-api.com/"+currencyCode+"/usd/1?k=eBMtn-V4U6g-fiLRp");
+				URL convert = new URL("http://www.exchangerate-api.com/"+currencyCode+"/usd/1?k=puupy-nZ3tU-rHeQe");
 				BufferedReader in = new BufferedReader(new InputStreamReader(convert.openStream()));
 				answer = in.readLine();
-				exchangeRatesMap.put(countrycode, answer);
+				exchangeRatesMap.put(currencyCode, answer);
 				in.close();
 			} else {
-				answer = exchangeRatesMap.get(countrycode);
+				answer = exchangeRatesMap.get(currencyCode);
 			}
-			String insertsql = "update dbeps01.teb_division set nmExchangeRate="+answer+" where nmDivision="+rs.getInt(1);
-			this.ebEnt.dbEnterprise.ExecuteUpdate(insertsql);
+			String insertsql = "update teb_division set nmExchangeRate="+answer+",dtExchangeRate=CURRENT_TIMESTAMP where nmDivision="+rs.getInt(1);
+			this.ebEnt.dbDyn.ExecuteUpdate(insertsql);
 		}
 	  
     runD50D53();
