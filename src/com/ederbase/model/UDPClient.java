@@ -4,25 +4,21 @@ package com.ederbase.model;
 
 import java.net.*;
 
-class UDPClient
-{
-  public void sendUdp(String stSend, int iPort) throws Exception
-  {
-    byte[] send_data = new byte[1024];
+class UDPClient {
+	public void sendUdp(String stSend, int iPort) throws Exception {
+		byte[] send_data = new byte[1024];
 
-    DatagramSocket client_socket = new DatagramSocket();
+		DatagramSocket client_socket = new DatagramSocket();
 
-    InetAddress IPAddress = InetAddress.getByName("127.0.0.1");
+		InetAddress IPAddress = InetAddress.getByName("127.0.0.1");
 
-    send_data = stSend.getBytes();
+		send_data = stSend.getBytes();
 
-    DatagramPacket send_packet = new DatagramPacket(send_data,
-        send_data.length,
-        IPAddress, iPort);
+		DatagramPacket send_packet = new DatagramPacket(send_data,
+		    send_data.length, IPAddress, iPort);
 
-    client_socket.send(send_packet);
+		client_socket.send(send_packet);
 
-    client_socket.close();
-  }
+		client_socket.close();
+	}
 }
-
