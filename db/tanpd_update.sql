@@ -57,3 +57,47 @@ INSERT INTO `dbeps01`.`teb_division` (`nmDivision`, `nmUsersInDivision`, `nmHour
 									VALUES (NULL, '0', '8', '07:00', '1', 'US', '', '$', '1', 'San Francisco', sysdate(), 'USD', 'Mon,Tue,Wed,Thu,Fri');
 									
 UPDATE  `dbeps01`.`teb_fields` SET  `nmFlags` =  '0' WHERE  `teb_fields`.`nmForeignId` =816;
+
+ALTER TABLE  `dbeps01`.`options` ADD  `FixedDateThreshold` INT NOT NULL DEFAULT  '5';
+INSERT INTO  `dbeps01`.`teb_fields` (
+`nmForeignId` ,
+`stDbFieldName` ,
+`nmDataType` ,
+`nmFlags` ,
+`nmOrder2` ,
+`nmGrouping` ,
+`nmGroupingOrder` ,
+`stDefaultValue` ,
+`nmTabId` ,
+`stTabName` ,
+`stLabel` ,
+`nmOrder` ,
+`nmHeaderOrder` ,
+`nmMinBytes` ,
+`nmMaxBytes` ,
+`nmRows` ,
+`nmCols` ,
+`nmSecurityFlags` ,
+`stMask` ,
+`stValidation` ,
+`stValidParam` ,
+`stLabelShort`
+)
+VALUES (
+NULL ,  'FixedDateThreshold',  '1',  '1',  '0',  '15',  '15',  '5',  '15',  '',  'Fixed Date Threshold (%)',  '0',  '0',  '0',  '5',  '0',  '5',  '0',  '',  '',  '',  ''
+);
+INSERT INTO  `dbeps01`.`teb_epsfields` (
+`nmForeignId` ,
+`nmOrderDisplay` ,
+`stValidationFlags` ,
+`stHandler` ,
+`stChoiceValues` ,
+`stSpecial` ,
+`stTemp` ,
+`nmPriv` ,
+`stNull` ,
+`stExtra`
+)
+VALUES (
+'1096',  '999',  'int',  '',  '',  '', NULL ,  '32',  '',  ''
+);

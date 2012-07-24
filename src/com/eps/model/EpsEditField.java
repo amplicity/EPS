@@ -5,6 +5,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 /**
  * 
@@ -2442,7 +2444,6 @@ public class EpsEditField {
 			stReturn += addIndicator(iMode, 0, 0x10, iFlags, "LL"); // LL=Low-Level
 																															// Task
 			stReturn += addIndicator(iMode, 1, 0x4000, iFlags, "M"); // Milestone
-			stReturn += addIndicator(iMode, 0, 0x80, iFlags, "D"); // Deliverable
 			stReturn += addIndicator(iMode, 0, 0x4, iFlags, "P"); // P=Parent Task
 			stReturn += addIndicator(iMode, 0, 0x80, iFlags, "PLA"); // PLA=Permanent
 																															 // Labor
@@ -2631,10 +2632,37 @@ public class EpsEditField {
 					}
 				}
 			}
-			if (iUsr > 0)
-				this.epsClient.epsUd.makeTask(22, getUserName(stPk)); // 22 1 Updated
-																															// User Enabled
-																															// Yes 4096
+			if (iUsr > 0) {
+//				this.epsClient.epsUd.makeTask(22, getUserName(stPk)); // 22 1 Updated User Enabled Yes 4096
+				
+				// make message to ppm
+				ResultSet rsLC = ebEnt.dbDyn
+				    .ExecuteSql("select lc.LaborCategory from LaborCategory lc, teb_reflaborcategory rlc"
+				        + " where rlc.nmLaborCategoryId=lc.nmLcId and nmRefType=42 and nmRefId="
+				        + stPk);
+				rsLC.last();
+				int iLC = rsLC.getRow();
+				String msg = "";
+				if (iLC > 0) {
+					for (int i = 1; i <= iLC; i++) {
+						rsLC.absolute(i);
+						msg += "<tr><td>" + rsLC.getString("LaborCategory")
+						    + "</td></tr>";
+					}
+				} else {
+					msg += "<tr><td>No Labor Category</td></tr>";
+				}
+				msg = "Updated User: "
+				    + getUserName(stPk)
+				    + "<br><table border=1><tr><th>Labor Category Support</th></tr>"
+				    + msg + "</table>";
+				Calendar c = Calendar.getInstance();
+				c.add(Calendar.DAY_OF_YEAR, 10);
+				epsClient.epsUd.makeMessage("All", epsClient.epsUd.getAllUsers(epsClient.epsUd.getPriviledge("ppm")),
+				    "Updated User", msg,
+				    new SimpleDateFormat("MM/dd/yyyy").format(c.getTime()));
+			}
+				
 			if (iReq > 0) {
 				this.epsClient.epsUd.makeTask(21,
 				    getRequirementName(stPk, stProject, nmBaseline)); // 21 1 Updated
