@@ -45,7 +45,7 @@ class EpsXlsProject // extends EpsUserData
 	private int iCpIndexByDate = -1;
 	private int iMaxRecId = 0;
 
-	public void EpsXlsProject() {
+	public EpsXlsProject() {
 		this.ebEnt = null;
 	}
 

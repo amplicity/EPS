@@ -167,7 +167,7 @@ public class EpsEditField {
 					this.stValidation += ",";
 				}
 				this.stValidation += "\n new Array(" + iF + ",\""
-				    + rsFields.getString("stDbFieldName") + "\"," + "\"" + stLabel
+				    + rsFields.getString("stDbFieldName") + "\"," + "\"" + stLabel.trim()
 				    + "\"," + iDt + "," + iFlags + "," + rsFields.getInt("nmMinBytes")
 				    + "," + nmMaxBytes + "," + "\""
 				    + rsFields.getString("stValidation") + "\"," + "\""

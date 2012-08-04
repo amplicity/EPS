@@ -1267,10 +1267,13 @@ function myValidation(form1)
         case 32:  // Long Text
           if  ( (gaValidation[i][4] & 0x2 ) != 0 && thisCtrl.value.length <= 0 ) // Mandatory
           {
-          	//hard code for login page validation
-          	if (gaValidation[0][1] == 'UserName' && gaValidation[0][2] == 'E-Mail') {
+          	if (form1.id == 'form3' && giSubmitId == 9997 
+          			&& (gaValidation[i][1] == 'UserName' || gaValidation[i][1] == 'Password')) {
+          		//hard code for login page validation
           		var stMsg = "\nE-Mail or Password cannot be blank.";
           		if (stAlert.indexOf(stMsg) < 0)	stAlert += stMsg;
+          	} else if (form1.id == 'form3' && giSubmitId == 9993 && gaValidation[i][1] == 'Password') {
+          		break;
           	} else {
           		stAlert += "\n" +gaValidation[i][2] + " cannot be blank.";
           	}

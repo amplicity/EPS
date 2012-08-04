@@ -222,6 +222,7 @@ public class EpsUserData {
 
 	public void processSubmit(HttpServletRequest request,
 	    HttpServletResponse response) {
+		ebEnt.ebUd.clearPopupMessage();
 
 		// Check for exchange rates
 		// Creates the scheduler.
@@ -312,118 +313,118 @@ public class EpsUserData {
 				this.ebEnt.ebUd.setRedirect("./");
 			} else {
 				stTemp = this.ebEnt.ebUd.request.getParameter("Login");
-				if (stTemp != null && !stTemp.equals("")) {
-					this.ebEnt.ebUd.aLogin[0] = "";
-					this.ebEnt.ebUd.aLogin[1] = "";
-					this.ebEnt.ebUd.aLogin[2] = this.ebEnt.ebUd.request
-					    .getParameter("f5");
-					this.ebEnt.ebUd.aLogin[3] = this.ebEnt.ebUd.request
-					    .getParameter("f3");
-				}
-				iRecId = this.ebEnt.ebUd.checkLogin();
-				if (iRecId > 0) {
-					this.ebEnt.ebUd.request.getSession().setAttribute("userId", iRecId);
-					@SuppressWarnings("unchecked")
-					Set<Integer> ids = (Set<Integer>) this.ebEnt.ebUd.request
-					    .getSession().getServletContext().getAttribute("LOG_IN_USERS");
-					if (ids == null)
-						ids = new HashSet<Integer>();
-					ids.add(iRecId);
-					this.ebEnt.ebUd.request.getSession().getServletContext()
-					    .setAttribute("LOG_IN_USERS", ids);
-
+				if (stTemp != null && stTemp.startsWith("Forgot")) {
+					ebEnt.ebUd.setRedirect("./?");
+					EbMail ebM = new EbMail(this.ebEnt);
+					ebM.setProduction(1);
+					ebM.setEbEmail("smtp.myinfo.com", "false", "EPPORA Do Not Reply",
+					    "donotreply@eppora.com", "donotreply@eppora.com", "eppora123");
+					iRecId = ebM.sendMail("pdtanit@gmail.com", "Pham DINH Tan", "Password Recovery", "Test", 1);
+					if (iRecId > 0) 
+					{
+						ebEnt.ebUd.setPopupMessage("Password is sent to your email address.");
+					}
+				} else {
 					if (stTemp != null && !stTemp.equals("")) {
-						if (this.rsMyDiv != null
-						    && this.rsMyDiv.getInt("UserQuestionsOnOff") > 0) {
-							String[] aV = this.ebEnt.dbDyn
-							    .ExecuteSql1(
-							        "select Answers from Users where nmUserId="
-							            + this.ebEnt.ebUd.aLogin[0]).replace(",", "\n")
-							    .replace("~", "\n").split("\\\n");
-							String stAnswer = this.ebEnt.ebUd.request.getParameter("f4")
-							    .trim();
-							stTemp = this.ebEnt.ebUd.request.getParameter("f6");
-							int iIndex = Integer.parseInt(stTemp);
-							if (aV != null && aV.length > iIndex) {
-								if (!aV[iIndex].trim().equals(stAnswer)) {
+						this.ebEnt.ebUd.aLogin[0] = "";
+						this.ebEnt.ebUd.aLogin[1] = "";
+						this.ebEnt.ebUd.aLogin[2] = this.ebEnt.ebUd.request
+						    .getParameter("f5");
+						this.ebEnt.ebUd.aLogin[3] = this.ebEnt.ebUd.request
+						    .getParameter("f3");
+					}
+						
+					iRecId = this.ebEnt.ebUd.checkLogin();
+					if (iRecId > 0) {
+						this.ebEnt.ebUd.request.getSession().setAttribute("userId", iRecId);
+						@SuppressWarnings("unchecked")
+						Set<Integer> ids = (Set<Integer>) this.ebEnt.ebUd.request
+						    .getSession().getServletContext().getAttribute("LOG_IN_USERS");
+						if (ids == null)
+							ids = new HashSet<Integer>();
+						ids.add(iRecId);
+						this.ebEnt.ebUd.request.getSession().getServletContext()
+						    .setAttribute("LOG_IN_USERS", ids);
+	
+						if (stTemp != null && !stTemp.equals("")) {
+							if (this.rsMyDiv != null
+							    && this.rsMyDiv.getInt("UserQuestionsOnOff") > 0
+							    && ebEnt.ebUd.request.getParameterMap().containsKey("f4")) {
+								String[] aV = this.ebEnt.dbDyn
+								    .ExecuteSql1(
+								        "select Answers from Users where nmUserId="
+								            + this.ebEnt.ebUd.aLogin[0]).replace(",", "\n")
+								    .replace("~", "\n").split("\\\n");
+								String stAnswer = this.ebEnt.ebUd.request.getParameter("f4")
+								    .trim();
+								stTemp = this.ebEnt.ebUd.request.getParameter("f6");
+								int iIndex = Integer.parseInt(stTemp);
+								if (aV != null && aV.length > iIndex) {
+									if (!aV[iIndex].trim().equals(stAnswer)) {
+										this.ebEnt.ebUd.aLogin[0] = "0";
+										this.ebEnt.ebUd.aLogin[1] = "0";
+										this.setUser(-1, 0);
+										this.ebEnt.ebUd.setPopupMessage("Invalid Answer");
+										makeTask(5, "Invalid Answer / Email: "
+										    + this.ebEnt.ebUd.aLogin[2]); // 5 1 Failed Login Enabled
+										                                  // Yes
+									}
+								} else {
 									this.ebEnt.ebUd.aLogin[0] = "0";
 									this.ebEnt.ebUd.aLogin[1] = "0";
 									this.setUser(-1, 0);
-									this.ebEnt.ebUd.setPopupMessage("Invalid Answer");
-									makeTask(5, "Invalid Answer / Email: "
+									this.ebEnt.ebUd.setPopupMessage("Answer not found");
+									makeTask(5, "Answer not found / Email: "
 									    + this.ebEnt.ebUd.aLogin[2]); // 5 1 Failed Login Enabled
 									                                  // Yes
 								}
-							} else {
-								this.ebEnt.ebUd.aLogin[0] = "0";
-								this.ebEnt.ebUd.aLogin[1] = "0";
-								this.setUser(-1, 0);
-								this.ebEnt.ebUd.setPopupMessage("Answer not found");
-								makeTask(5, "Answer not found / Email: "
-								    + this.ebEnt.ebUd.aLogin[2]); // 5 1 Failed Login Enabled
-								                                  // Yes
+							}
+							this.ebEnt.ebUd.setCookie("ui", this.ebEnt.ebUd.aLogin[0], 30);
+							this.ebEnt.ebUd.setCookie("ut", this.ebEnt.ebUd.aLogin[1], 30);
+							this.ebEnt.ebUd.setCookie("email", this.ebEnt.ebUd.aLogin[2], 30);
+							this.ebEnt.ebUd.setCookie("sid", this.ebEnt.ebUd.aLogin[4], 30);
+	
+							this.epsEf.addAuditTrail(5, "0", this.ebEnt.ebUd.aLogin[2]); // This
+							                                                             // is
+							                                                             // to
+							                                                             // LOG
+							                                                             // the
+							                                                             // LOGIN
+							                                                             // event
+							                                                             // for
+							                                                             // reporting
+						}
+					} else {
+						if (iRecId == -5) {
+							this.ebEnt.ebUd
+							    .setPopupMessage("E-Mail/Password is being used. \nPlease try again after "
+							        + (request.getSession().getMaxInactiveInterval() / 60)
+							        + " minutes.");
+						} else if (stTemp != null && !stTemp.equals("")) {
+							this.ebEnt.ebUd.setPopupMessage("E-Mail/Password not found.");
+							makeTask(5, "E-Mail/Password not found "
+							    + this.ebEnt.ebUd.aLogin[2]); // 5 1 Failed Login Enabled Yes
+							makeMessage("All", getAllUsers(getPriviledge("ad")),
+							    "Illegal Login", "Illegal Login with email \""
+							        + this.ebEnt.ebUd.aLogin[2] + "\" and password \""
+							        + this.ebEnt.ebUd.aLogin[3] + "\"", new SimpleDateFormat(
+							        "MM/dd/yyyy").format(Calendar.getInstance().getTime()));
+							iRecId = this.ebEnt.dbEnterprise
+							    .ExecuteSql1n("select RecId from X25User where stEMail='"
+							        + this.ebEnt.ebUd.aLogin[2] + "'");
+							if (iRecId > 0) {
+								makeMessage(
+								    "All",
+								    "" + iRecId,
+								    "Illegal Login",
+								    "Illegal Login with email \"" + this.ebEnt.ebUd.aLogin[2]
+								        + "\" and password \"" + this.ebEnt.ebUd.aLogin[3] + "\"",
+								    new SimpleDateFormat("MM/dd/yyyy").format(Calendar
+								        .getInstance().getTime()));
 							}
 						}
-						this.ebEnt.ebUd.setCookie("ui", this.ebEnt.ebUd.aLogin[0], 30);
-						this.ebEnt.ebUd.setCookie("ut", this.ebEnt.ebUd.aLogin[1], 30);
-						this.ebEnt.ebUd.setCookie("email", this.ebEnt.ebUd.aLogin[2], 30);
-						this.ebEnt.ebUd.setCookie("sid", this.ebEnt.ebUd.aLogin[4], 30);
-						// Cookie userCookie1 = new Cookie("ui", this.ebEnt.ebUd.aLogin[0]);
-						// userCookie1.setMaxAge(24*60*60);
-						// response.addCookie(userCookie1);
-						// Cookie userCookie2 = new Cookie("ut", this.ebEnt.ebUd.aLogin[1]);
-						// userCookie2.setMaxAge(24*60*60);
-						// response.addCookie(userCookie2);
-						// Cookie userCookie3 = new Cookie("email",
-						// this.ebEnt.ebUd.aLogin[2]);
-						// userCookie3.setMaxAge(24*60*60);
-						// response.addCookie(userCookie3);
-						// //Cookie userCookie4 = new Cookie("sid",
-						// this.ebEnt.EBEncrypt(this.ebEnt.ebUd.aLogin[4]));
-						// Cookie userCookie4 = new Cookie("sid",
-						// this.ebEnt.ebUd.aLogin[4]);
-						// userCookie4.setMaxAge(24*60*60);
-						// response.addCookie(userCookie4);
-						this.epsEf.addAuditTrail(5, "0", this.ebEnt.ebUd.aLogin[2]); // This
-						                                                             // is
-						                                                             // to
-						                                                             // LOG
-						                                                             // the
-						                                                             // LOGIN
-						                                                             // event
-						                                                             // for
-						                                                             // reporting
 					}
-				} else {
-					if (iRecId == -5) {
-						this.ebEnt.ebUd
-						    .setPopupMessage("E-Mail/Password is being used. \nPlease try again after "
-						        + (request.getSession().getMaxInactiveInterval() / 60)
-						        + " minutes.");
-					} else if (stTemp != null && !stTemp.equals("")) {
-						this.ebEnt.ebUd.setPopupMessage("E-Mail/Password not found.");
-						makeTask(5, "E-Mail/Password not found "
-						    + this.ebEnt.ebUd.aLogin[2]); // 5 1 Failed Login Enabled Yes
-						makeMessage("All", getAllUsers(getPriviledge("ad")),
-						    "Illegal Login", "Illegal Login with email \""
-						        + this.ebEnt.ebUd.aLogin[2] + "\" and password \""
-						        + this.ebEnt.ebUd.aLogin[3] + "\"", new SimpleDateFormat(
-						        "MM/dd/yyyy").format(Calendar.getInstance().getTime()));
-						iRecId = this.ebEnt.dbEnterprise
-						    .ExecuteSql1n("select RecId from X25User where stEMail='"
-						        + this.ebEnt.ebUd.aLogin[2] + "'");
-						if (iRecId > 0) {
-							makeMessage(
-							    "All",
-							    "" + iRecId,
-							    "Illegal Login",
-							    "Illegal Login with email \"" + this.ebEnt.ebUd.aLogin[2]
-							        + "\" and password \"" + this.ebEnt.ebUd.aLogin[3] + "\"",
-							    new SimpleDateFormat("MM/dd/yyyy").format(Calendar
-							        .getInstance().getTime()));
-						}
-					}
-				}
+				} 
 				// rest moved to savedata section !!
 			}
 			stPrj = this.ebEnt.ebUd.request.getParameter("f8");
@@ -2821,7 +2822,9 @@ public class EpsUserData {
 				stLabel = rsF.getString("stLabel");
 				switch (rsF.getInt("nmForeignId")) {
 				case 4: // User question - RESPONSE
-					if (this.rsMyDiv.getInt("UserQuestionsOnOff") > 0) {
+					Map<String, String> paramMap = ebEnt.ebUd.request.getParameterMap();
+					boolean isLoggingIn = (paramMap != null) && (paramMap.get("Login") != null);
+					if (this.rsMyDiv.getInt("UserQuestionsOnOff") > 0 && isLoggingIn) {
 						String[] aV = rsMyDiv.getString("UserQuestions").replace("~", "\n")
 						    .split("\\\n", -1);
 						if (aV != null && aV.length >= this.ebEnt.ebUd.iLic) {
@@ -2924,6 +2927,7 @@ public class EpsUserData {
 				stReturn += "<input type=hidden name=f6 id=f6 value=\""
 				    + this.ebEnt.ebUd.iLic
 				    + "\">"
+				    + "<input type=submit name=Login value='Forgot Password' onClick=\"setSubmitId(9993);\">&nbsp;"
 				    + "<input type=submit name=Login value='Login' onClick=\"setSubmitId(9997);\"></td></tr>";
 			} else {
 				stReturn += "<input type=hidden name=stChildren value=\""
@@ -6257,7 +6261,7 @@ public class EpsUserData {
 					// Handle EMAIL here
 					EbMail ebM = new EbMail(this.ebEnt);
 					ebM.setEbEmail("smtp.myinfo.com", "false", "EPPORA Do Not Reply",
-					    "donotreply@epproa.com", "donotreply@epproa.com", "eppora123");
+					    "donotreply@eppora.com", "donotreply@eppora.com", "eppora123");
 					ebM.setProduction(1);
 					stSql = "select * from X25User where RecId in ("
 					    + rsTrigger.getString("ContactList") + ")";
