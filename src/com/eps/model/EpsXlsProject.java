@@ -92,7 +92,7 @@ class EpsXlsProject // extends EpsUserData
 				this.ebEnt.ebUd.setRedirect(stLink + "#row"
 				    + this.ebEnt.ebUd.request.getParameter("edit"));
 				return ""; // redirect, to remove EDIT tag
-									 // ----------------------------->
+				           // ----------------------------->
 			}
 			String stAction = this.ebEnt.ebUd.request.getParameter("a");
 			String stR = this.ebEnt.ebUd.request.getParameter("r");
@@ -195,7 +195,7 @@ class EpsXlsProject // extends EpsUserData
 				} else if (stAction.equals("delete")) {
 					this.epsUd.makeTask(4, this.epsUd.epsEf.getRequirementName(""
 					    + iRecIdDo, stPk, nmBaseline)); // 4 1 Deleted Requirement Enabled
-																							// Yes
+					                                    // Yes
 					this.ebEnt.dbDyn
 					    .ExecuteUpdate("delete from Requirements where RecId=" + iRecIdDo
 					        + " and  nmProjectId=" + stPk + " and nmBaseline="
@@ -329,7 +329,7 @@ class EpsXlsProject // extends EpsUserData
 			rs.last();
 			int iMax = rs.getRow();
 			if (iMax <= 0) // Fix query, if it does not return any rows ... otherwise
-										 // we auto insert
+			               // we auto insert
 			{
 				iFrom = 0; // reset to 0
 				rs.close();
@@ -390,7 +390,7 @@ class EpsXlsProject // extends EpsUserData
 						stDescription = stDescription.trim();
 					if (iEditId <= 0
 					    && (this.ebEnt.ebUd.getLoginPersonFlags() & 0xA0) != 0) // Only BA
-																																			// and PPM
+					                                                            // and PPM
 					{
 						// onmouseover="
 						// + "\"setActions(1," + rs.getInt("RecId") + "," +
@@ -500,7 +500,7 @@ class EpsXlsProject // extends EpsUserData
 				this.ebEnt.ebUd.setRedirect(stLink + "#row"
 				    + this.ebEnt.ebUd.request.getParameter("edit"));
 				return ""; // redirect, to remove EDIT tag
-									 // ----------------------------->
+				           // ----------------------------->
 			}
 			String stAction = this.ebEnt.ebUd.request.getParameter("a");
 			String stR = this.ebEnt.ebUd.request.getParameter("r");
@@ -704,7 +704,7 @@ class EpsXlsProject // extends EpsUserData
 			rs.last();
 			int iMax = rs.getRow();
 			if (iMax <= 0) // Fix query, if it does not return any rows ... otherwise
-										 // we auto insert
+			               // we auto insert
 			{
 				iFrom = 0; // reset to 0
 				rs.close();
@@ -855,7 +855,7 @@ class EpsXlsProject // extends EpsUserData
 				this.ebEnt.ebUd.setRedirect(stLink + "#row"
 				    + this.ebEnt.ebUd.request.getParameter("edit"));
 				return ""; // redirect, to remove EDIT tag
-									 // ----------------------------->
+				           // ----------------------------->
 			}
 			String stAction = this.ebEnt.ebUd.request.getParameter("a");
 			String stR = this.ebEnt.ebUd.request.getParameter("r");
@@ -1156,7 +1156,7 @@ class EpsXlsProject // extends EpsUserData
 			rs.last();
 			int iMax = rs.getRow();
 			if (iMax <= 0) // Fix query, if it does not return any rows ... otherwise
-										 // we auto insert
+			               // we auto insert
 			{
 				iFrom = 0; // reset to 0
 				rs.close();
@@ -1220,7 +1220,7 @@ class EpsXlsProject // extends EpsUserData
 						stDescription = stDescription.trim();
 					if (iEditId <= 0
 					    && (this.ebEnt.ebUd.getLoginPersonFlags() & 0x60) != 0) // Only PM
-																																			// and PPM
+					                                                            // and PPM
 					{
 						// onmouseover="
 						// + "\"setActions(1," + rs.getInt("RecId") + "," +
@@ -1276,7 +1276,7 @@ class EpsXlsProject // extends EpsUserData
 							} else if (iEditId == rs.getInt("RecId")
 							    && (rsFields.getInt("nmFlags") & 0x1) != 0) {
 								sbReturn.append(editXlsField(stValue)); // passes value into a
-																												// editable field
+								                                        // editable field
 							} else {
 								if (rsFields.getString("stDbFieldName").equals("SchTitle"))
 									for (int i = 0; i < rs.getInt("SchLevel"); i++)
@@ -1295,8 +1295,8 @@ class EpsXlsProject // extends EpsUserData
 									for (int iRa = 0; iRa < iRecMax; iRa++) {
 										if (iRa < iRecMax) {
 											aFields = aRecords[iRa].split("~", -1); // LcId,
-																															// MaxEmployess,
-																															// Effort,
+											                                        // MaxEmployess,
+											                                        // Effort,
 											ResultSet rsLcAll = this.ebEnt.dbDyn
 											    .ExecuteSql("SELECT * FROM LaborCategory WHERE nmLcId="
 											        + aFields[0]);
@@ -1355,13 +1355,13 @@ class EpsXlsProject // extends EpsUserData
 
 									if (rs.getInt("lowlvl") == 1
 									    && rs.getInt("SchLevel") == Integer.parseInt(stValue)) { // same
-																																							 // level
-																																							 // as
-																																							 // before,
-																																							 // therefore
-																																							 // we
-																																							 // are
-																																							 // LAST
+										                                                           // level
+										                                                           // as
+										                                                           // before,
+										                                                           // therefore
+										                                                           // we
+										                                                           // are
+										                                                           // LAST
 										sbReturn.append("(LL) ");
 									}
 
@@ -1415,7 +1415,7 @@ class EpsXlsProject // extends EpsUserData
 								stReturn += "<tr class=d0>";
 								if (iRa < iRecMax) {
 									aFields = aRecords[iRa].split("~", -1); // LcId, MaxEmployess,
-																													// Effort,
+									                                        // Effort,
 								} else {
 									aFields = new String[7];
 									for (int i = 0; i < aFields.length; i++) {
@@ -1582,7 +1582,7 @@ class EpsXlsProject // extends EpsUserData
 			for (int iR = 1; iR <= iMax; iR++) {
 				rs1.absolute(iR);
 				if ((iLastId + 1) != rs1.getInt(2)) { // Out of sequence ... set parent
-																							// to COLAPSED
+					                                    // to COLAPSED
 					iFlags2above = 0;
 					if (stChild.equals("19")) // Requirements
 					{
@@ -1798,9 +1798,9 @@ class EpsXlsProject // extends EpsUserData
 			if ((stChild.equals("21") && (this.ebEnt.ebUd.getLoginPersonFlags() & 0x60) != 0)
 			    || // Only PM and PPM
 			    (stChild.equals("19") && (this.ebEnt.ebUd.getLoginPersonFlags() & 0xA0) != 0)) // Only
-																																												 // PM
-																																												 // and
-																																												 // PPM
+			                                                                                   // PM
+			                                                                                   // and
+			                                                                                   // PPM
 			{
 				s1 = "<input type=button onClick=\"parent.location='./?stAction=projects&t=12&do=xls&pk="
 				    + stPk
@@ -1810,8 +1810,8 @@ class EpsXlsProject // extends EpsUserData
 				sbReturn.append(s1);
 			} else if (stChild.equals("34")
 			    && (this.ebEnt.ebUd.getLoginPersonFlags() & 0xF0) != 0) // Test,
-																																	// everyone
-																																	// for now
+			                                                            // everyone
+			                                                            // for now
 			{
 				s1 = "<input type=button onClick=\"parent.location='./?stAction=projects&t=12&do=xls&pk="
 				    + stPk
@@ -1878,7 +1878,7 @@ class EpsXlsProject // extends EpsUserData
 			String s1 = "";
 			String stNew = ebEnt.ebUd.request.getParameter("new");
 			switch (rsFields.getInt("nmDataType")) // create editable fields for
-																						 // inline schedule and requirements
+			                                       // inline schedule and requirements
 			{
 			case 4:
 				s1 = "<textarea name=f" + rsFields.getString("nmForeignId") + " id=f"
@@ -1934,11 +1934,11 @@ class EpsXlsProject // extends EpsUserData
 
 				if (iSubmit == 0
 				    && Integer.parseInt(this.ebEnt.ebUd.request.getParameter("child")) != 21) // submit
-																																											// and
-																																											// cancel
-																																											// buttons
-																																											// for
-																																											// non-schedule
+				                                                                              // and
+				                                                                              // cancel
+				                                                                              // buttons
+				                                                                              // for
+				                                                                              // non-schedule
 				{
 					iSubmit++; // only do it once
 					s1 = "<center><br><input type=submit name=savedataxls value='Save' onClick=\"return setSubmitId(9970);\">";
@@ -1968,7 +1968,7 @@ class EpsXlsProject // extends EpsUserData
 			if (stStyle == null || stStyle.length() <= 0 || stStyle.equals("null")) {
 				double d1 = this.epsUd.rsMyDiv.getDouble("PageWidthPx");
 				double d2 = rsFields.getDouble("nmWidth") - dReduce; // Take 1 pct off
-																														 // for borders etc
+				                                                     // for borders etc
 				int iWidth = (int) ((d1 * d2) / 100);
 
 				stStyle = " style='width:" + iWidth + "px;";
@@ -1999,10 +1999,10 @@ class EpsXlsProject // extends EpsUserData
 		try {
 			String doneID = this.ebEnt.dbDyn
 			    .ExecuteSql1("SELECT nmForeignId FROM teb_fields WHERE stDbFieldName='SchDone'"); // id
-																																														// for
-																																														// schedule
-																																														// done
-																																														// checkbox
+			                                                                                      // for
+			                                                                                      // schedule
+			                                                                                      // done
+			                                                                                      // checkbox
 			ResultSet rsTable = this.ebEnt.dbDyn
 			    .ExecuteSql("SELECT * FROM teb_table where nmTableId=" + stChild);
 			rsTable.absolute(1);
@@ -2016,17 +2016,17 @@ class EpsXlsProject // extends EpsUserData
 				    + this.rsFields.getString("nmForeignId"));
 				if (stValue != null
 				    && !this.rsFields.getString("nmForeignId").equals(doneID)) // append
-																																			 // post
-																																			 // value
-																																			 // to
-																																			 // update
-																																			 // query
-																																			 // if not
-																																			 // empty
-																																			 // and
-																																			 // not
-																																			 // done
-																																			 // checkbox
+				                                                               // post
+				                                                               // value
+				                                                               // to
+				                                                               // update
+				                                                               // query
+				                                                               // if not
+				                                                               // empty
+				                                                               // and
+				                                                               // not
+				                                                               // done
+				                                                               // checkbox
 				{
 					String stTemp = this.rsFields.getString("stValidation");
 					if (stTemp != null && stTemp.length() > 0
@@ -2093,12 +2093,12 @@ class EpsXlsProject // extends EpsUserData
 					    .equals("0")) // don't add | to new row fields
 						lcfields += "|";
 					if (!this.ebEnt.ebUd.request.getParameter("lc_" + iR).equals("0")) { // skip
-																																							 // the
-																																							 // add
-																																							 // new
-																																							 // labor
-																																							 // category
-																																							 // row
+						                                                                   // the
+						                                                                   // add
+						                                                                   // new
+						                                                                   // labor
+						                                                                   // category
+						                                                                   // row
 						String stEffort = this.ebEnt.ebUd.request.getParameter("est_" + iR);
 						if (stEffort != null && !"".equals(stEffort))
 							nmEffort += Double.parseDouble(stEffort);
@@ -2210,18 +2210,22 @@ class EpsXlsProject // extends EpsUserData
 				}
 			}
 
-			stSql += " where RecId = " + this.ebEnt.ebUd.request.getParameter("edit")
-			    + " and nmBaseline=" + this.nmBaseline + " and nmProjectId=" + stPk;
-			stSqlOld += " where RecId = "
+			String stWhere = " where RecId = "
 			    + this.ebEnt.ebUd.request.getParameter("edit") + " and nmBaseline="
 			    + this.nmBaseline + " and nmProjectId=" + stPk;
+
+			stSql += stWhere;
+			stSqlOld += stWhere;
 
 			ResultSet rsOld = this.ebEnt.dbDyn.ExecuteSql(stSqlOld);
 			this.ebEnt.dbDyn.ExecuteUpdate(stSql);
 
 			ResultSet rsNew = this.ebEnt.dbDyn.ExecuteSql(stSqlOld);
-			processScheduleRequirementCost(Integer.parseInt(this.ebEnt.ebUd.request
-			    .getParameter("edit"))); // calculate linked requirement costs
+			if (Integer.parseInt(this.ebEnt.ebUd.request.getParameter("child")) == 21) {
+				epsUd.calculateScheduleCost(stWhere);
+				processScheduleRequirementCost(Integer.parseInt(this.ebEnt.ebUd.request
+				    .getParameter("edit"))); // calculate linked requirement costs
+			}
 			this.epsUd.epsEf.addAuditTrail(rsTable, rsOld, rsNew,
 			    this.ebEnt.ebUd.request.getParameter("edit"), stPk, nmBaseline);
 		} catch (Exception e) {
@@ -2450,7 +2454,7 @@ class EpsXlsProject // extends EpsUserData
 												String stType = this.ebEnt.ebUd.request
 												    .getParameter("type_" + i);
 												if (stType.equals("sf")) // we reverse FINISH START to
-																								 // to FS
+												                         // to FS
 												{
 													stType = "fs";
 													linkMap(2, stPrj, iBaseline, stToProject, iTo1,
@@ -2540,7 +2544,7 @@ class EpsXlsProject // extends EpsUserData
 												String stType = this.ebEnt.ebUd.request
 												    .getParameter("type_" + i);
 												if (stType.equals("sf")) // we reverse START TO FINISH
-																								 // to FS
+												                         // to FS
 												{
 													stType = "fs";
 													linkMap(2, stPrj, iBaseline, stPrj, iTo,
@@ -2622,14 +2626,25 @@ class EpsXlsProject // extends EpsUserData
 								// df.format(this.epsUd.rsMyDiv.getDouble("MaximumTaskHours")) +
 								// ")");
 								// }
+								String stWhere = " where nmProjectId="
+								    + this.ebEnt.ebUd.request.getParameter("pk")
+								    + " and nmBaseline=" + nmBaseline + " and RecId="
+								    + this.ebEnt.ebUd.request.getParameter("r");
 								this.ebEnt.dbDyn
 								    .ExecuteUpdate("update Schedule set SchLaborCategories = "
 								        + this.ebEnt.dbDyn.fmtDbString(SchLaborCategories)
-								        + ",SchEstimatedEffort=" + dEffort
-								        + " where nmProjectId="
-								        + this.ebEnt.ebUd.request.getParameter("pk")
-								        + " and nmBaseline=" + nmBaseline + " and RecId="
-								        + this.ebEnt.ebUd.request.getParameter("r"));
+								        + ",SchEstimatedEffort=" + dEffort + stWhere);
+								double dCost = epsUd.calculateScheduleCost(stWhere);
+								this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchCost = "
+								    + dCost + stWhere);
+								processScheduleRequirementCost(Integer
+								    .parseInt(this.ebEnt.ebUd.request.getParameter("r"))); // calculate
+								                                                           // requirement
+								                                                           // costs
+								                                                           // linked
+								                                                           // to
+								                                                           // this
+								                                                           // task
 							}
 							stMake = "lc";
 							break;
@@ -2641,25 +2656,18 @@ class EpsXlsProject // extends EpsUserData
 							    + this.ebEnt.ebUd.request.getParameter("r") + "&make="
 							    + stMake);
 							return "."; // on return need data to exit loop, main redirect has
-													// higher priority, (to remove EDIT tags)---------->
+							            // higher priority, (to remove EDIT tags)---------->
 						}
 					}
 					if (giSubmitId >= 9980 && giSubmitId < 9999)
 						return this.editMake(stChild, stPk);
 
-					processScheduleRequirementCost(Integer
-					    .parseInt(this.ebEnt.ebUd.request.getParameter("r"))); // calculate
-																																		 // requirement
-																																		 // costs
-																																		 // linked
-																																		 // to this
-																																		 // task
 				}
 				if (giSubmitId == 0 || giSubmitId == 9999 || stCancel != null) {
 					this.ebEnt.ebUd.setRedirect(stLink + "&from=" + stFrom + "#row"
 					    + this.ebEnt.ebUd.request.getParameter("r"));
 					return "."; // on return need data to exit loop, main redirect has
-											// higher priority, (to remove EDIT tags)---------->
+					            // higher priority, (to remove EDIT tags)---------->
 				}
 			}
 			if (giSubmitId != 8888) // 9970-9979 is Save and Exit;
@@ -2711,13 +2719,13 @@ class EpsXlsProject // extends EpsUserData
 				sbReturn.append(analyzeSchedules("21"));
 			if (stChild.length() <= 0 || stChild.equals("19")) {
 				sbReturn.append(analyzeRequirements("19"));
-				processAllRequirementCost();
+				// processAllRequirementCost();
 			}
 			if (stChild.length() <= 0 || stChild.equals("34"))
 				sbReturn.append(analyzeTest("34"));
 			if (stChild.length() <= 0) {
 				sbReturn.append(analyzeLink());
-				/* sbReturn.append(processCriticalPath()); */
+				// sbReturn.append(processCriticalPath());
 			}
 		} catch (Exception e) {
 			this.stError += "<br>ERROR xlsAnalyze " + e;
@@ -2811,7 +2819,7 @@ class EpsXlsProject // extends EpsUserData
 					rs.absolute(iR);
 					ReqFlags = 0;
 					aRecId[rs.getInt("Reqlevel")] = rs.getInt("RecId"); // Save this RecId
-																															// on this level
+					                                                    // on this level
 					if (iLastLevel < rs.getInt("Reqlevel")) {
 						if (stRecIdList.length() > 0)
 							stRecIdList += ",";
@@ -2875,7 +2883,7 @@ class EpsXlsProject // extends EpsUserData
 					rs1.absolute(iR);
 
 					if (iLastLevel == rs1.getInt("Reqlevel")) // same level as before,
-																										// therefore we are LAST
+					                                          // therefore we are LAST
 						ReqFlags = 0x10;
 					else if (iLastLevel > rs1.getInt("Reqlevel"))
 						ReqFlags = 0;
@@ -2984,7 +2992,7 @@ class EpsXlsProject // extends EpsUserData
 					rs.absolute(iR);
 					SchFlags = 0;
 					aRecId[rs.getInt("Schlevel")] = rs.getInt("RecId"); // Save this RecId
-																															// on this level
+					                                                    // on this level
 					if (iLastLevel < rs.getInt("Schlevel")) {
 						if (stRecIdList.length() > 0)
 							stRecIdList += ",";
@@ -3077,7 +3085,7 @@ class EpsXlsProject // extends EpsUserData
 				for (int iR = 1; iR <= iSch; iR++) {
 					rs.absolute(iR);
 					if (iLastLevel == rs.getInt("Schlevel")) { // same level as before,
-																										 // therefore we are LAST
+						                                         // therefore we are LAST
 						SchFlags = 0x10;
 					} else if (iLastLevel > rs.getInt("Schlevel")) {
 						SchFlags = 0;
@@ -3157,7 +3165,7 @@ class EpsXlsProject // extends EpsUserData
 				if (iLastLevel == rs1.getInt("Schlevel")
 				    && rs1.getInt("SchEstimatedEffort") > epsUd.rsMyDiv
 				        .getDouble("MaximumTaskHours")) { // same level as before,
-																									// therefore we are LAST
+					                                        // therefore we are LAST
 					effortFlag++;
 					this.ebEnt.dbDyn
 					    .ExecuteUpdate("UPDATE Schedule SET nmEffort40Flag=1 WHERE nmProjectId="
@@ -3680,7 +3688,7 @@ class EpsXlsProject // extends EpsUserData
 												iDep = Integer.parseInt(aDep[i].trim());
 											}
 											if (stComment.equals("sf")) // we reverse START TO FINISH
-																									// to FS
+											                            // to FS
 												linkMap(2, aFields[0], nmBaseline, aFields[0],
 												    Integer.parseInt(aFields[1]), aFields[0], iDep,
 												    dLag, stComment, 0, 0);
@@ -3745,7 +3753,7 @@ class EpsXlsProject // extends EpsUserData
 								    + ","
 								    + this.ebEnt.dbDyn.fmtDbString(stLc)
 								    // + this.ebEnt.dbDyn.fmtDbString(aFields[11]) --
-										// SchIndicators
+								    // SchIndicators
 								    + ")";
 								iSchedule++;
 								break;
@@ -3795,8 +3803,14 @@ class EpsXlsProject // extends EpsUserData
 					    .ExecuteUpdate("update Triggers set ContactList='1,2,3', TriggerEvent='Enabled', Communication='No' ");
 					EpsReport epsReport = new EpsReport();
 					epsReport.doProjectRanking(this.epsUd);
-					// this.epsUd.runEOB();
 					stError += epsReport.getError();
+					this.epsUd.runEOB();
+					ResultSet rsPrjs = ebEnt.dbDyn.ExecuteSql("SELECT * FROM projects");
+					while (rsPrjs.next()) {
+	          stPk = rsPrjs.getString("nmRecId");
+	          nmBaseline = rsPrjs.getInt("CurrentBaseline");
+	          processAllRequirementCost();
+          }
 					sbReturn.append(" Rows: " + aLines.length);
 					if (this.stError.length() > 0)
 						sbReturn.append(" <font color=red>WITH ERRORS<hr>" + this.stError
@@ -5105,59 +5119,59 @@ class EpsXlsProject // extends EpsUserData
 								if (aCp[aChain[iChain - 1]] != null) {
 									if (aCp[iI].aDependency[iD] == aChain[iChain - 1]) {
 										if (aCp[iI].aDependencyType[iD].equals("ss")) { // Start to
-																																		// Start
+											                                              // Start
 											calcStartEnd(aChain[iChain - 1], dtStart, aChain[iChain]); // Set
-																																								 // dependent
-																																								 // to
-																																								 // same
-																																								 // start
-																																								 // as
-																																								 // us
+											                                                           // dependent
+											                                                           // to
+											                                                           // same
+											                                                           // start
+											                                                           // as
+											                                                           // us
 										} else if (aCp[iI].aDependencyType[iD].equals("ff")) { // Finish
-																																					 // to
-																																					 // Finish
+											                                                     // to
+											                                                     // Finish
 											dtStart = getLatestStart(iI, dtStart);
 											aCp[iI].dtStart = dtStart;
 											aCp[iI].calculateEnd(dPreviousHours);
 											aCp[aChain[iChain]].dtEnd = (Calendar) aCp[iI].dtEnd
 											    .clone(); // Set My end to depend end
 											aCp[aChain[iChain]].calculateStart(); // calculate depend
-																														// start
+											                                      // start
 										} else if (aCp[iI].aDependencyType[iD].equals("sf")) { // Start
-																																					 // to
-																																					 // Finish
-																																					 // (is
-																																					 // reverse
-																																					 // of
-																																					 // Finish
-																																					 // to
-																																					 // Start
+											                                                     // to
+											                                                     // Finish
+											                                                     // (is
+											                                                     // reverse
+											                                                     // of
+											                                                     // Finish
+											                                                     // to
+											                                                     // Start
 											                                                     // dtEnd2
-																																					 // =
-																																					 // calcStartEnd(aChain[iChain
-																																					 // -
-																																					 // 1],
-																																					 // dtStart);
-																																					 // //
-																																					 // Start
-																																					 // dependent
-																																					 // on
-																																					 // my
-																																					 // START
+											                                                     // =
+											                                                     // calcStartEnd(aChain[iChain
+											                                                     // -
+											                                                     // 1],
+											                                                     // dtStart);
+											                                                     // //
+											                                                     // Start
+											                                                     // dependent
+											                                                     // on
+											                                                     // my
+											                                                     // START
 											                                                     // dtStart
-																																					 // =
-																																					 // (Calendar)
-																																					 // dtEnd2.clone();
-																																					 // //
-																																					 // set
-																																					 // my
-																																					 // Start
-																																					 // to
-																																					 // prev.
-																																					 // end
+											                                                     // =
+											                                                     // (Calendar)
+											                                                     // dtEnd2.clone();
+											                                                     // //
+											                                                     // set
+											                                                     // my
+											                                                     // Start
+											                                                     // to
+											                                                     // prev.
+											                                                     // end
 											dtEnd2 = calcStartEnd(aChain[iChain - 1], dtEnd2,
 											    aChain[iChain]); // we treat SF like FS since To/from
-																					 // reversed
+											                     // reversed
 										} else { // Normal Finish to Start
 											dtEnd2 = calcStartEnd(aChain[iChain - 1], dtEnd2,
 											    aChain[iChain]);
@@ -5181,20 +5195,20 @@ class EpsXlsProject // extends EpsUserData
 				int iD = 0; // Don't know how to handle multple deps' here
 				if (aCp[iI].aDependency[iD] > 0
 				    && (aCp[aCp[iI].aDependency[iD]].iFLags & 0x8000) != 0) // Special
-																																		// case of
-																																		// dep.
+				                                                            // case of
+				                                                            // dep.
 				{
 					if (aCp[iI].aDependencyType[iD].equals("ss")) { // Start to Start
 						dtStart = (Calendar) aCp[aCp[iI].aDependency[iD]].dtStart.clone();
 					} else if (aCp[iI].aDependencyType[iD].equals("ff")) { // Finish to
-																																 // Finish
+						                                                     // Finish
 						aCp[iI].dtEnd = (Calendar) aCp[aCp[iI].aDependency[iD]].dtEnd
 						    .clone();
 						aCp[iI].calculateStart(); // calculate depend start
 						dtStart = aCp[iI].dtStart;
 					} else if (aCp[iI].aDependencyType[iD].equals("sf")) {
 						dtStart = getLatestStart(iI, dtStart); // we treat SF like FS since
-																									 // To/From reversed
+						                                       // To/From reversed
 					} else // Normal Finish to Start
 					{
 						dtStart = getLatestStart(iI, dtStart);
@@ -5233,7 +5247,7 @@ class EpsXlsProject // extends EpsUserData
 			// finish the rest.
 			for (int iP = 0; iP < aCp.length; iP++) {
 				if (aCp[iP] != null && (aCp[iP].iFLags & 0x100) == 0) // Non processed
-																															// ID's
+				                                                      // ID's
 				{
 					this.aaPath[iMaxPath] = new int[iMaxRecId];
 					for (int i2 = 0; i2 < iMaxRecId; i2++)
@@ -5316,7 +5330,7 @@ class EpsXlsProject // extends EpsUserData
 	public void setDependendies(int iR) {
 		if (aCp[iR] != null) {
 			for (int i = 0; i < aCp[iR].aSuccessor.length; i++) {
-				if (aCp[iR].aSuccessor[i] > 0) {
+				if (aCp[iR].aSuccessor[i] > 0 && aCp[aCp[iR].aSuccessor[i]] != null) {
 					aCp[aCp[iR].aSuccessor[i]].addDpendency(iR,
 					    aCp[iR].aSuccessorType[i], aCp[iR].aSuccessorLag[i]);
 				} else
@@ -5793,7 +5807,7 @@ class EpsXlsProject // extends EpsUserData
 		// get requirements we need to calculate
 		Double rCost = 0.00;
 		DecimalFormat df = new DecimalFormat("#########0.00");
-		String[] reqIDs = null;
+		int[] reqIDs = null;
 		int iCount = 0;
 
 		// get all requirements that are linked to this schedule
@@ -5806,42 +5820,40 @@ class EpsXlsProject // extends EpsUserData
 		        + scheduleID);
 		stResult.last();
 		if (stResult.getRow() > 0)
-			reqIDs = new String[stResult.getRow()];
+			reqIDs = new int[stResult.getRow()];
 		stResult.beforeFirst();
 
 		// build requirements string
 		while (stResult.next()) {
-			reqIDs[iCount] = stResult.getString("nmFromId");
+			reqIDs[iCount] = stResult.getInt("nmFromId");
 			iCount++;
 		}
 
 		// calculate requirement costs
 		if (iCount > 0) {
 			for (int i = 0; i < iCount; i++) {
-				rCost = 0.00;
-				stResult = this.ebEnt.dbDyn
-				    .ExecuteSql("select l.nmPercent, l.nmRemainder, l.nmToId, r.ReqCost from teb_link l left join requirements r on l.nmFromId=r.RecId and l.nmProjectId=r.nmProjectId and l.nmBaseline=r.nmBaseline where l.nmLinkFlags=1 and l.nmProjectId="
-				        + stPk
-				        + " and l.nmBaseline="
-				        + this.nmBaseline
-				        + " and nmFromId=" + reqIDs[i]);
-
-				while (stResult.next()) {
-					if (stResult.getString("l.nmRemainder").equals("1"))
-						rCost += Double.parseDouble(this.ebEnt.dbDyn
-						    .ExecuteSql1("select SchCost from schedule where nmProjectId="
-						        + stPk + " and nmBaseline=" + this.nmBaseline
-						        + " and RecId=" + stResult.getString("l.nmToId")));
-					else
-						rCost += Double.parseDouble(this.ebEnt.dbDyn
-						    .ExecuteSql1("select SchCost from schedule where nmProjectId="
-						        + stPk + " and nmBaseline=" + this.nmBaseline
-						        + " and RecId=" + stResult.getString("l.nmToId")))
-						    * (Double.parseDouble(stResult.getString("l.nmPercent")) * 0.01);
-				}
-				this.ebEnt.dbDyn.ExecuteUpdate("update requirements set ReqCost='"
-				    + df.format(rCost) + "' where nmProjectId=" + stPk + " and RecId="
-				    + reqIDs[i] + " and nmBaseline=" + this.nmBaseline);
+				processRequirementCost(reqIDs[i]);
+				/*
+				 * rCost = 0.00; stResult = this.ebEnt.dbDyn .ExecuteSql(
+				 * "select l.nmPercent, l.nmRemainder, l.nmToId, r.ReqCost from teb_link l left join requirements r on l.nmFromId=r.RecId and l.nmProjectId=r.nmProjectId and l.nmBaseline=r.nmBaseline where l.nmLinkFlags=1 and l.nmProjectId="
+				 * + stPk + " and l.nmBaseline=" + this.nmBaseline + " and nmFromId=" +
+				 * reqIDs[i]);
+				 * 
+				 * while (stResult.next()) { if
+				 * (stResult.getString("l.nmRemainder").equals("1")) rCost +=
+				 * Double.parseDouble(this.ebEnt.dbDyn
+				 * .ExecuteSql1("select SchCost from schedule where nmProjectId=" + stPk
+				 * + " and nmBaseline=" + this.nmBaseline + " and RecId=" +
+				 * stResult.getString("l.nmToId"))); else rCost +=
+				 * Double.parseDouble(this.ebEnt.dbDyn
+				 * .ExecuteSql1("select SchCost from schedule where nmProjectId=" + stPk
+				 * + " and nmBaseline=" + this.nmBaseline + " and RecId=" +
+				 * stResult.getString("l.nmToId")))
+				 * (Double.parseDouble(stResult.getString("l.nmPercent")) * 0.01); }
+				 * this.ebEnt.dbDyn.ExecuteUpdate("update requirements set ReqCost='" +
+				 * df.format(rCost) + "' where nmProjectId=" + stPk + " and RecId=" +
+				 * reqIDs[i] + " and nmBaseline=" + this.nmBaseline);
+				 */
 			}
 		}
 	}
@@ -6019,9 +6031,9 @@ class EpsXlsProject // extends EpsUserData
 			for (int iR = 1; iR <= iSch; iR++) {
 				rs1.absolute(iR);
 				if (iR == 1 || iLastLevel == rs1.getInt("Schlevel")) // same level as
-																														 // before,
-																														 // therefore we are
-																														 // LAST
+				                                                     // before,
+				                                                     // therefore we are
+				                                                     // LAST
 					SchFlags = 1;
 				else if (iLastLevel > rs1.getInt("Schlevel"))
 					SchFlags = 0;
