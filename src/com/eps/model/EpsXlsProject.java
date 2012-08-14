@@ -2725,7 +2725,7 @@ class EpsXlsProject // extends EpsUserData
 				sbReturn.append(analyzeTest("34"));
 			if (stChild.length() <= 0) {
 				sbReturn.append(analyzeLink());
-				// sbReturn.append(processCriticalPath());
+				sbReturn.append(processCriticalPath());
 			}
 		} catch (Exception e) {
 			this.stError += "<br>ERROR xlsAnalyze " + e;
@@ -3316,6 +3316,16 @@ class EpsXlsProject // extends EpsUserData
 								sbReturn.append("AssignLaborCategory ");
 								iL++; // go past field headers
 								iAssignLaborCategoy = 1;
+							} else if (aLines[iL].toLowerCase().trim()
+							    .startsWith("::cost_req")) {
+								ResultSet rsPrjs = ebEnt.dbDyn
+								    .ExecuteSql("SELECT * FROM projects");
+								while (rsPrjs.next()) {
+									stPk = rsPrjs.getString("RecId");
+									nmBaseline = rsPrjs.getInt("CurrentBaseline");
+									processAllRequirementCost();
+								}
+								return "REQUIREMENTS COST";
 							}
 						} else if (aLines[iL].trim().length() > 0) {
 							stSql = "";
@@ -3804,13 +3814,7 @@ class EpsXlsProject // extends EpsUserData
 					EpsReport epsReport = new EpsReport();
 					epsReport.doProjectRanking(this.epsUd);
 					stError += epsReport.getError();
-					this.epsUd.runEOB();
-					ResultSet rsPrjs = ebEnt.dbDyn.ExecuteSql("SELECT * FROM projects");
-					while (rsPrjs.next()) {
-	          stPk = rsPrjs.getString("nmRecId");
-	          nmBaseline = rsPrjs.getInt("CurrentBaseline");
-	          processAllRequirementCost();
-          }
+					// this.epsUd.runEOB();
 					sbReturn.append(" Rows: " + aLines.length);
 					if (this.stError.length() > 0)
 						sbReturn.append(" <font color=red>WITH ERRORS<hr>" + this.stError

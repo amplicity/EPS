@@ -13,7 +13,7 @@ import java.sql.ResultSet;
  * @author Rob Eder
  */
 public class EpsClient {
-	public String stVersion = "Version: 8/3/12 12:30PM";
+	public String stVersion = "Version: 8/13/12 8:00AM";
 	private int iUserId = -1;
 	private int nmPrivUser = 0;
 	private String stAction = "";
@@ -64,10 +64,10 @@ public class EpsClient {
 
 			String stLookup = this.ebEnt.ebUd.request.getParameter("h");
 			if (stLookup != null && stLookup.equals("n")) { // Load
-																											// Framework.Masterpage
-																											// for popup menus,
-																											// without TOP and
-																											// NAVIGATION
+				                                              // Framework.Masterpage
+				                                              // for popup menus,
+				                                              // without TOP and
+				                                              // NAVIGATION
 				stSql = "SELECT * FROM X25RefContent where nmContentId in (1,5,6)  order by nmUserId;";
 			}
 			ResultSet rs = this.ebEnt.dbEnterprise.ExecuteSql(stSql);
@@ -96,19 +96,26 @@ public class EpsClient {
 			if (stA == null || !stA.equals("28"))
 				stReturn = stReturn.replace("PageWidthPx",
 				    this.epsUd.rsMyDiv.getString("PageWidthPx") + "px");
-			if (iUserId > 0)
+			if (iUserId > 0) {
 				stReturn = stReturn
 				    .replace(
 				        "~~stWelcome~",
 				        "<div id='gen3'>"
 				            + "<form method=post id=loginout name=loginout>"
-				            + "<center><font class=medium>Welcome: </font><font class=mediumbold>"
+				            + "<font class=medium>Welcome: </font><font class=mediumbold>"
 				            + this.ebEnt.dbDyn
 				                .ExecuteSql1("select concat(FirstName,' ',LastName) from Users where nmUserId="
 				                    + this.iUserId)
-				            + "</b></font> &nbsp;&nbsp;<input type=submit name=Logout value=Logout onClick=\"setSubmitId(9998);\"></center></form></div>");
-			else
+				            + "</b></font>"
+				            + "<input type=hidden name=Logout value=Logout onClick=\"setSubmitId(9998);\">"
+				            + "<div class='vsplitter'><span/></div>"
+				            + "<span onClick='setSubmitId(9998);document.loginout.submit();' style='cursor:pointer;'><b>Sign Out</b></span>"
+				            + "</form></div><div class='clr'><span/></div>");
+				stReturn = stReturn.replaceAll("~BodyStyleClass~", "body");
+			} else {
 				stReturn = stReturn.replace("~~stWelcome~", "");
+				stReturn = stReturn.replaceAll("~BodyStyleClass~", "body-login");
+			}
 		} catch (Exception e) {
 			this.stError += "<BR>ERROR getEpsPage: " + e;
 		}
@@ -145,7 +152,10 @@ public class EpsClient {
 							}
 						} else if (asFields[0].equals("~~MainBody")) {
 							if (iUserId <= 0) {
-								this.epsUd.setPageTitle("Login Page");
+								this.epsUd.setPageTitle("<div class='login-pagetitle'>"
+								    + "	<div class='login-title'>Login</div>"
+								    + "	<div class='login-title-shadow'><span/></div>"
+								    + "</div>");
 								stReturn += this.epsUd.getLoginPage();
 							} else {
 								String stA = this.ebEnt.ebUd.request.getParameter("a");
@@ -196,10 +206,10 @@ public class EpsClient {
 
 	public String makeMenuBar() {
 		String stReturn = "";
-		stReturn += "<li><a class='topnav' href='./?stAction=home'>Home</a><ul>";
+		stReturn += "<li><a class='topnav' href='./?stAction=home'>Home</a>";
 		// stReturn += "<li><a href='./?stAction=tasks'>Tasks</a></li>";
 		// stReturn += "<li><a href='./?stAction=wf'>Workflow</a></li>
-		stReturn += "</ul></li>";
+		stReturn += "</li>";
 		try {
 			String stSql = "SELECT * FROM teb_table where nmTableType > 0 order by stTableName";
 			ResultSet rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
@@ -276,7 +286,7 @@ public class EpsClient {
 			stReturn += "<li><a href='./?stAction=help&i=content'>Contents</a></li></ul></li>";
 
 			if ((this.ebEnt.ebUd.getLoginPersonFlags() & 0x800) != 0) { // Super User
-																																	// only
+				                                                          // only
 				stReturn += "<li><a class='topnav' href='#'>System Admin</a><ul>";
 				// stReturn +=
 				// "<li><a href='./?a=28&tb=1.d.teb_division'>Division Setup</a></li>";

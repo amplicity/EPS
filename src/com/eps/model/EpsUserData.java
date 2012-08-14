@@ -2710,7 +2710,7 @@ public class EpsUserData {
 			stReturn += "<tr>";
 			if (this.nmTableId == 3) // Login
 			{
-				stReturn += "<td valign=top width=100% align=center><table style='border: 5px solid #008066;'>";
+				stReturn += "<td valign=top width=100% align=center><table>";
 			} else {
 				stReturn += "<td valign=top><table style='text-align:left;'>";
 			}
@@ -2856,11 +2856,14 @@ public class EpsUserData {
 						iColSpan = 2;
 						stClass = "table1";
 					} else {
+						if (nmTableId == 3) {//Login
+							stClass = "login-label";
+						}
 						if (rsF.getInt("nmForeignId") == 4) {
-							stReturn += "<td class=\"" + stClass + "\" valign=top>" + stLabel
+							stReturn += "<td class=\"" + stClass + "\">" + stLabel
 							    + " </td>";
 						} else {
-							stReturn += "<td class=\"" + stClass + "\" valign=top>" + stLabel
+							stReturn += "<td class=\"" + stClass + "\">" + stLabel
 							    + ": </td>";
 						}
 					}
@@ -2927,8 +2930,9 @@ public class EpsUserData {
 				stReturn += "<input type=hidden name=f6 id=f6 value=\""
 				    + this.ebEnt.ebUd.iLic
 				    + "\">"
-				    + "<input type=submit name=Login value='Forgot Password' onClick=\"setSubmitId(9993);\">&nbsp;"
-				    + "<input type=submit name=Login value='Login' onClick=\"setSubmitId(9997);\"></td></tr>";
+				    + "<input type=submit name=Login value='Login' onClick=\"setSubmitId(9997);\">&nbsp;"
+				    + "<input type=submit name=Login value='Forgot Password' onClick=\"setSubmitId(9993);\">"
+				    + "</td></tr>";
 			} else {
 				stReturn += "<input type=hidden name=stChildren value=\""
 				    + stChildren
@@ -5263,6 +5267,7 @@ public class EpsUserData {
 	}
 
 	public String runEOB() {
+		long startTime = System.nanoTime();
 		String stReturn = "<br><h1>End of Business Processor</h1>";
 		String[] aItems = null;
 		String[] aFields = null;
@@ -5276,7 +5281,6 @@ public class EpsUserData {
 		// activity #17 see: EpsUserData line 3060 (send message when delete user)
 
 		try {
-			long startTime = System.nanoTime();
 			this.ebEnt.ebUd.setLoginId(5); // set to EOB user
 			long endTime = 0;
 			long elapsedTime = 0;
@@ -6198,7 +6202,7 @@ public class EpsUserData {
 		} catch (Exception e) {
 			this.stError += "<BR>ERROR runEOB " + e;
 		}
-		System.out.println("Finish runEOB");
+		System.out.println("Finish runEOB: " + (System.nanoTime() - startTime)/10E9 + " seconds");
 		return stReturn;
 	}
 

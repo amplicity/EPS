@@ -1,0 +1,245 @@
+/* COMMON */
+.vsplitter {
+	display: inline-block;
+	background: #e4e4e4;
+	margin: auto 10px;
+	width: 1px;
+}
+
+.hsplitter {
+	background: #e4e4e4;
+	height: 1px;
+	margin: 10px auto;
+}
+
+/* START LOGIN PAGE */
+.body-login .welcome-wrapper, .body-login .hbar {
+	display: none;
+}
+
+.body-login #header {
+	width: 500px;
+	border-top: 1px solid #ccc;
+	border-left: 1px solid #ccc;
+	border-right: 1px solid #ccc;
+	margin-top: 20px;
+}
+
+.body-login #header table {
+	background: #e8e8e8;
+	background: -moz-linear-gradient(top, #e8e8e8 0%, #fcfcfc 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#e8e8e8), color-stop(100%,#fcfcfc));
+	background: -webkit-linear-gradient(top, #e8e8e8 0%,#fcfcfc 100%);
+	background: -o-linear-gradient(top, #e8e8e8 0%,#fcfcfc 100%);
+	background: -ms-linear-gradient(top, #e8e8e8 0%,#fcfcfc 100%);
+	background: linear-gradient(to bottom, #e8e8e8 0%,#fcfcfc 100%);
+}
+
+.body-login #content {
+	width: 500px;
+	margin: -13px auto 20px auto;
+	border-bottom: 1px solid #ccc;
+	border-left: 1px solid #ccc;
+	border-right: 1px solid #ccc;
+	color: #666;
+}
+
+.body-login #content input[type=submit] {
+	height: 36px;
+	line-height: 36px;
+	background: #eaeaea;
+	border: 0;
+	padding: 0 15px;
+	color: #666;
+	cursor: pointer;
+}
+
+.body-login #content .login-label {
+	width: 115px;
+	padding-right: 20px;
+	text-align: right;
+	height: 30px;
+}
+
+.body-login #content input[type=text], .body-login #content input[type=password] {
+	width: 300px;
+	height: 30px;
+	line-height: 30px;
+	border: 1px inset;
+}
+
+.body-login #content input[type=submit]:hover {
+	background: #31ac5a;
+	color: #fff;
+}
+
+.body-login .login-pagetitle {
+	margin-left: -31px;
+	margin-right: 25px;
+	text-align: left;
+}
+
+.body-login .login-title {
+	background: #333333;
+	background: -moz-linear-gradient(left, #333333 0%, #2c2c2c 100%);
+	background: -webkit-gradient(linear, left top, right top, color-stop(0%,#333333), color-stop(100%,#2c2c2c));
+	background: -webkit-linear-gradient(left, #333333 0%,#2c2c2c 100%);
+	background: -o-linear-gradient(left, #333333 0%,#2c2c2c 100%);
+	background: -ms-linear-gradient(left, #333333 0%,#2c2c2c 100%);
+	background: linear-gradient(to right, #333333 0%,#2c2c2c 100%);
+	height: 55px;
+	line-height: 55px;
+	text-indent: 50px;
+	font-weight: normal;
+	color: #e6e6e6;
+}
+
+.body-login .login-title-shadow {
+	background: url('../images/login-shadow.png') right top no-repeat;
+	height: 25px;
+	width: 28px;
+}
+
+/* END LOGIN PAGE */
+
+/* NORMAL PAGE */
+.body .logo-wrapper {
+	width: 200px;
+	padding-top: 10px;
+	background: #f0f0f0;
+	background: -moz-linear-gradient(top, #ffffff 0%, #f0f0f0 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(100%,#f0f0f0));
+	background: -webkit-linear-gradient(top, #ffffff 0%,#f0f0f0 100%);
+	background: -o-linear-gradient(top, #ffffff 0%,#f0f0f0 100%);
+	background: -ms-linear-gradient(top, #ffffff 0%,#f0f0f0 100%);
+	background: linear-gradient(to bottom, #ffffff 0%,#f0f0f0 100%);
+}
+
+.body .welcome-wrapper {
+	background: #f0f0f0;
+	background: -moz-linear-gradient(top, #ffffff 0%, #f0f0f0 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(100%,#f0f0f0));
+	background: -webkit-linear-gradient(top, #ffffff 0%,#f0f0f0 100%);
+	background: -o-linear-gradient(top, #ffffff 0%,#f0f0f0 100%);
+	background: -ms-linear-gradient(top, #ffffff 0%,#f0f0f0 100%);
+	background: linear-gradient(to bottom, #ffffff 0%,#f0f0f0 100%);
+}
+
+.body #header {
+	margin: 0 10px;
+}
+
+.body .hbar {
+	height: 16px;
+	background: #2da948;
+	background: -moz-linear-gradient(top, #2da948 0%, #078042 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#2da948), color-stop(100%,#078042));
+	background: -webkit-linear-gradient(top, #2da948 0%,#078042 100%);
+	background: -o-linear-gradient(top, #2da948 0%,#078042 100%);
+	background: -ms-linear-gradient(top, #2da948 0%,#078042 100%);
+	background: linear-gradient(to bottom, #2da948 0%,#078042 100%);
+}
+
+.welcome-wrapper > table {
+	width: 100%;
+	height: 95px;
+}
+
+.welcome-wrapper #gen3 {
+	color: #a4a4a4;
+	border: 0;
+	border-radius: 0px 0px 40px 40px;
+	float: right;
+	height: 18px;
+	line-height: 18px;
+	padding: 0 40px;
+	background: #efefef;
+	background: -moz-linear-gradient(top, #ffffff 0%, #f9f9f9 50%, #efefef 75%, #f1f1f1 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(50%,#f9f9f9), color-stop(75%,#efefef), color-stop(100%,#f1f1f1));
+	background: -webkit-linear-gradient(top, #ffffff 0%,#f9f9f9 50%,#efefef 75%,#f1f1f1 100%);
+	background: -o-linear-gradient(top, #ffffff 0%,#f9f9f9 50%,#efefef 75%,#f1f1f1 100%);
+	background: -ms-linear-gradient(top, #ffffff 0%,#f9f9f9 50%,#efefef 75%,#f1f1f1 100%);
+	background: linear-gradient(to bottom, #ffffff 0%,#f9f9f9 50%,#efefef 75%,#f1f1f1 100%);
+}
+
+#gen3 .vsplitter {
+	height: 12px;
+}
+
+.body #menu {
+	background: transparent;
+	text-align: center;
+}
+
+.body ul#topNavItems {
+	display: block;
+}
+
+.body ul#topNavItems > li {
+	display: inline-block;
+	float: none;
+	border-left: 2px solid #e4e4e4;
+	margin: 0;
+}
+
+.body ul#topNavItems > :first-child {
+	border-left: 0;
+}
+
+.body ul#topNavItems > li > a {
+	border: 0;
+	color: #7b7b7b;
+	font-weight: normal;
+	padding: 0 20px;
+	height: 32px;
+	line-height: 32px;
+}
+
+.body ul#topNavItems > li:hover > a {
+	background: #fff;
+	position: relative;
+	z-index: 99999;
+	color: #7b7b7b;
+	font-weight: normal;
+}
+
+ul#topNavItems li:hover ul, ul#topNavItems li.over ul {
+	left: -2px;
+	top: 30px;
+	border: 2px solid #e4e4e4;
+	border-radius: 0px 10px 10px 10px;
+	width: auto;	
+	-moz-opacity: 1;
+	opacity: 1;
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha"(Opacity=100);
+	background: #fff;
+	padding: 10px 0px;
+}
+
+ul#topNavItems li ul li {
+	display: block;
+	background: #fff;
+	float: none;
+}
+
+ul#topNavItems li ul li:hover {
+	background: #efefef;
+	background: -moz-linear-gradient(top, #ffffff 0%, #f9f9f9 50%, #efefef 75%, #f1f1f1 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(50%,#f9f9f9), color-stop(75%,#efefef), color-stop(100%,#f1f1f1));
+	background: -webkit-linear-gradient(top, #ffffff 0%,#f9f9f9 50%,#efefef 75%,#f1f1f1 100%);
+	background: -o-linear-gradient(top, #ffffff 0%,#f9f9f9 50%,#efefef 75%,#f1f1f1 100%);
+	background: -ms-linear-gradient(top, #ffffff 0%,#f9f9f9 50%,#efefef 75%,#f1f1f1 100%);
+	background: linear-gradient(to bottom, #ffffff 0%,#f9f9f9 50%,#efefef 75%,#f1f1f1 100%);
+}
+
+.body ul#topNavItems li ul li a, ul#topNavItems li ul li a:hover {
+	background: none;
+	margin: 0 10px;
+	text-indent: 10px;
+	padding: 0;
+	border-bottom: 1px solid #e4e4e4;
+	color: #7b7b7b;
+	font-weight: normal;
+	height: 26px;
+	line-height: 26px
+}
