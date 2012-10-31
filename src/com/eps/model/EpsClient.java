@@ -230,7 +230,6 @@ public class EpsClient {
 			int iMax = rs.getRow();
 			String stReport = "";
 			String stAdmin = "";
-			String stEdit = "";
 			String stProject = "";
 			for (int iR = 1; iR <= iMax; iR++) {
 				rs.absolute(iR);
@@ -259,14 +258,14 @@ public class EpsClient {
 					    && !epsUd.stPrj.equals("0")) {
 						String stPrjLink = "./?stAction=projects&t=12&pk="
 						    + this.epsUd.stPrj;
-						stProject += "<li><a href='"
-						    + stPrjLink
-						    + "&do=edit'>Current Project</a>"
+						stProject += "<li><a href='javascript:void(0);'>Current Project</a>"
 						    + "	<li><a class='sub-item' href='"
 						    + stPrjLink
 						    + "&do=xls&child=46'>Analyze Project</a></li>"
 						    + "	<li><a class='sub-item' href='javascript:void(0);'>Approve</a></li>"
-						    + "	<li><a class='sub-item' href='javascript:void(0);'>Project Attributes</a></li>"
+						    + "	<li><a class='sub-item' href='"
+						    + stPrjLink
+						    + "&do=edit'>Project Attributes</a></li>"
 						    + "	<li><a class='sub-item' href='./?stAction=projects&c=critscor'>Criterion Score</a></li>"
 						    + "	<li><a class='sub-item' href='"
 						    + stPrjLink
@@ -282,38 +281,6 @@ public class EpsClient {
 						    + "&do=xls&child=34'>Test</a></li>"
 						    + "	<li><a class='sub-item' href='javascript:void(0);'>WBS</a></li>"
 						    + "</li>";
-					}
-					
-					{
-						stEdit +="<li><a href=''>Customize</a></li>";
-						stEdit +="<li><a class='collapsed' href=''>Insert</a>" +
-								"<ul>" +
-								"<li><a href=''>Above</a></li>" +
-								"<li><a href=''>Below</a></li>" +
-								"</ul></li>";
-						stEdit +="<li><a class='collapsed' href=''>Edit</a>" +
-								"<ul>" +
-								"<li><a href=''>Full Record</a></li>" +
-								"<li><a href=''>Inline</a></li>" +
-								"</ul></li>";
-						stEdit +="<li><a class='collapsed' href=''>Delete</a>" +
-								"<ul>" +
-								"<li><a href=''>This Item Only</a></li>" +
-								"<li><a href=''>With Children</a></li>" +
-								"</ul></li>";
-						stEdit +="<li><a class='collapsed' href=''>Map</a>" +
-								"<ul>" +
-								"<li><a href=''>WBS to Requirements</a></li>" +
-								"<li><a href=''>Requirements to </a></li>" +
-								"<li><a href=''>Requirements to Test Cases</a></li>" +
-								"<li><a href=''>Schedule Tasks to Requirements</a></li>" +
-								"</ul></li>";
-						stEdit +="<li><a class='collapsed' href=''>Promote</a>" +
-								"<ul>" +
-								"<li><a href=''>This Item Only</a></li>" +
-								"<li><a href=''>With Children</a></li>" +
-								"</ul></li>";
-						stEdit +="<li><a href=''>Demote</a></li>";
 					}
 				}
 				if ((rs.getInt("nmReportPriv") & nmPrivUser) != 0) {
@@ -348,17 +315,19 @@ public class EpsClient {
 						stAdmin += "<li><a href='./?stAction=admin&t="
 						    + rs.getInt("nmTableId") + "&do=users'>"
 						    + rs.getString("stTableName") + "</a></li>";
-					} else if (rs.getInt("nmTableId") == 17) { //Calendar
+					} else if (rs.getInt("nmTableId") == 17) { // Calendar
 						stAdmin += "<li><a class='collapsed' href='./?stAction=admin&t="
 						    + rs.getInt("nmTableId") + "'>" + rs.getString("stTableName")
-						    + "</a><ul>" +
-						    "  <li><a href='./?stAction=admin&t="
-						    + rs.getInt("nmTableId") + "&do=insert'>Create New Calendar</a></li>";
-//						ResultSet rsCalendar = this.ebEnt.dbDyn.ExecuteSql("SELECT * FROM Calendar where year(dtDay)=year(curdate())");
-//						while (rsCalendar.next()) {
-//							stAdmin += "<li><a>" + rsCalendar.getString("stEvent") + " - " + (1900+rsCalendar.getDate("dtDay").getYear()) + "</a></li>";
-//						}
-				    stAdmin += "</ul></li>";
+						    + "</a><ul>" + "  <li><a href='./?stAction=admin&t="
+						    + rs.getInt("nmTableId")
+						    + "&do=insert'>Create New Calendar</a></li>";
+						// ResultSet rsCalendar =
+						// this.ebEnt.dbDyn.ExecuteSql("SELECT * FROM Calendar where year(dtDay)=year(curdate())");
+						// while (rsCalendar.next()) {
+						// stAdmin += "<li><a>" + rsCalendar.getString("stEvent") + " - " +
+						// (1900+rsCalendar.getDate("dtDay").getYear()) + "</a></li>";
+						// }
+						stAdmin += "</ul></li>";
 					} else {
 						stAdmin += "<li><a href='./?stAction=admin&t="
 						    + rs.getInt("nmTableId") + "'>" + rs.getString("stTableName")
@@ -377,9 +346,7 @@ public class EpsClient {
 			if (stAdmin.length() > 0)
 				stReturn += "<li class='top-nav nav-admin'><a class='topnav' href='#'>Administration</a><ul>"
 				    + stAdmin + "</ul></li>";
-			if (stEdit.length() > 0)
-				stReturn += "<li class='top-nav nav-edit'><a class='topnav' href='#'>Edit</a><ul>"
-						+ stEdit + "</ul></li>";
+			stReturn += "<li class='top-nav nav-edit'><a class='topnav' href='#'>Edit</a><ul id='edit-menu'>edit-menu-content</ul></li>";
 
 			stReturn += "<li class='top-nav nav-help'><a class='topnav' href='#'>Help</a><ul>";
 			stReturn += "<li><a href='./?stAction=help&i=about'>About</a></li>";

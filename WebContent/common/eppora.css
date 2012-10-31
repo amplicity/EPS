@@ -247,6 +247,10 @@ body {
 	display: block;
 }
 
+.body ul#topNavItems .nav-edit {
+	display: none;
+}
+
 .body ul#topNavItems > li {
 	display: inline-block;
 	float: none;
@@ -632,3 +636,4 @@ body.admin.t_14 .col2 {
 body.admin.t_14 .col0 {
 	width: 35px;
 }
+

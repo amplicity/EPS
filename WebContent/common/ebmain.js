@@ -2133,58 +2133,58 @@ document.onmousemove=getXY;
 
 function buildText(iReqSched, iRecId, iId, iFlags, iLevel,iNextLevel, iPrevLevel, iNextShow, stLink)
 {
-  tcolor='black';
-  bcolor='red';
-
   // CHANGE EACH ARRAY ELEMENT BELOW TO YOUR OWN CONTENT. MAKE SURE TO USE SINGLE QUOTES INSIDE DOUBLE QUOTES.
   //height="+winHeight+"
-  text="<table border='5' width="+winWidth+" bgcolor='"+tableColor+"' cellspacing='0' cellpadding=1>";
-  text+="<tr><td align='center' valign='top' bgcolor='"+headerColor+"'>";
-  text+="<font face='arial,helvetica' color='"+tcolor+"' SIZE='-1'>ACTIONS (ID="+iId+")</font>";
-  text+="</td></tr>";
-  text+="<tr><td align='left' valign='top' height='90%'>";
-  text+="<font face='verdana,helvetica' color='"+bcolor+"' SIZE='-1'>";
+  text="";
   if(  iNextLevel > iLevel && iNextShow > 0 )
-    text+="<a href='./"+stLink+"&a=collapse&r="+iRecId+"#row"+iId+"'>Collapse</a><br>";
+    text+="<li><a href='./"+stLink+"&a=collapse&r="+iRecId+"#row"+iId+"'>Collapse</a></li>";
+  if( ! ( iNextLevel > iLevel && iNextShow > 0 ) )
+    text+="<li><a href='./"+stLink+"&a=expand&r="+iRecId+"#row"+iId+"'>Expand</a></li>";
+  text+="<li><a href='./"+stLink+"&a=customize&r="+iRecId+"#row"+iId+"'>Customize</a></li>";
 
   if( iNextShow > 0 )
   {
+  	text+="<li><a class='collapsed' href='javascript:void(0);'>Delete</a><ul>";
     if ( iNextLevel > iLevel )
-      text+="<a href='./"+stLink+"&a=delete&what=this&r="+iRecId+"#row"+iId+"' onClick=\"return confirm('Warning – the children of this requirement will be promoted one level after the selected requirement`s deletion.  Do you still wish to delete this requirement and promote its children?')\">Delete this item only</a><br>";
+      text+="<li><a href='./"+stLink+"&a=delete&what=this&r="+iRecId+"#row"+iId+"' onClick=\"return confirm('Warning – the children of this requirement will be promoted one level after the selected requirement`s deletion.  Do you still wish to delete this requirement and promote its children?')\">This item only</a></li>";
     else
-      text+="<a href='./"+stLink+"&a=delete&what=this&r="+iRecId+"#row"+iId+"' onClick=\"return confirm('Warning – the selected requirement will be deleted.  Do you still wish to delete this requirement?')\">Delete this item only</a><br>";
+      text+="<li><a href='./"+stLink+"&a=delete&what=this&r="+iRecId+"#row"+iId+"' onClick=\"return confirm('Warning – the selected requirement will be deleted.  Do you still wish to delete this requirement?')\">This item only</a></li>";
+    if ( iReqSched < 3 ) text+="<li><a href='./"+stLink+"&a=delete&what=children&r="+iRecId+"#row"+iId+"' onClick=\"return confirm('Warning – the children of this requirement will be deleted along with the selected requirement.  Do you still wish to delete this requirement and delete its children requirements?')\">With children</a></li>";
+    text+="</ul></li>";
   }
+  
+  text+="<li><a class='collapsed' href='javascript:void(0);'>Edit</a><ul>";
+  text+="<li><a href='./"+stLink+"&a=editfull&r="+iRecId+"#row"+iId+"'>Full record</a></li>";
   if ( iReqSched < 3 )
-  {
-    text+="<a href='./"+stLink+"&a=delete&what=children&r="+iRecId+"#row"+iId+"' onClick=\"return confirm('Warning – the children of this requirement will be deleted along with the selected requirement.  Do you still wish to delete this requirement and delete its children requirements?')\">Delete with children</a><br>";
-    if (  iNextShow > 0 && iLevel > 0 )
-    {
-      text+="<a href='./"+stLink+"&a=demote&what=children&r="+iRecId+"#row"+iId+"' onClick=\"return confirm('Warning – The Demote action will automatically demote the selected requirement one level and the entire selected requirement’s children one level.  Do you wish to demote this requirement and its children?')\">Demote</a><br>";
-    }
-  }
-  text+="<a href='./"+stLink+"&a=editfull&r="+iRecId+"#row"+iId+"'>Edit full record</a><br>";
-  if ( iReqSched < 3 )
-    text+="<a href='./"+stLink+"&edit="+iRecId+"#row"+iId+"'>Edit inline</a><br>";
-  //if ( iNextShow <= 0 )
-  if( ! ( iNextLevel > iLevel && iNextShow > 0 ) )
-    text+="<a href='./"+stLink+"&a=expand&r="+iRecId+"#row"+iId+"'>Expand</a><br>";
-  text+="<a href='./"+stLink+"&a=insert&what=above&r="+iRecId+"#row"+iId+"'>Insert above</a><br>";
+    text+="<li><a href='./"+stLink+"&edit="+iRecId+"#row"+iId+"'>Inline</a></li>";
+  text+="</ul></li>";
+  
+  text+="<li><a class='collapsed' href='javascript:void(0);'>Insert</a><ul>";
+  text+="<li><a href='./"+stLink+"&a=insert&what=above&r="+iRecId+"#row"+iId+"'>Above</a></li>";
   if ( iNextShow > 0  )
-    text+="<a href='./"+stLink+"&a=insert&what=below&r="+iRecId+"#row"+iId+"'>Insert below</a><br>";
+    text+="<li><a href='./"+stLink+"&a=insert&what=below&r="+iRecId+"#row"+iId+"'>Below</a></li>";
+  text+="</ul></li>";
+  
   if ( iReqSched < 3 )
   {
     //if( (iFlags & 0x10) != 0 )
-      text+="<a href='./"+stLink+"&a=map&r="+iRecId+"#row"+iId+"'>Map</a><br>"; // Only Low level
+      text+="<li><a href='./"+stLink+"&a=map&r="+iRecId+"#row"+iId+"'>Map</a></li>"; // Only Low level
     //if( iFlags == 0 && iNextLevel <=  iLevel )
     //if ( iReqSched == 2 )
-    //  text+="<a href='./"+stLink+"&a=test&r="+iRecId+"#row"+iId+"'>Test</a><br>";
+    //  text+="<li><a href='./"+stLink+"&a=test&r="+iRecId+"#row"+iId+"'>Test</a></li>";
+    if (  iNextShow > 0 && iLevel > 0 )
+    {
+      text+="<li><a href='./"+stLink+"&a=demote&what=children&r="+iRecId+"#row"+iId+"' onClick=\"return confirm('Warning – The Demote action will automatically demote the selected requirement one level and the entire selected requirement’s children one level.  Do you wish to demote this requirement and its children?')\">Demote</a></li>";
+    }
     if ( iPrevLevel >= iLevel )
     {
+    	text+="<li><a class='collapsed' href='javascript:void(0);'>Promote</a><ul>";
       if( iNextLevel <=  iLevel )
-        text+="<a href='./"+stLink+"&a=promote&what=this&r="+iRecId+"#row"+iId+"' onClick=\"return confirm('Warning – the selected requirement will become a child of the preceding requirement.  Do you wish to promote this requirement?')\">Promote this item only</a><br>";
+        text+="<li><a href='./"+stLink+"&a=promote&what=this&r="+iRecId+"#row"+iId+"' onClick=\"return confirm('Warning – the selected requirement will become a child of the preceding requirement.  Do you wish to promote this requirement?')\">This item only</a></li>";
       else
-        text+="<a href='./"+stLink+"&a=promote&what=this&r="+iRecId+"#row"+iId+"' onClick=\"return confirm('Warning – This will make this requirement a child (sub-requirement) of the preceding requirement and all this requirements children will be promoted one level.  Do you wish to promote this requirement and its children?')\">Promote this item only</a><br>";
-      text+="<a href='./"+stLink+"&a=promote&what=children&r="+iRecId+"#row"+iId+"' onClick=\"return confirm('Warning – the children of this requirement will be promoted one level.  Do you wish to promote this requirement and its children?')\">Promote with children</a><br>";
+        text+="<li><a href='./"+stLink+"&a=promote&what=this&r="+iRecId+"#row"+iId+"' onClick=\"return confirm('Warning – This will make this requirement a child (sub-requirement) of the preceding requirement and all this requirements children will be promoted one level.  Do you wish to promote this requirement and its children?')\">This item only</a></li>";
+      text+="<li><a href='./"+stLink+"&a=promote&what=children&r="+iRecId+"#row"+iId+"' onClick=\"return confirm('Warning – the children of this requirement will be promoted one level.  Do you wish to promote this requirement and its children?')\">With children</a></li>";
+      text+="</ul></li>";
     }
   }
   var regexS = "[\\?&]child=([^&#]*)";
@@ -2192,11 +2192,8 @@ function buildText(iReqSched, iRecId, iId, iFlags, iLevel,iNextLevel, iPrevLevel
   var results = regex.exec(stLink);
   var childVal = results[1];
   if(childVal == 21){
-	  text+="<a href='./"+stLink+"&a=send&what=this&r="+iRecId+"#row"+iId+"' onClick=\"return confirm('Warning – this task will be removed from this list. The children of this task will be promoted one level after the selected task`s deletion.  Do you still wish to delete this task and send a message to users?')\">Remove and Send Message</a><br>";
+	  text+="<li><a href='./"+stLink+"&a=send&what=this&r="+iRecId+"#row"+iId+"' onClick=\"return confirm('Warning – this task will be removed from this list. The children of this task will be promoted one level after the selected task`s deletion.  Do you still wish to delete this task and send a message to users?')\">Remove and Send Message</a></li>";
   }
-  text+="<hr style=\"color: #aaa;background-color: #aaa;height: 5px;\"><a href='./"+stLink+"&a=customize&r="+iRecId+"#row"+iId+"'>Customize</a><br>";
-
-  text+="</font></td></tr></table>";
 
   return text;
 }
@@ -2210,34 +2207,36 @@ function setActionsClick(iReqSched, iRecId, iId, iFlags, iLevel, iNextLevel, iPr
   winHeight=260;
 
   thetext=buildText(iReqSched, iRecId, iId, iFlags, iLevel, iNextLevel, iPrevLevel, iNextShow, stLink);
-  x=x-50;
-  y=y-10;
-  if(iens6)
-  {
-    thename = "viewer"
-    theobj = getObject( thename );
-    theobj.style.width=winWidth;
-    theobj.style.height=winHeight;
-    theobj.style.left=(x+5)+"px";
-    theobj.style.top=(y+5)+"px";
-    theobj.style.display = "";
-    theobj.innerHTML = "";
-    theobj.innerHTML=thetext;
-  }
-  if(ns4)
-  {
-    thename = "nsviewer";
-    theobj = eval("document."+thename);
-    theobj.left=x;
-    theobj.top=y;
-    theobj.width=winWidth;
-    theobj.clip.width=winWidth;
-    theobj.height=winHeight;
-    theobj.clip.height=winHeight;
-    theobj.document.write("<table cellspacing=0 width="+winWidth+" height="+winHeight+" border=0><tr><td width=100% valign=top><font type='times' size='2' style='color:black;font-weight:normal'>"+thetext+"</font></td></tr></table>");
-    theobj.document.close();
-  }
-  viewIt();
+//  x=x-50;
+//  y=y-10;
+//  if(iens6)
+//  {
+//    thename = "viewer"
+//    theobj = getObject( thename );
+//    theobj.style.width=winWidth;
+//    theobj.style.height=winHeight;
+//    theobj.style.left=(x+5)+"px";
+//    theobj.style.top=(y+5)+"px";
+//    theobj.style.display = "";
+//    theobj.innerHTML = "";
+//    theobj.innerHTML=thetext;
+//  }
+//  if(ns4)
+//  {
+//    thename = "nsviewer";
+//    theobj = eval("document."+thename);
+//    theobj.left=x;
+//    theobj.top=y;
+//    theobj.width=winWidth;
+//    theobj.clip.width=winWidth;
+//    theobj.height=winHeight;
+//    theobj.clip.height=winHeight;
+//    theobj.document.write("<table cellspacing=0 width="+winWidth+" height="+winHeight+" border=0><tr><td width=100% valign=top><font type='times' size='2' style='color:black;font-weight:normal'>"+thetext+"</font></td></tr></table>");
+//    theobj.document.close();
+//  }
+//  viewIt();
+  $('.nav-edit #edit-menu').html(text);
+  $('.nav-edit').css('display', 'inline-block');
   if ( oldRecId > 0 )
   {
     for( i=1 ; i <= iMaxCol ; i++ )
@@ -2263,39 +2262,41 @@ function setActions(iReqSched, iRecId, iId, iFlags, iLevel, iNextLevel, iPrevLev
   headerColor='#d5e9ea';
   winWidth=210;
   winHeight=260;
-  if ( x < 10 )
-    return; // dont paint if no x is set
+//  if ( x < 10 )
+//    return; // dont paint if no x is set
   
   thetext=buildText(iReqSched, iRecId, iId, iFlags, iLevel, iNextLevel, iPrevLevel, iNextShow, stLink);
-  x=x+offsetx;
-  y=y+offsety;
-
-  if(iens6)
-  {
-    thename = "viewer"
-    theobj = getObject( thename );
-    theobj.style.width=winWidth;
-    theobj.style.height=winHeight;
-    theobj.style.left=(x+5)+"px";
-    theobj.style.top=(y+5)+"px";
-    theobj.style.display = "";
-    theobj.innerHTML = "";
-    theobj.innerHTML=thetext;
-  }
-  if(ns4)
-  {
-    thename = "nsviewer";
-    theobj = eval("document."+thename);
-    theobj.left=x;
-    theobj.top=y;
-    theobj.width=winWidth;
-    theobj.clip.width=winWidth;
-    theobj.height=winHeight;
-    theobj.clip.height=winHeight;
-    theobj.document.write("<table cellspacing=0 width="+winWidth+" height="+winHeight+" border=0><tr><td width=100% valign=top><font type='times' size='2' style='color:black;font-weight:normal'>"+thetext+"</font></td></tr></table>");
-    theobj.document.close();
-  }
-  viewIt();
+//  x=x+offsetx;
+//  y=y+offsety;
+//
+//  if(iens6)
+//  {
+//    thename = "viewer"
+//    theobj = getObject( thename );
+//    theobj.style.width=winWidth;
+//    theobj.style.height=winHeight;
+//    theobj.style.left=(x+5)+"px";
+//    theobj.style.top=(y+5)+"px";
+//    theobj.style.display = "";
+//    theobj.innerHTML = "";
+//    theobj.innerHTML=thetext;
+//  }
+//  if(ns4)
+//  {
+//    thename = "nsviewer";
+//    theobj = eval("document."+thename);
+//    theobj.left=x;
+//    theobj.top=y;
+//    theobj.width=winWidth;
+//    theobj.clip.width=winWidth;
+//    theobj.height=winHeight;
+//    theobj.clip.height=winHeight;
+//    theobj.document.write("<table cellspacing=0 width="+winWidth+" height="+winHeight+" border=0><tr><td width=100% valign=top><font type='times' size='2' style='color:black;font-weight:normal'>"+thetext+"</font></td></tr></table>");
+//    theobj.document.close();
+//  }
+//  viewIt();
+  $('.nav-edit #edit-menu').html(text);
+  $('.nav-edit').css('display', 'inline-block');
 }
 function viewIt()
 {
