@@ -2244,15 +2244,21 @@ public class EpsUserData {
 
 						iCount++;
 
-						stReturn += "<td class='l1td td1'>"
-						    + (prjArr[0].equals("All") ? "" : prjArr[0]) + "</td>"
-						    + "<td class='l1td td2'>" + rs.getString("stTitle") + "</td>"
-						    + "<td class='l1td td3'>" + prjArr[1] + "</td>";
+						if (prjArr.length > 1) {
+							stReturn += "<td class='l1td td1'>"
+							    + (prjArr[0].equals("All") ? "" : prjArr[0]) + "</td>"
+							    + "<td class='l1td td2'>" + rs.getString("stTitle") + "</td>"
+							    + "<td class='l1td td3'>" + prjArr[1] + "</td>";
+						} else {
+							stReturn += "<td class='l1td td1'>&nbsp;</td>"
+								    + "<td class='l1td td2'>" + rs.getString("stTitle") + "</td>"
+								    + "<td class='l1td td3'>" + prjArr[0] + "</td>";
+						}
 					} else if (nmTaskFlag == 1) {
 						iCount++;
 						stReturn += "<td class='l1td td1'>&nbsp;</td>"
 						    + "<td class='l1td td2'>" + rs.getString("stTitle") + "</td>"
-						    + "<td class='l1td td3'>&nbsp;</td>";
+						    + "<td class='l1td td3'>" + rs.getString("stDescription") + "</td>";
 					}
 					stReturn += "</tr>";
 				}
