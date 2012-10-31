@@ -14,7 +14,7 @@ import java.util.Enumeration;
  * @author Rob Eder
  */
 public class EpsClient {
-	public String stVersion = "EPPORA Version: 29 October 2012";
+	public String stVersion = "EPPORA Version: 30 October 2012";
 	private int iUserId = -1;
 	private int nmPrivUser = 0;
 	private String stAction = "";
