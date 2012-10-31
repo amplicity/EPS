@@ -1293,12 +1293,12 @@ public class EpsEditField {
 			    + rsTable.getInt("nmTableId") + ".f" + iF + "_list, document.form"
 			    + rsTable.getInt("nmTableId") + ".f" + iF + "_selected);\"  name=f"
 			    + iF + "_add  id=n" + iF
-			    + "_add  value='&gt;&gt; ADD'><br>&nbsp;<br>"
+			    + "_add  value='ADD &gt;&gt;'><br>&nbsp;<br>"
 			    + "<input type=button onclick=\"moveOptions(document.form"
 			    + rsTable.getInt("nmTableId") + ".f" + iF
 			    + "_selected, document.form" + rsTable.getInt("nmTableId") + ".f"
 			    + iF + "_list);\"  name=f" + iF + "_remove id=n" + iF
-			    + "_remove  value='REMOVE &lt;&lt;'>";
+			    + "_remove  value='&lt;&lt; REMOVE'>";
 			/* AS -- 29Sept2011 -- Issue #76 */
 			// stEdit += "</td><td valign=top align=center><b>SELECTED USERS</b><br>";
 			stEdit += "</td><td valign=top align=center><b>SELECTED</b><br>";
@@ -1384,12 +1384,12 @@ public class EpsEditField {
 			    + rsTable.getInt("nmTableId") + ".f" + iF + "_list, document.form"
 			    + rsTable.getInt("nmTableId") + ".f" + iF + "_selected);\"  name=f"
 			    + iF + "_add  id=n" + iF
-			    + "_add  value='&gt;&gt; ADD'><br>&nbsp;<br>"
+			    + "_add  value='ADD &gt;&gt;'><br>&nbsp;<br>"
 			    + "<input type=button onclick=\"moveOptions(document.form"
 			    + rsTable.getInt("nmTableId") + ".f" + iF
 			    + "_selected, document.form" + rsTable.getInt("nmTableId") + ".f"
 			    + iF + "_list);\"  name=f" + iF + "_remove id=n" + iF
-			    + "_remove  value='REMOVE &lt;&lt;'>";
+			    + "_remove  value='&lt;&lt; REMOVE'>";
 			stEdit += "</td><td valign=top align=center><b>SELECTED PROJECTS</b><br>";
 			stEdit += "<select MULTIPLE SIZE="
 			    + this.epsClient.epsUd.rsMyDiv.getInt("MaxRecords") + " name='f" + iF

@@ -73,9 +73,6 @@ public class EbMail {
 		int iDnc = 1;
 		this.stBody = stBodyIn;
 		try {
-			if (stTo.trim().toLowerCase().startsWith("joeledfleiss")) {
-				stTo = "jf@eppora.com";
-			}
 			iPos = stTo.indexOf("@");
 			if (iPos > 0) {
 				iDnc = this.ebEnt.dbEnterprise
@@ -93,7 +90,11 @@ public class EbMail {
 				Properties props = System.getProperties();
 
 				props.put("mail.transport.protocol", "smtp");
-				props.put("mail.smtp.starttls.enable", "false");
+				if (this.stFromEmail.indexOf("@gmail.com") >= 0) {
+					props.put("mail.smtp.starttls.enable", "true");
+				} else {
+					props.put("mail.smtp.starttls.enable", "false");
+				}
 				props.put("mail.smtp.host", this.stHost);
 
 				props.put("mail.smtp.auth", this.stAuth);

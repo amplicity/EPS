@@ -16,6 +16,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -315,14 +316,52 @@ public class EpsUserData {
 				stTemp = this.ebEnt.ebUd.request.getParameter("Login");
 				if (stTemp != null && stTemp.startsWith("Forgot")) {
 					ebEnt.ebUd.setRedirect("./?");
+
+					String stEmail = this.ebEnt.ebUd.request.getParameter("f5");
+
+					if (stEmail == null || stEmail.isEmpty())
+						return;
+					ResultSet rsUser = this.ebEnt.dbDyn
+					    .ExecuteSql("select * from Users u, ebeps01.X25User xu where "
+					        + "u.nmUserId=xu.RecId and stEmail = '" + stEmail + "'");
+					if (rsUser == null || !rsUser.next()) {
+						return;
+					}
+
+					String stPattern = "!@#$%^&*+_.";
+					String stPass = "EPPORA";
+					stPass += stPattern.charAt(Math.round((float) Math.random()
+					    * (stPattern.length() - 1)));
+					stPass += stPattern.charAt(Math.round((float) Math.random()
+					    * (stPattern.length() - 1)));
+					stPass += stPattern.charAt(Math.round((float) Math.random()
+					    * (stPattern.length() - 1)));
+					stPass += System.currentTimeMillis();
+
+					this.ebEnt.dbEnterprise
+					    .ExecuteUpdate("update x25user set stPassword=password('"
+					        + stPass + "') where RecId=" + rsUser.getString("RecId"));
+
+					String stContent = "Your password has been changed to \""
+					    + stPass
+					    + "\" temporarily. "
+					    + "It is recommended that when you log back in you change your password to something that will be easy "
+					    + "for you to remember and contains at least one non-alphanumeric character.";
+
 					EbMail ebM = new EbMail(this.ebEnt);
 					ebM.setProduction(1);
-					ebM.setEbEmail("smtp.myinfo.com", "false", "EPPORA Do Not Reply",
-					    "donotreply@eppora.com", "donotreply@eppora.com", "eppora123");
-					iRecId = ebM.sendMail("pdtanit@gmail.com", "Pham DINH Tan", "Password Recovery", "Test", 1);
-					if (iRecId > 0) 
-					{
-						ebEnt.ebUd.setPopupMessage("Password is sent to your email address.");
+					ebM.setEbEmail("smtp.gmail.com", "true", "EPPORA Do Not Reply",
+					    "donotreply.eppora@gmail.com", "donotreply.eppora@gmail.com",
+					    "epsdonotreply");
+					iRecId = ebM
+					    .sendMail(
+					        stEmail,
+					        rsUser.getString("FirstName") + " "
+					            + rsUser.getString("LastName"), "Password Recovery",
+					        stContent, 1);
+					if (iRecId > 0) {
+						ebEnt.ebUd
+						    .setPopupMessage("Password is sent to your email address.");
 					}
 				} else {
 					if (stTemp != null && !stTemp.equals("")) {
@@ -333,7 +372,7 @@ public class EpsUserData {
 						this.ebEnt.ebUd.aLogin[3] = this.ebEnt.ebUd.request
 						    .getParameter("f3");
 					}
-						
+
 					iRecId = this.ebEnt.ebUd.checkLogin();
 					if (iRecId > 0) {
 						this.ebEnt.ebUd.request.getSession().setAttribute("userId", iRecId);
@@ -345,7 +384,7 @@ public class EpsUserData {
 						ids.add(iRecId);
 						this.ebEnt.ebUd.request.getSession().getServletContext()
 						    .setAttribute("LOG_IN_USERS", ids);
-	
+
 						if (stTemp != null && !stTemp.equals("")) {
 							if (this.rsMyDiv != null
 							    && this.rsMyDiv.getInt("UserQuestionsOnOff") > 0
@@ -366,7 +405,8 @@ public class EpsUserData {
 										this.setUser(-1, 0);
 										this.ebEnt.ebUd.setPopupMessage("Invalid Answer");
 										makeTask(5, "Invalid Answer / Email: "
-										    + this.ebEnt.ebUd.aLogin[2]); // 5 1 Failed Login Enabled
+										    + this.ebEnt.ebUd.aLogin[2]); // 5 1 Failed Login
+										                                  // Enabled
 										                                  // Yes
 									}
 								} else {
@@ -383,7 +423,7 @@ public class EpsUserData {
 							this.ebEnt.ebUd.setCookie("ut", this.ebEnt.ebUd.aLogin[1], 30);
 							this.ebEnt.ebUd.setCookie("email", this.ebEnt.ebUd.aLogin[2], 30);
 							this.ebEnt.ebUd.setCookie("sid", this.ebEnt.ebUd.aLogin[4], 30);
-	
+
 							this.epsEf.addAuditTrail(5, "0", this.ebEnt.ebUd.aLogin[2]); // This
 							                                                             // is
 							                                                             // to
@@ -413,18 +453,16 @@ public class EpsUserData {
 							    .ExecuteSql1n("select RecId from X25User where stEMail='"
 							        + this.ebEnt.ebUd.aLogin[2] + "'");
 							if (iRecId > 0) {
-								makeMessage(
-								    "All",
-								    "" + iRecId,
-								    "Illegal Login",
+								makeMessage("All", "" + iRecId, "Illegal Login",
 								    "Illegal Login with email \"" + this.ebEnt.ebUd.aLogin[2]
-								        + "\" and password \"" + this.ebEnt.ebUd.aLogin[3] + "\"",
+								        + "\" and password \"" + this.ebEnt.ebUd.aLogin[3]
+								        + "\"",
 								    new SimpleDateFormat("MM/dd/yyyy").format(Calendar
 								        .getInstance().getTime()));
 							}
 						}
 					}
-				} 
+				}
 				// rest moved to savedata section !!
 			}
 			stPrj = this.ebEnt.ebUd.request.getParameter("f8");
@@ -1893,7 +1931,7 @@ public class EpsUserData {
 
 	public String makeHomePage() {
 		this.setPageTitle("Home Page");
-		String stReturn = "<br/>&nbsp;<br/>";
+		String stReturn = "";
 		String stProjects = "";
 		String stSql = "";
 		try {
@@ -1962,12 +2000,8 @@ public class EpsUserData {
 			if (iMax == 0) {
 				stReturn += "No Projects";
 			} else {
-				stReturn += "<form name='form4' id='form4' onsubmit='return myValidation(this)' method='post'>"
-				    + "Project Name: <select name=f8 id=f8  onChange=\"document.form4.submit();\" >";
-				stReturn += stProjects;
-				stReturn += "</select><br/>";
+				stReturn += "<form name='form4' id='form4' onsubmit='return myValidation(this)' method='post'>";
 			}
-			stReturn += "<br /><table border=0><tr><td valign=top align=center>";
 			String stUser = "";
 
 			SimpleDateFormat dateFormatter = new SimpleDateFormat("ddMMMyy");
@@ -2026,89 +2060,170 @@ public class EpsUserData {
 				}
 				stReturn += "<tr><td class=l1td colspan=4>&nbsp;</td><td class=l1td colspan=2>"
 				    + "<input type=submit name=saveactual value='Save'></td></tr>"
-				    + "</table></center><br /><table><tr><td valign=top>";
+				    + "</table></center><br />";
 			}
 
 			ResultSet rs = null;
 			int iCount = 0;
 
 			stReturn += "<input type=hidden name=workflowtype value=''><input type=hidden name=nmPrjId value='' /><input type=hidden name=nmBaseline value='' /><input type=hidden name=nmSchId value='' /><input type=hidden name=wfStatus value='' />";
+
+			// accordion
+			stReturn += "<div id='home-accordion'>";
+			int nmPriviledge = this.ebEnt.dbEnterprise
+			    .ExecuteSql1n("select nmPriviledge from x25user where RecId="
+			        + this.ebEnt.ebUd.getLoginId());
+			String stPriviledge = getPriviledgeTypes(nmPriviledge);
+
+			String stFrom = this.ebEnt.ebUd.request.getParameter("from");
+			if (stFrom == null || stFrom.isEmpty() || Integer.parseInt(stFrom) < 0)
+				stFrom = "0";
+			int iFrom = Integer.parseInt(stFrom);
+			String stDisplay = this.ebEnt.ebUd.request.getParameter("display");
+			if (stDisplay == null || stDisplay.isEmpty()
+			    || Integer.parseInt(stDisplay) <= 0)
+				stDisplay = rsMyDiv.getString("MaxRecords");
+			int iDisplay = Integer.parseInt(stDisplay);
+			int iTotalRecords = 0;
+
 			// work flow
-			stReturn += "<table class=l1tablenarrow>"
-			    + "<tr><th class=l1th colspan=7>Work Flow</th></tr>"
-			    + "<tr><th class=l1th>Project Name</th><th class=l1th>Task ID</th><th class=l1th>Estimated Hours</th><th class=l1th>Expended Hours</th><th class=l1th>Details</th><th class=l1th>Status</th><th class=l1th>Update</th></tr>";
+			iCount = 0;
+			stReturn += "<div><a href='./?stAction=home&part=0&display="
+			    + iDisplay
+			    + "'>Work Flow</a>"
+			    + "<span class='project-selector'>Project Name: <select name=f8 id=f8  onChange=\"document.form4.submit();\" onclick=\"event.cancelBubble=true\">"
+			    + stProjects
+			    + "</select></span></div>"
+			    + "<div id='wf-content'><table class=l1tablenarrow>"
+			    + "<tr><th class='l1th th0'>Action</th><th class='l1th th1'>Project Name</th><th class='l1th th2'>Task ID</th><th class='l1th th3'>Estimated Hours</th><th class='l1th th4'>Expended Hours</th><th class='l1th th5'>Status</th><th class='l1th th6'>Description</th></tr>";
+			String stPrjIds = "";
 			iMax = rsP.getRow();
 			for (int i = 1; i <= iMax; i++) {
 				rsP.absolute(i);
-				String stPrjId = rsP.getString("RecId");
-				rs = this.ebEnt.dbDyn
-				    .ExecuteSql("select p.ProjectName, p.RecId AS ProjectId, s.*, (select count(*) from teb_workflow wf where wf.nmBaseline=s.nmBaseline and wf.nmProjectId=s.nmProjectId and wf.nmSchId=s.RecId) AS cnt  "
-				        + "from Projects p, Schedule s"
-				        + " LEFT JOIN teb_reflaborcategory rlc ON rlc.nmLaborCategoryId = SUBSTRING_INDEX( s.SchLaborCategories, '~', 1 )"
-				        + " LEFT JOIN users u ON rlc.nmRefId=u.nmUserId"
-				        + " where p.CurrentBaseline=s.nmBaseline and p.RecId=s.nmProjectId and p.ProjectStatus=0 and s.lowlvl=1"
-				        + " 	and u.nmUserId="
-				        + this.ebEnt.ebUd.getLoginId()
-				        + " and p.RecId="
-				        + stPrjId
-				        + " having cnt=0"
-				        + " order by p.ProjectName,s.RecId");
-				while (rs.next()) {
-					iCount++;
-					String recId = rs.getString("RecId");
-					String stBaseLine = rs.getString("nmBaseline");
-					stReturn += "<tr>";
-					stReturn += "<td class=l1td>" + rs.getString("ProjectName") + "</td>";
-					stReturn += "<td class=l1td align=right>" + recId + "</td>";
-					stReturn += "<td class=l1td><input type=text name='wfEstimated-"
-					    + stPrjId + "_" + stBaseLine + "_" + recId
-					    + "' style='text-align:right;' value='"
-					    + rs.getString("SchEstimatedEffort") + "' /></td>";
-					stReturn += "<td class=l1td><input type=text name='wfExpended-"
-					    + stPrjId + "_" + stBaseLine + "_" + recId
-					    + "' style='text-align:right;' value='"
-					    + rs.getString("SchEfforttoDate") + "' /></td>";
-					stReturn += "<td class=l1td><input type='button' value='Details' onclick='window.open(\"./?stAction=admin&t=0&h=n&do=scheduledetail&listm=1&lists="
-					    + recId
-					    + "&listp="
-					    + stPrjId
-					    + "&listb="
-					    + stBaseLine
-					    + "\")' /></td>";
-					String stStatus = (rs.getString("SchDone") == null ? "0" : ("N"
-					    .equals(rs.getString("SchDone")) ? "1" : "2"));
-					stReturn += "<td class=l1td><select name='wfStatus-" + stPrjId + "_"
-					    + stBaseLine + "_" + recId + "'>"
-					    + this.ebEnt.ebUd.addOption("Wait", "0", stStatus)
-					    + this.ebEnt.ebUd.addOption("Progress", "1", stStatus)
-					    + this.ebEnt.ebUd.addOption("Done", "2", stStatus)
-					    + "</select></td>";
-					stReturn += "<td class=l1td><input type='submit' value='Update' "
-					    + "onclick='document.form4.workflowtype.value=\"wf\"; document.form4.nmPrjId.value=\""
-					    + stPrjId + "\"; document.form4.nmBaseline.value=\"" + stBaseLine
-					    + "\"; document.form4.nmSchId.value=\"" + recId
-					    + "\";document.form4.wfStatus.value=0' /></td>";
-					stReturn += "</tr>";
-				}
+				if (i > 1)
+					stPrjIds += ",";
+				stPrjIds += rsP.getString("RecId");
+			}
+			iTotalRecords = this.ebEnt.dbDyn
+			    .ExecuteSql1n("select count(*), (select count(*) from teb_workflow wf where wf.nmBaseline=s.nmBaseline and wf.nmProjectId=s.nmProjectId and wf.nmSchId=s.RecId) AS cnt "
+			        + "from Projects p, Schedule s"
+			        + " LEFT JOIN teb_reflaborcategory rlc ON rlc.nmLaborCategoryId = SUBSTRING_INDEX( s.SchLaborCategories, '~', 1 )"
+			        + " LEFT JOIN users u ON rlc.nmRefId=u.nmUserId"
+			        + " where p.CurrentBaseline=s.nmBaseline and p.RecId=s.nmProjectId and p.ProjectStatus=0 and s.lowlvl=1"
+			        + " 	and u.nmUserId="
+			        + this.ebEnt.ebUd.getLoginId()
+			        + " and p.RecId IN ("
+			        + stPrjIds
+			        + ") having cnt=0"
+			        + " order by p.ProjectName,s.RecId");
+			rs = this.ebEnt.dbDyn
+			    .ExecuteSql("select p.ProjectName, p.RecId AS ProjectId, s.*, (select count(*) from teb_workflow wf where wf.nmBaseline=s.nmBaseline and wf.nmProjectId=s.nmProjectId and wf.nmSchId=s.RecId) AS cnt  "
+			        + "from Projects p, Schedule s"
+			        + " LEFT JOIN teb_reflaborcategory rlc ON rlc.nmLaborCategoryId = SUBSTRING_INDEX( s.SchLaborCategories, '~', 1 )"
+			        + " LEFT JOIN users u ON rlc.nmRefId=u.nmUserId"
+			        + " where p.CurrentBaseline=s.nmBaseline and p.RecId=s.nmProjectId and p.ProjectStatus=0 and s.lowlvl=1"
+			        + " 	and u.nmUserId="
+			        + this.ebEnt.ebUd.getLoginId()
+			        + " and p.RecId IN ("
+			        + stPrjIds
+			        + ") having cnt=0"
+			        + " order by p.ProjectName,s.RecId"
+			        + " LIMIT "
+			        + iFrom
+			        + ","
+			        + iDisplay);
+			while (rs.next()) {
+				iCount++;
+				String recId = rs.getString("RecId");
+				String stPrjId = rs.getString("ProjectId");
+				String stBaseLine = rs.getString("nmBaseline");
+				stReturn += "<tr>";
+				stReturn += "<td class='l1td td0'><span class=hiddenfield><input type='submit' value='Save' "
+				    + "onclick='document.form4.workflowtype.value=\"wf\"; document.form4.nmPrjId.value=\""
+				    + stPrjId
+				    + "\"; document.form4.nmBaseline.value=\""
+				    + stBaseLine
+				    + "\"; document.form4.nmSchId.value=\""
+				    + recId
+				    + "\";document.form4.wfStatus.value=0;' /><input type=button class='cancel-button' value='Cancel' /></span>"
+				    + "<span class=showfield>"
+				    + "<a title='Edit' href='javascript:void(0);'><img class='edit-button' src='./common/b_edit.png' /></a>&nbsp;"
+				    + "<a title='Info' href='javascript:void(0);'><img src='./common/b_info.png' onclick='window.open(\"./?stAction=admin&t=0&h=n&do=scheduledetail&listm=1&lists="
+				    + recId
+				    + "&listp="
+				    + stPrjId
+				    + "&listb="
+				    + stBaseLine
+				    + "\")' /></a>" + "</span></td>";
+				stReturn += "<td class='l1td td1'>" + rs.getString("ProjectName")
+				    + "</td>";
+				stReturn += "<td class='l1td td2'>" + recId + "</td>";
+				stReturn += "<td class='l1td td3'>"
+				    + "<span class=hiddenfield><input type=text name='wfEstimated-"
+				    + stPrjId + "_" + stBaseLine + "_" + recId
+				    + "' style='text-align:right;' value='"
+				    + rs.getString("SchEstimatedEffort")
+				    + "' /></span><span class=showfield data-value='"
+				    + rs.getString("SchEstimatedEffort") + "'>"
+				    + rs.getString("SchEstimatedEffort") + "</span></td>";
+				stReturn += "<td class='l1td td4'>"
+				    + "<span class=hiddenfield><input type=text name='wfExpended-"
+				    + stPrjId + "_" + stBaseLine + "_" + recId
+				    + "' style='text-align:right;' value='"
+				    + rs.getString("SchEfforttoDate")
+				    + "' /></span><span class=showfield data-value='"
+				    + rs.getString("SchEfforttoDate") + "'>"
+				    + rs.getString("SchEfforttoDate") + "</span></td>";
+				String stStatus = (rs.getString("SchDone") == null ? "0" : ("N"
+				    .equals(rs.getString("SchDone")) ? "1" : "2"));
+				stReturn += "<td class='l1td td5'>"
+				    + "<span class=hiddenfield><select name='wfStatus-"
+				    + stPrjId
+				    + "_"
+				    + stBaseLine
+				    + "_"
+				    + recId
+				    + "'>"
+				    + this.ebEnt.ebUd.addOption("Wait", "0", stStatus)
+				    + this.ebEnt.ebUd.addOption("Progress", "1", stStatus)
+				    + this.ebEnt.ebUd.addOption("Done", "2", stStatus)
+				    + "</select></span>"
+				    + "<span class=showfield data-value='"
+				    + stStatus
+				    + "'>"
+				    + (stStatus.equals("0") ? "Wait"
+				        : (stStatus.equals("1") ? "Progress" : "Done")) + "</span>"
+				    + "</td>";
+				stReturn += "<td class='l1td td6'>" + rs.getString("SchDescription")
+				    + "</td>";
+				stReturn += "</tr>";
 			}
 			if (iCount == 0) {
 				stReturn += "<tr><td class=l1td colspan=7>No Tasks</td></tr>";
 			}
-			stReturn += "</table>";
+			stReturn += "</table>"
+			    + (iCount > 0 ? makeToolbar(false, iTotalRecords, iFrom, iDisplay,
+			        "./?stAction=home&part=0") : "") + "</div>";
 			rs.close();
 
-			stReturn += "</td><td valign=top>"
-			    + "<table class=l1tablenarrow>"
-			    + "<tr><th class=l1th colspan=5>Messages</th></tr>"
-			    + "<tr><th class=l1th>Date</th><th class=l1th>Time</th><th class=l1th>Message</th><th class=l1th>Details</th><th class=l1th>Delete</th></tr>";
+			stReturn += "<div><a href='./?stAction=home&part=1&display="
+			    + iDisplay
+			    + "'>Messages</a></div>"
+			    + "<div id='msg-content'><table class=l1tablenarrow>"
+			    + "<tr><th class='l1th th0'>Action</th><th class='l1th th1'>Project</th><th class='l1th th2'>Message</th><th class='l1th th3'>Description</th></tr>";
 
 			// message
+			iTotalRecords = this.ebEnt.dbEnterprise
+			    .ExecuteSql1n("select count(*) from X25RefTask rt, X25Task t"
+			        + " where t.RecId=rt.nmTaskId and rt.nmRefType=42 and (t.nmTaskFlag=1 OR (t.nmTaskFlag=2  and dtStart >= DATE_ADD(curdate(),INTERVAL -10 DAY)))"
+			        + " and rt.nmRefId=" + this.ebEnt.ebUd.getLoginId());
 			rs = this.ebEnt.dbEnterprise
 			    .ExecuteSql("select t.* from X25RefTask rt, X25Task t"
 			        + " where t.RecId=rt.nmTaskId and rt.nmRefType=42 and (t.nmTaskFlag=1 OR (t.nmTaskFlag=2  and dtStart >= DATE_ADD(curdate(),INTERVAL -10 DAY)))"
-			        + " and rt.nmRefId=" + this.ebEnt.ebUd.getLoginId()
-			        // + " order by dtAssignStart desc limit 30");
-			        + " order by dtStart desc limit 100");
+			        + " and rt.nmRefId=" + this.ebEnt.ebUd.getLoginId() + " LIMIT "
+			        + iFrom + "," + iDisplay);
+			// + " order by dtAssignStart desc limit 30");
+			// + " order by dtStart desc limit 100");
 			rs.last();
 			iMax = rs.getRow();
 			iCount = 0;
@@ -2117,139 +2232,52 @@ public class EpsUserData {
 					                                   // stId, String stCurrent)
 					rs.absolute(iR);
 					int nmTaskFlag = rs.getInt("nmTaskFlag");
+					stReturn += "<tr>"
+					    + "<td class='l1td td0'><a title='Info' href='javascript:void(0);'><img src='./common/b_info.png' onclick='window.open(\"./?stAction=admin&t=0&do=taskdetail&h=n&list="
+					    + rs.getString("RecId")
+					    + "\")' /></a>&nbsp;"
+					    + "<a title='Delete' href='./?stAction=admin&t=0&do=taskdelete&h=n&list="
+					    + rs.getString("RecId")
+					    + "'><img src='./common/b_drop.png' /></a></td>";
 					if (nmTaskFlag == 2) {
-						// only trigger if project is approved
 						String[] prjArr = rs.getString("stDescription").split(" - ");
-						// int approved = 0;
-						// if(!prjArr[0].equals(""))
-						// approved =
-						// this.ebEnt.dbDyn.ExecuteSql1n("select ProjectStatus from projects where ProjectName = '"
-						// + prjArr[0] + "'");
 
-						Date aDate = rs.getTimestamp("dtStart");
-						String stDate = (aDate == null ? "&nbsp;" : dateFormatter
-						    .format(aDate));
-						String stTime = (aDate == null ? "&nbsp;" : timeFormatter
-						    .format(aDate));
-						// if(approved == 1 || (approved!=1 && prjArr[0].equals("All"))){
 						iCount++;
-						stReturn += "<tr>" + "<td class=l1td>" + stDate + "</td>"
-						    + "<td class=l1td>" + stTime + "</td>" + "<td class=l1td>"
-						    + rs.getString("stTitle") + "</td><td class=l1td>";
-						if (rs.getString("stDescription") != null) {
-							stReturn += "<input type='button' onclick='window.open(\"./?stAction=admin&t=0&do=taskdetail&h=n&list="
-							    + rs.getString("RecId") + "\")' value='Details' />";
-						} else {
-							stReturn += "&nbsp;";
-						}
-						stReturn += "</td>"
-						    + "<td class=l1td><input type='button' onclick='parent.location=\"./?stAction=admin&t=0&do=taskdelete&h=n&list="
-						    + rs.getString("RecId") + "\"' value='Delete' /></td>"
-						    + "</tr>";
-						// }
-						/*
-						 * else if(prjArr[0].equals("All")){ //message from eob #19
-						 * iCount++; stReturn += "<tr><td class=l1td>" +
-						 * rs.getString("stTitle") + "</td><td class=l1td>"; if
-						 * (rs.getString("stDescription") != null) { stReturn += prjArr[1];
-						 * } else { stReturn += "&nbsp;"; } stReturn +=
-						 * "</td><td class=l1td>" +
-						 * this.ebEnt.ebUd.fmtDateFromDb(rs.getString("dtStart")) +
-						 * "</td></tr>"; }
-						 */
+
+						stReturn += "<td class='l1td td1'>"
+						    + (prjArr[0].equals("All") ? "" : prjArr[0]) + "</td>"
+						    + "<td class='l1td td2'>" + rs.getString("stTitle") + "</td>"
+						    + "<td class='l1td td3'>" + prjArr[1] + "</td>";
 					} else if (nmTaskFlag == 1) {
 						iCount++;
-						Date aDate = rs.getTimestamp("dtStart");
-						String stDate = (aDate == null ? "&nbsp;" : dateFormatter
-						    .format(aDate));
-						String stTime = (aDate == null ? "&nbsp;" : timeFormatter
-						    .format(aDate));
-						stReturn += "<tr>" + "<td class=l1td>" + stDate + "</td>"
-						    + "<td class=l1td>" + stTime + "</td>" + "<td class=l1td>"
-						    + rs.getString("stTitle") + "</td><td class=l1td>";
-						if (rs.getString("stDescription") != null) {
-							stReturn += "<input type='button' onclick='window.open(\"./?stAction=admin&t=0&do=taskdetail&h=n&list="
-							    + rs.getString("RecId") + "\")' value='Details' />";
-						} else {
-							stReturn += "&nbsp;";
-						}
-						stReturn += "</td>"
-						    + "<td class=l1td><input type='button' onclick='parent.location=\"./?stAction=admin&t=0&do=taskdelete&h=n&list="
-						    + rs.getString("RecId") + "\"' value='Delete' /></td>"
-						    + "</tr>";
+						stReturn += "<td class='l1td td1'>&nbsp;</td>"
+						    + "<td class='l1td td2'>" + rs.getString("stTitle") + "</td>"
+						    + "<td class='l1td td3'>&nbsp;</td>";
 					}
+					stReturn += "</tr>";
 				}
 			}
-
-			// flag low level tasks with 40+ hours to PM, PPM, BA, Sponsor #21
-			// String userType =
-			// this.ebEnt.dbEnterprise.ExecuteSql1("select nmPriviledge from X25user where RecId="
-			// + this.ebEnt.ebUd.getLoginId());
-			// if(userType.equals(getPriviledge("pm")) ||
-			// userType.equals(getPriviledge("ppm")) ||
-			// userType.equals(getPriviledge("ba")) ||
-			// userType.equals(getPriviledge("su")) || userType.equals("65535")){
-			// Date aDate = null;
-			// rs =
-			// this.ebEnt.dbDyn.ExecuteSql("SELECT * FROM schedule WHERE nmEffort40Flag = 1 AND dtSchLastUpdate IS NOT NULL");
-			// while(rs.next()){
-			// aDate = rs.getTimestamp("dtSchLastUpdate");
-			// iCount++;
-			// stReturn += "<tr>"
-			// + "<td class='l1td'>" + (aDate == null ? "&nbsp;" :
-			// dateFormatter.format(aDate)) + "</td>"
-			// + "<td class='l1td'>" + (aDate == null ? "&nbsp;" :
-			// timeFormatter.format(aDate)) + "</td>"
-			// + "<td class='l1td'>" + rs.getString("SchTitle") + "</td>"
-			// +
-			// "<td class='l1td'><input type='button' value='Details' onclick='window.open(\"./?stAction=admin&t=0&h=n&do=scheduledetail&listm=0&lists="+rs.getString("recId")+"&listp="+rs.getString("nmProjectId")+"&listb="+rs.getString("nmBaseLine")+"\")'/></td>"
-			// // "Task may not exceed 40 hours"
-			// // + "<td class='l1td'><input type='button' value='Delete' /></td>"
-			// + "<td class='l1td'>&nbsp;</td>"
-			// + "</tr>";
-			// }
-			// }
-
-			// show estimated, expended hours and done tasks to pm and ppm
-			// String userType =
-			// this.ebEnt.dbEnterprise.ExecuteSql1("select nmPriviledge from X25user where RecId="
-			// + this.ebEnt.ebUd.getLoginId());
-			// if(userType.equals(getPriviledge("pm")) ||
-			// userType.equals(getPriviledge("ppm")) || userType.equals("65535")){
-			// Date aDate = null;
-			// rs =
-			// this.ebEnt.dbDyn.ExecuteSql("SELECT * FROM schedule WHERE SchMessage IS NOT NULL");
-			// while(rs.next()){
-			// aDate = rs.getTimestamp("dtSchLastUpdate");
-			// iCount++;
-			// stReturn += "<tr>"
-			// + "<td class='l1td'>" + (aDate == null ? "&nbsp;" :
-			// dateFormatter.format(aDate)) + "</td>"
-			// + "<td class='l1td'>" + (aDate == null ? "&nbsp;" :
-			// timeFormatter.format(aDate)) + "</td>"
-			// + "<td class='l1td'>" + rs.getString("SchTitle") + "</td>"
-			// +
-			// "<td class='l1td'><input type='button' value='Details' onclick='window.open(\"./?stAction=admin&t=0&h=n&do=scheduledetail&listm=1&lists="+rs.getString("recId")+"&listp="+rs.getString("nmProjectId")+"&listb="+rs.getString("nmBaseLine")+"\")'/></td>"
-			// /*stReturn += "<td class=l1td>";
-			// if(rs.getString("SchDone") != null &&
-			// rs.getString("SchDone").equals("Y"))
-			// stReturn += "Status: Done<br>";
-			// stReturn += "Estimated Hours: " + rs.getString("SchEstimatedEffort") +
-			// "<br>"
-			// + "Expended Hours: " + rs.getString("SchEfforttoDate")*/
-			// + "<td class='l1td'>&nbsp;</td>"
-			// + "</tr>";
-			// }
-			// }
 
 			if (iCount == 0) {
 				stReturn += "<tr><td class=l1td colspan=5>No Messages</td></tr>";
 			}
-			stReturn += "</table>" + "</td></tr>";
+			stReturn += "</table>"
+			    + (iCount > 0 ? makeToolbar(false, iTotalRecords, iFrom, iDisplay,
+			        "./?stAction=home&part=1") : "") + "</div>";
 
 			// work flow project team members
+			iTotalRecords = this.ebEnt.dbDyn
+			    .ExecuteSql1n("select count(*) "
+			        + " from Projects p, Schedule s, teb_workflow wf, Users u"
+			        + " where p.CurrentBaseline=s.nmBaseline and p.RecId=s.nmProjectId and p.ProjectStatus=0 and s.lowlvl=1"
+			        + " and wf.nmProjectId=s.nmProjectId and wf.nmBaseline=s.nmBaseline and wf.nmSchId=s.RecId and wf.nmUserId=u.nmUserId and wf.nmStatus=0"
+			        + " and (p.ProjectManagerAssignment="
+			        + this.ebEnt.ebUd.getLoginId()
+			        + " or p.ProjectPortfolioManagerAssignment="
+			        + this.ebEnt.ebUd.getLoginId() + ")"
+			        + " order by p.ProjectName,s.RecId");
 			rs = this.ebEnt.dbDyn
-			    .ExecuteSql("select p.ProjectName, p.RecId AS ProjectId, s.RecId,s.nmBaseline,wf.SchEstimatedEffort, wf.SchEfforttoDate, wf.SchDone,CONCAT(u.FirstName, ' ', u.LastName) AS UserName"
+			    .ExecuteSql("select p.ProjectName, p.RecId AS ProjectId, s.RecId, s.SchDescription, s.nmBaseline,wf.SchEstimatedEffort, wf.SchEfforttoDate, wf.SchDone,CONCAT(u.FirstName, ' ', u.LastName) AS UserName"
 			        + " from Projects p, Schedule s, teb_workflow wf, Users u"
 			        + " where p.CurrentBaseline=s.nmBaseline and p.RecId=s.nmProjectId and p.ProjectStatus=0 and s.lowlvl=1"
 			        + " and wf.nmProjectId=s.nmProjectId and wf.nmBaseline=s.nmBaseline and wf.nmSchId=s.RecId and wf.nmUserId=u.nmUserId and wf.nmStatus=0"
@@ -2258,87 +2286,126 @@ public class EpsUserData {
 			        + " or p.ProjectPortfolioManagerAssignment="
 			        + this.ebEnt.ebUd.getLoginId()
 			        + ")"
-			        + " order by p.ProjectName,s.RecId");
+			        + " order by p.ProjectName,s.RecId"
+			        + " LIMIT "
+			        + iFrom
+			        + ","
+			        + iDisplay);
 
 			rs.last();
 			iCount = 0;
 			iMax = rs.getRow();
-			if (iMax > 0) {
-				stReturn += "<tr><td>&nbsp;</td></tr><tr><td align='center' colspan=2><table class=l1tablenarrow>"
-				    + "<tr><th class=l1th colspan=8>Work Flow of Project Team Members</th></tr>"
-				    + "<tr><th class=l1th>Project Name</th><th class=l1th>Task ID</th><th class=l1th>Estimated Hours</th><th class=l1th>Expended Hours</th><th class=l1th>Details</th><th class=l1th>Status</th><th class=l1th>Project Team Member</th><th class=l1th>Response</th></tr>";
-				for (int iR = 1; iR <= iMax; iR++) {
-					rs.absolute(iR);
-					iCount++;
-					String stPrjId = rs.getString("ProjectId");
-					String recId = rs.getString("RecId");
-					String stBaseLine = rs.getString("nmBaseline");
-					stReturn += "<tr>";
-					stReturn += "<td class=l1td>" + rs.getString("ProjectName") + "</td>";
-					stReturn += "<td class=l1td align=right>" + rs.getString("RecId")
-					    + "</td>";
-					stReturn += "<td class=l1td><input type=text name='wfPTMEstimated-"
-					    + stPrjId + "_" + stBaseLine + "_" + recId
-					    + "' style='text-align:right;' value='"
-					    + rs.getString("SchEstimatedEffort") + "' /></td>";
-					stReturn += "<td class=l1td><input type=text name='wfPTMExpended-"
-					    + stPrjId + "_" + stBaseLine + "_" + recId
-					    + "' style='text-align:right;' value='"
-					    + rs.getString("SchEfforttoDate") + "' /></td>";
+			stReturn += "<div><a href='./?stAction=home&part=2&display="
+			    + iDisplay
+			    + "'>Work Flow of Project Team Members</a></div>"
+			    + "<div id='wfptm-content'><table class=l1tablenarrow>"
+			    + "<tr><th class='l1th th0'>Action</th><th class='l1th th1'>Project Name</th><th class='l1th th2'>Task ID</th><th class='l1th th3'>Project Team Member</th><th class='l1th th4'>Estimated Hours</th><th class='l1th th5'>Expended Hours</th><th class='l1th th6'>Status</th><th class='l1th th7'>Description</th></tr>";
+			for (int iR = 1; iR <= iMax; iR++) {
+				rs.absolute(iR);
+				iCount++;
+				String stPrjId = rs.getString("ProjectId");
+				String recId = rs.getString("RecId");
+				String stBaseLine = rs.getString("nmBaseline");
+				stReturn += "<tr>";
+				stReturn += "<td class='l1td td0'><span class=hiddenfield>"
+				    + "<input type='submit' value='Update' onclick='document.form4.workflowtype.value=\"wfPTM\"; document.form4.nmPrjId.value=\""
+				    + stPrjId
+				    + "\"; document.form4.nmBaseline.value=\""
+				    + stBaseLine
+				    + "\"; document.form4.nmSchId.value=\""
+				    + recId
+				    + "\";document.form4.wfStatus.value=1' />"
+				    + "<input type='submit' value='Reject'  onclick='document.form4.workflowtype.value=\"wfPTM\"; document.form4.nmPrjId.value=\""
+				    + stPrjId
+				    + "\"; document.form4.nmBaseline.value=\""
+				    + stBaseLine
+				    + "\"; document.form4.nmSchId.value=\""
+				    + recId
+				    + "\";document.form4.wfStatus.value=\"-1\"'/>"
+				    + "<input type=button class='cancel-button' value='Cancel' /></span>"
+				    + "<span class=showfield>"
+				    + "<a title='Edit' href='javascript:void(0);'><img class='edit-button' src='./common/b_edit.png' /></a>&nbsp;"
+				    + "<a title='Info' href='javascript:void(0);'><img src='./common/b_info.png' onclick='window.open(\"./?stAction=admin&t=0&h=n&do=scheduledetail&listm=1&lists="
+				    + recId
+				    + "&listp="
+				    + stPrjId
+				    + "&listb="
+				    + stBaseLine
+				    + "\")' /></a>" + "</span></td>";
+				stReturn += "<td class='l1td td1'>" + rs.getString("ProjectName")
+				    + "</td>";
+				stReturn += "<td class='l1td td2'>" + rs.getString("RecId") + "</td>";
+				stReturn += "<td class='l1td td3'>" + rs.getString("UserName")
+				    + "</td>";
+				stReturn += "<td class='l1td td4'>"
+				    + "<span class=hiddenfield><input type=text name='wfPTMEstimated-"
+				    + stPrjId + "_" + stBaseLine + "_" + recId
+				    + "' style='text-align:right;' value='"
+				    + rs.getString("SchEstimatedEffort")
+				    + "' /></span><span class=showfield data-value='"
+				    + rs.getString("SchEstimatedEffort") + "'>"
+				    + rs.getString("SchEstimatedEffort") + "</span></td>";
+				stReturn += "<td class='l1td td5'>"
+				    + "<span class=hiddenfield><input type=text name='wfPTMExpended-"
+				    + stPrjId + "_" + stBaseLine + "_" + recId
+				    + "' style='text-align:right;' value='"
+				    + rs.getString("SchEfforttoDate")
+				    + "' /></span><span class=showfield data-value='"
+				    + rs.getString("SchEfforttoDate") + "'>"
+				    + rs.getString("SchEfforttoDate") + "</span></td>";
 
-					stReturn += "<td class=l1td><input type='button' value='Details' onclick='window.open(\"./?stAction=admin&t=0&h=n&do=scheduledetail&listm=1&lists="
-					    + recId
-					    + "&listp="
-					    + stPrjId
-					    + "&listb="
-					    + stBaseLine
-					    + "\")' /></td>";
-					String stStatus = (rs.getString("SchDone") == null ? "0" : ("N"
-					    .equals(rs.getString("SchDone")) ? "1" : "2"));
-					stReturn += "<td class=l1td><select name='wfPTMStatus-" + stPrjId
-					    + "_" + stBaseLine + "_" + recId + "'>"
-					    + this.ebEnt.ebUd.addOption("Wait", "0", stStatus)
-					    + this.ebEnt.ebUd.addOption("Progress", "1", stStatus)
-					    + this.ebEnt.ebUd.addOption("Done", "2", stStatus)
-					    + "</select></td>";
+				String stStatus = (rs.getString("SchDone") == null ? "0" : ("N"
+				    .equals(rs.getString("SchDone")) ? "1" : "2"));
+				stReturn += "<td class='l1td td6'>"
+				    + "<span class=hiddenfield><select name='wfPTMStatus-"
+				    + stPrjId
+				    + "_"
+				    + stBaseLine
+				    + "_"
+				    + recId
+				    + "'>"
+				    + this.ebEnt.ebUd.addOption("Wait", "0", stStatus)
+				    + this.ebEnt.ebUd.addOption("Progress", "1", stStatus)
+				    + this.ebEnt.ebUd.addOption("Done", "2", stStatus)
+				    + "</select></span>"
+				    + "<span class=showfield data-value='"
+				    + stStatus
+				    + "'>"
+				    + (stStatus.equals("0") ? "Wait"
+				        : (stStatus.equals("1") ? "Progress" : "Done")) + "</span>"
+				    + "</td>";
+				stReturn += "<td class='l1td td7'>" + rs.getString("SchDescription")
+				    + "</td>";
 
-					stReturn += "<td class=l1td>" + rs.getString("UserName") + "</td>";
-					stReturn += "<td class=l1td>"
-					    + "<input type='submit' value='Update' onclick='document.form4.workflowtype.value=\"wfPTM\"; document.form4.nmPrjId.value=\""
-					    + stPrjId
-					    + "\"; document.form4.nmBaseline.value=\""
-					    + stBaseLine
-					    + "\"; document.form4.nmSchId.value=\""
-					    + recId
-					    + "\";document.form4.wfStatus.value=1' />&nbsp;"
-					    + "<input type='submit' value='Reject'  onclick='document.form4.workflowtype.value=\"wfPTM\"; document.form4.nmPrjId.value=\""
-					    + stPrjId + "\"; document.form4.nmBaseline.value=\"" + stBaseLine
-					    + "\"; document.form4.nmSchId.value=\"" + recId
-					    + "\";document.form4.wfStatus.value=\"-1\"'/></td>";
-					stReturn += "</tr>";
-				}
-				if (iCount == 0) {
-					stReturn += "<tr><td class=l1td colspan=8>No Tasks</td></tr>";
-				}
-				stReturn += "</table></td></tr>";
-				rs.close();
+				stReturn += "</tr>";
 			}
+			if (iCount == 0) {
+				stReturn += "<tr><td class=l1td colspan=8>No Tasks</td></tr>";
+			}
+			stReturn += "</table>"
+			    + (iCount > 0 ? makeToolbar(false, iTotalRecords, iFrom, iDisplay,
+			        "./?stAction=home&part=2") : "") + "</div>";
+			rs.close();
 
-			int nmPriviledge = this.ebEnt.dbEnterprise
-			    .ExecuteSql1n("select nmPriviledge from x25user where RecId="
-			        + this.ebEnt.ebUd.getLoginId());
-			String stPriviledge = getPriviledgeTypes(nmPriviledge);
+			// approved project dashboard
 			if (stPriviledge.contains("Ex") || stPriviledge.contains("Ppm")) {
-				// approved project dashboard
+				iTotalRecords = this.ebEnt.dbDyn
+				    .ExecuteSql1n("select count(*) from Projects p"
+				        + " where p.ProjectStatus=1 order by p.ProjectName");
 				rs = this.ebEnt.dbDyn.ExecuteSql("select * from Projects p"
-				    + " where p.ProjectStatus=1" + " order by p.ProjectName");
+				    + " where p.ProjectStatus=1 order by p.ProjectName" + " LIMIT "
+				    + iFrom + "," + iDisplay);
 
 				rs.last();
 				iCount = 0;
 				iMax = rs.getRow();
-				stReturn += "<tr><td>&nbsp;</td></tr><tr><td align='center' colspan=2><table class=l1tablenarrow>"
-				    + "<tr><th class=l1th colspan=7>Approved Project Dashboard</th></tr>"
-				    + "<tr><th class=l1th>Project Name</th><th class=l1th>Start Date</th><th class=l1th>End Date</th><th class=l1th>Estimated Hours</th><th class=l1th>Expended Hours</th><th class=l1th>Estimated Cost</th><th class=l1th>Expended to 	Date</th></tr>";
+				stReturn += "<div><a href='./?stAction=home&part=3&display="
+				    + iDisplay
+				    + "'>Executive Project Portfolio Dashboard</a></div>"
+				    + "<div id='prj-content'><table class=l1tablenarrow>"
+				    + "<tr><th class=l1th>Project Name</th><th class=l1th>Start Date</th><th class=l1th>End Date</th><th class=l1th>Estimated Hours</th><th class=l1th>Expended Hours</th><th class=l1th>Estimated Cost</th><th class=l1th>Expended to 	Date</th>"
+				    + "<th class='l1th spi-header'><table><tr><td colspan=3 align=center>SPI</td></tr><tr><td class=greencolor><div>&nbsp;</div>1.1</td><td class=yellowcolor><div>&nbsp;</div>1.2</td><td class=redcolor><div>&nbsp;</div>1.3</td></tr></table></th>"
+				    + "<th class='l1th cpi-header'><table><tr><td colspan=3 align=center>CPI</td></tr><tr><td class=greencolor><div>&nbsp;</div>1.1</td><td class=yellowcolor><div>&nbsp;</div>1.2</td><td class=redcolor><div>&nbsp;</div>1.3</td></tr></table></th></tr>";
 				for (int iR = 1; iR <= iMax; iR++) {
 					rs.absolute(iR);
 					iCount++;
@@ -2367,7 +2434,10 @@ public class EpsUserData {
 					Date fixedEndDate = rs.getDate("FixedProjectEndDate");
 
 					stReturn += "<tr>";
-					stReturn += "<td class=l1td>" + rs.getString("ProjectName") + "</td>";
+					stReturn += "<td class=l1td> <a title='Edit' class='edit-button' href='.?stAction=projects&t=12&pk="
+					    + rs.getString("RecId")
+					    + "&do=edit'><img src='./common/b_edit.png'></a>"
+					    + rs.getString("ProjectName") + "</td>";
 					stReturn += "<td class=l1td>"
 					    + (fixedStartDate != null ? dateFormatter.format(fixedStartDate)
 					        : "") + "</td>";
@@ -2382,47 +2452,9 @@ public class EpsUserData {
 					    + InitialEstimatedCost + "</td>";
 					stReturn += "<td class=l1td align=right>&#36; "
 					    + CurrentEstimatedCost + "</td>";
-					stReturn += "</tr>";
-				}
-				if (iCount == 0) {
-					stReturn += "<tr><td class=l1td colspan=7>No Projects</td></tr>";
-				}
-				stReturn += "</table></td></tr>";
-
-				// CPI SPI
-				stReturn += "<tr><td>&nbsp;</td></tr>";
-				stReturn += "<tr><td align='center' colspan=2><table class=l1tablenarrow>"
-				    + "<tr><th class=l1th>Project Name</th>"
-				    + "<th class=l1th><table border=0 style='border-collapse:collapse;'><tr><td colspan=10 align=center>Schedule (SPI)</td></tr><tr>";
-				for (int i = 0; i < 10; i++) {
-					stReturn += "<td align=left width='50px' style='padding: 0;'>" + i
-					    + "</td>";
-				}
-				stReturn += "</tr></table></th>";
-				stReturn += "<th class=l1th><table border=0 style='border-collapse:collapse;'><tr><td colspan=10 align=center>Cost (CPI)</td></tr><tr>";
-				for (int i = 0; i < 10; i++) {
-					stReturn += "<td align=left width='50px' style='padding: 0;'>" + i
-					    + "</td>";
-				}
-				stReturn += "</tr></table></th></tr>";
-
-				iCount = 0;
-				for (int iR = 1; iR <= iMax; iR++) {
-					rs.absolute(iR);
-					iCount++;
 
 					double CPI = 0;
 					double SPI = 0;
-
-					int iFirstApprove = this.ebEnt.dbDyn
-					    .ExecuteSql1n("SELECT min(nmBaseline)"
-					        + " FROM teb_baseline where nmProjectId="
-					        + rs.getString("RecId") + " and stType='Approve'");
-					int iIniticalBaseline = this.ebEnt.dbDyn
-					    .ExecuteSql1n("SELECT max(nmBaseline)"
-					        + " FROM teb_baseline where nmProjectId="
-					        + rs.getString("RecId") + " and nmBaseline < "
-					        + iFirstApprove);
 
 					double BCWP = this.ebEnt.dbDyn
 					    .ExecuteSql1n("select sum(nmExpenditureToDate) from Schedule"
@@ -2447,52 +2479,53 @@ public class EpsUserData {
 						SPI = 1.0 * Math.round(EV * 100 / PV) / 100;
 					}
 
-					String cpiColor = (CPI > 1.5 ? "red" : (CPI > 1.1 ? "yellow"
-					    : (CPI >= 0.9 ? "lightgreen" : "deepskyblue")));
-					String spiColor = (SPI > 1.5 ? "red" : (SPI > 1.1 ? "yellow"
-					    : (SPI >= 0.9 ? "lightgreen" : "deepskyblue")));
-					stReturn += "<tr>";
-					stReturn += "<td class=l1td>" + rs.getString("ProjectName") + "</td>";
-					stReturn += "<td class=l1td align=left><div align=center style='background: "
-					    + spiColor
-					    + ";margin-left:5px;width:"
-					    + (SPI * 50)
-					    + "px'>"
-					    + SPI + "</div></td>";
-					stReturn += "<td class=l1td align=left><div align=center style='background: "
-					    + cpiColor
-					    + ";margin-left:5px;width:"
-					    + (CPI * 50)
-					    + "px'>"
-					    + CPI + "</div></td>";
+					stReturn += "<td class='l1td spi-content'>"
+					    + "<table><tr class=spibg><td colspan=4><div class=spiline data-val='"
+					    + SPI
+					    + "'/></td></tr>"
+					    + "<tr class=spinumber><td>0</td><td>1</td><td>2</td><td>3</td></tr></table>"
+					    + "</td>";
+					stReturn += "<td class='l1td spi-content'>"
+					    + "<table><tr class=spibg><td colspan=4><div class=spiline data-val='"
+					    + CPI
+					    + "'/></td></tr>"
+					    + "<tr class=spinumber><td>0</td><td>1</td><td>2</td><td>3</td></tr></table>"
+					    + "</td>";
+
 					stReturn += "</tr>";
 				}
-
 				if (iCount == 0) {
-					stReturn += "<tr><td class=l1td colspan=3>No Projects</td></tr>";
+					stReturn += "<tr><td class=l1td colspan=9>No Projects</td></tr>";
 				}
-
+				stReturn += "</table>"
+				    + (iCount > 0 ? makeToolbar(false, iTotalRecords, iFrom, iDisplay,
+				        "./?stAction=home&part=3") : "") + "</div>";
 				rs.close();
 			}
 
-			stReturn += "</table></form>";
-			stReturn += "<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"
-			    + "<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"
-			    + "<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;";
 		} catch (Exception e) {
 			stError += "<br>ERROR makeHomePage " + e;
 		}
-		stReturn += "</table>";
+		String stPart = this.ebEnt.ebUd.request.getParameter("part");
+		if (stPart == null || stPart.isEmpty())
+			stPart = "0";
+		stReturn += "</div></form>"
+		    + "<script>"
+		    + "$('#home-accordion').accordion({active: "
+		    + stPart
+		    + ", autoHeight: false, collapsible: true, change: function(e, ui){if(ui.newHeader.length>0)location.href=ui.newHeader.find('a').attr('href')}});"
+		    + "initWorkflowEditButtons();" + "updateCPISPIlines();</script>";
 		return stReturn;
 	}
 
 	private String epsTable(String stAction) { // http://localhost:8084/eps/?stAction=admin&t=40
-		String stReturn = "<center>";
+		String stT = this.ebEnt.ebUd.request.getParameter("t");
+		String stA = this.ebEnt.ebUd.request.getParameter("a");
+		String stReturn = "<center"
+		    + (stT != null && !stT.isEmpty() ? " class=t" + stT : "") + ">";
 		int iState = 0;
-		this.setPageTitle(stAction + ": ");
+		// this.setPageTitle(stAction + ": ");
 		try {
-			String stT = this.ebEnt.ebUd.request.getParameter("t");
-			String stA = this.ebEnt.ebUd.request.getParameter("a");
 			if (stT == null) {
 				String stC = this.ebEnt.ebUd.request.getParameter("c");
 				if (stC != null && stC.equals("critscor")) {
@@ -2521,7 +2554,7 @@ public class EpsUserData {
 					this.ebEnt.dbEnterprise
 					    .ExecuteUpdate("DELETE FROM x25task where RecId="
 					        + this.ebEnt.ebUd.request.getParameter("list"));
-					this.ebEnt.ebUd.setRedirect("./?stAction=home");
+					this.ebEnt.ebUd.setRedirect("./?stAction=home&part=1");
 				} else if (stTemp != null && stTemp.equals("scheduledetail")) {
 					String nmProjectId = this.ebEnt.ebUd.request.getParameter("listp");
 					String nmBaseLineId = this.ebEnt.ebUd.request.getParameter("listb");
@@ -2570,6 +2603,12 @@ public class EpsUserData {
 					if (rs.getInt("nmTableId") == 12 && stTemp != null
 					    && stTemp.equals("edit")) {
 						stPageTitle += " Project Attributes</h1>";
+					} else if (rs.getInt("nmTableId") == 9) {
+						if (stTemp.equals("users")) {
+							stPageTitle += " User Search</h1>";
+						} else {
+							stPageTitle += " User Attributes</h1>";
+						}
 					} else {
 						stTemp = this.ebEnt.ebUd.request.getParameter("child");
 						if (stTemp != null && stTemp.equals("19")) {
@@ -2609,7 +2648,12 @@ public class EpsUserData {
 		try {
 			this.nmTableId = rsTable.getInt("nmTableId");
 			if (this.nmTableId == 12 && stPk != null) // Projects
-			{ // Must Check Lock Flag
+			{
+				if (Integer.parseInt(stPk) <= 0) {
+					stReturn += "<center><h2>No Selected Project</h2></center>";
+					return stReturn;
+				}
+				// Must Check Lock Flag
 				ResultSet rsP = this.ebEnt.dbDyn
 				    .ExecuteSql("select * from Projects where RecId=" + stPk);
 				rsP.absolute(1);
@@ -2699,7 +2743,7 @@ public class EpsUserData {
 					    + rsTable.getString("stPk") + ") values( \"" + stPk + "\")");
 				}
 			}
-			stReturn = "</center><p align=left></form><form name='form"
+			stReturn = "</center></form><form name='form"
 			    + rsTable.getString("nmTableId")
 			    + "' id='form"
 			    + rsTable.getString("nmTableId")
@@ -2823,7 +2867,8 @@ public class EpsUserData {
 				switch (rsF.getInt("nmForeignId")) {
 				case 4: // User question - RESPONSE
 					Map<String, String> paramMap = ebEnt.ebUd.request.getParameterMap();
-					boolean isLoggingIn = (paramMap != null) && (paramMap.get("Login") != null);
+					boolean isLoggingIn = (paramMap != null)
+					    && (paramMap.get("Login") != null);
 					if (this.rsMyDiv.getInt("UserQuestionsOnOff") > 0 && isLoggingIn) {
 						String[] aV = rsMyDiv.getString("UserQuestions").replace("~", "\n")
 						    .split("\\\n", -1);
@@ -2856,12 +2901,11 @@ public class EpsUserData {
 						iColSpan = 2;
 						stClass = "table1";
 					} else {
-						if (nmTableId == 3) {//Login
+						if (nmTableId == 3) {// Login
 							stClass = "login-label";
 						}
 						if (rsF.getInt("nmForeignId") == 4) {
-							stReturn += "<td class=\"" + stClass + "\">" + stLabel
-							    + " </td>";
+							stReturn += "<td class=\"" + stClass + "\">" + stLabel + " </td>";
 						} else {
 							stReturn += "<td class=\"" + stClass + "\">" + stLabel
 							    + ": </td>";
@@ -3033,11 +3077,9 @@ public class EpsUserData {
 		String stAlign = "";
 		String stTemp = "";
 		int iFrom = 0;
-		int iTo = 0;
-		int iToPrevious = 0;
 		int iPk = 0;
 		int iPkFrom = 0;
-		stReturn += "<br /><table class=l1tableb>";
+		stReturn += "<table class=l1tableb>";
 		String stPk = this.ebEnt.ebUd.request.getParameter("pk");
 		try {
 			// Housekeeping
@@ -3566,20 +3608,21 @@ public class EpsUserData {
 			    + this.ebEnt.ebUd.request.getParameter("t");
 			stReturn += "<tr>";
 			if ((nmTableFlags & 0x18) != 0) {
-				stReturn += "<th class=l1th>Action</th>";
+				stReturn += "<th class='l1th col" + iFieldMax + "'>Action</th>";
 				iFieldMax++;
 			}
 			if ((nmTableFlags & 0x40) != 0) {
-				stReturn += "<th class=l1th>Division</th>";
+				stReturn += "<th class='l1th col" + iFieldMax + "'>Division</th>";
 				iFieldMax++;
 			}
 			for (int iF = 1; iF <= iMaxF; iF++) {
 				rsF.absolute(iF);
 				if (rsF.getString("stLabelShort").length() > 0) {
-					stReturn += "<th class=l1th>" + rsF.getString("stLabelShort")
-					    + "</th>";
+					stReturn += "<th class='l1th col" + iFieldMax + "'>"
+					    + rsF.getString("stLabelShort") + "</th>";
 				} else {
-					stReturn += "<th class=l1th>" + rsF.getString("stLabel") + "</th>";
+					stReturn += "<th class='l1th col" + iFieldMax + "'>"
+					    + rsF.getString("stLabel") + "</th>";
 				}
 				iFieldMax++;
 			}
@@ -3599,23 +3642,30 @@ public class EpsUserData {
 			if (stSearch.length() > 0) {
 				stSql += " where " + stSearch;
 			}
-			String stFrom = this.ebEnt.ebUd.request.getParameter("stFrom");
+			String stFrom = this.ebEnt.ebUd.request.getParameter("from");
 			stSql += stOrderBy;
 			if (stFrom != null && stFrom.length() > 0) {
-				stSql = this.ebEnt.ebUd.request.getParameter("stSql");
+				// stSql = this.ebEnt.ebUd.request.getParameter("stSql");
 				try {
 					iFrom = Integer.parseInt(stFrom);
 				} catch (Exception e) {
 				}
 			}
 
-			int iCount = this.ebEnt.dbDyn.ExecuteSql1n("select count(*) from "
-			    + rsTable.getString("stDbTableName"));
+			int iBlock = rsMyDiv.getInt("ReqSchRows");
+			String stBlock = this.ebEnt.ebUd.request.getParameter("display");
+			if (stBlock != null && !stBlock.isEmpty()) {
+				try {
+					iBlock = Integer.parseInt(stBlock);
+				} catch (Exception e) {
 
-			iTo = iFrom + this.rsMyDiv.getInt("MaxRecords");
-			iToPrevious = iFrom - this.rsMyDiv.getInt("MaxRecords");
+				}
+			}
+
+			int iCount = this.ebEnt.dbDyn.ebSql(stSql).iRows;
+
 			ResultSet rs = this.ebEnt.dbDyn.ExecuteSql(stSql + " limit " + iFrom
-			    + ", " + this.rsMyDiv.getInt("MaxRecords"));
+			    + ", " + iBlock);
 			rs.last();
 			int iMax = rs.getRow();
 			// Show each field / data element -- ROWS
@@ -3739,51 +3789,63 @@ public class EpsUserData {
 			}
 			if ((nmTableFlags & 0x20) != 0) {
 				stReturn += "<tr><td class=l1td colspan=" + iFieldMax
-				    + " align=center>";
-				if (iFrom >= this.rsMyDiv.getInt("MaxRecords")) {
-					stReturn += "&nbsp;&nbsp;&nbsp;<input type=button onClick=\"parent.location='./?stAction=admin&t="
-					    + rsTable.getInt("nmTableId")
-					    + "&stFrom="
-					    + 0
-					    + "&stSql="
-					    + java.net.URLEncoder.encode(stSql) + "'\"" + " value='First'>";
-					stReturn += "&nbsp;&nbsp;&nbsp;<input type=button onClick=\"parent.location='./?stAction=admin&t="
-					    + rsTable.getInt("nmTableId")
-					    + "&stFrom="
-					    + iToPrevious
-					    + "&stSql="
-					    + java.net.URLEncoder.encode(stSql)
-					    + "'\""
-					    + " value='Previous " + this.rsMyDiv.getInt("MaxRecords") + "'>";
-				}
+				    + " align=center style='background: skyblue'>";
+				// if (iFrom >= this.rsMyDiv.getInt("MaxRecords")) {
+				// stReturn +=
+				// "&nbsp;&nbsp;&nbsp;<input type=button onClick=\"parent.location='./?stAction=admin&t="
+				// + rsTable.getInt("nmTableId")
+				// + "&stFrom="
+				// + 0
+				// + "&stSql="
+				// + java.net.URLEncoder.encode(stSql) + "'\"" + " value='First'>";
+				// stReturn +=
+				// "&nbsp;&nbsp;&nbsp;<input type=button onClick=\"parent.location='./?stAction=admin&t="
+				// + rsTable.getInt("nmTableId")
+				// + "&stFrom="
+				// + iToPrevious
+				// + "&stSql="
+				// + java.net.URLEncoder.encode(stSql)
+				// + "'\""
+				// + " value='Previous " + this.rsMyDiv.getInt("MaxRecords") + "'>";
+				// }
 				// http://localhost:8084/eps/?stAction=admin&t=36
 				//
-				stReturn += "&nbsp;&nbsp;&nbsp;<input type=button onClick=\"parent.location='"
-				    + stLink + "&do=insert'\" value='Insert New'>";
-				if (iMax >= this.rsMyDiv.getInt("MaxRecords")) {
-					stReturn += "&nbsp;&nbsp;&nbsp;<input type=button onClick=\"parent.location='./?stAction=admin&t="
-					    + rsTable.getInt("nmTableId")
-					    + "&stFrom="
-					    + iTo
-					    + "&stSql="
-					    + java.net.URLEncoder.encode(stSql)
-					    + "'\""
-					    + " value='Next "
-					    + this.rsMyDiv.getInt("MaxRecords") + "'>";
-					int iLast = iCount - (iCount % this.rsMyDiv.getInt("MaxRecords"));
-					stReturn += "&nbsp;&nbsp;&nbsp;<input type=button onClick=\"parent.location='./?stAction=admin&t="
-					    + rsTable.getInt("nmTableId")
-					    + "&stFrom="
-					    + iLast
-					    + "&stSql="
-					    + java.net.URLEncoder.encode(stSql) + "'\"" + " value='Last'>";
-				}
+				stReturn += "<input type=button onClick=\"parent.location='" + stLink
+				    + "&do=insert'\" value='Insert New'>";
+				// if (iMax >= this.rsMyDiv.getInt("MaxRecords")) {
+				// stReturn +=
+				// "&nbsp;&nbsp;&nbsp;<input type=button onClick=\"parent.location='./?stAction=admin&t="
+				// + rsTable.getInt("nmTableId")
+				// + "&stFrom="
+				// + iTo
+				// + "&stSql="
+				// + java.net.URLEncoder.encode(stSql)
+				// + "'\""
+				// + " value='Next "
+				// + this.rsMyDiv.getInt("MaxRecords") + "'>";
+				// int iLast = iCount - (iCount % this.rsMyDiv.getInt("MaxRecords"));
+				// stReturn +=
+				// "&nbsp;&nbsp;&nbsp;<input type=button onClick=\"parent.location='./?stAction=admin&t="
+				// + rsTable.getInt("nmTableId")
+				// + "&stFrom="
+				// + iLast
+				// + "&stSql="
+				// + java.net.URLEncoder.encode(stSql) + "'\"" + " value='Last'>";
+				// }
 				// + "<a href='./?stAction=admin&t=" + rsTable.getInt("nmTableId")
 				// + "&stFrom=" + iTo + "&stSql=" + java.net.URLEncoder.encode(stSql) +
 				// "'>Next " + this.rsMyDiv.getInt("MaxRecords") + "</a>";
+
 				stReturn += "</td></tr>";
 			}
 			stReturn += "</table>";
+			if ((nmTableFlags & 0x20) != 0) {
+				// stReturn += "<tr><td class=l1td colspan=" + iFieldMax
+				// + " align=center>";
+				stReturn += makeToolbar(false, iCount, iFrom, iBlock,
+				    "./?stAction=admin&t=" + rsTable.getInt("nmTableId"));
+				// stReturn += "</td></tr>";
+			}
 			if (rsTable.getInt("nmTableId") == 17) // Calendar
 			{
 				stReturn += "<br/>&nbsp;<br><center><a href='./?stAction=specialdays'>Recalculate Calendar</a></center>";
@@ -3880,9 +3942,6 @@ public class EpsUserData {
 	public String userSearch(ResultSet rsTable, String stFilter) {
 		String stReturn = "";
 		String stSql = "";
-		int iFrom = 0;
-		int iTo = 0;
-		int iToPrevious = 0;
 		try {
 			if (stFilter == null) // comes from Reports, form is already open
 				stReturn = "</form><form method=post id='form"
@@ -3890,9 +3949,8 @@ public class EpsUserData {
 				    + rsTable.getString("nmTableId")
 				    + "' action='#next'  onsubmit='return myValidation(this)' >";
 
-			stReturn += "<table bgcolor='#ddd'>";
+			stReturn += "<table bgcolor='#ddd' style='border-collapse: collapse'>";
 			String stLookup = this.ebEnt.ebUd.request.getParameter("h");
-			String stFrom = this.ebEnt.ebUd.request.getParameter("stFrom");
 			String[] aType = this.ebEnt.ebUd.request.getParameterValues("nmType");
 			String stWhere = this.ebEnt.ebUd.request.getParameter("stWhere");
 			String stSearchType = this.ebEnt.ebUd.request
@@ -3901,6 +3959,18 @@ public class EpsUserData {
 			String[] aLc = this.ebEnt.ebUd.request.getParameterValues("nmLc");
 			String[] aDiv = this.ebEnt.ebUd.request.getParameterValues("nmDiv");
 			String stLc = this.ebEnt.ebUd.request.getParameter("lc");
+
+			String stFrom = this.ebEnt.ebUd.request.getParameter("from");
+			if (stFrom == null || stFrom.isEmpty() || Integer.parseInt(stFrom) < 0)
+				stFrom = "0";
+			int iFrom = Integer.parseInt(stFrom);
+
+			String stDisplay = this.ebEnt.ebUd.request.getParameter("display");
+			if (stDisplay == null || stDisplay.isEmpty()
+			    || Integer.parseInt(stDisplay) <= 0)
+				stDisplay = rsMyDiv.getString("MaxRecords");
+			int iDisplay = Integer.parseInt(stDisplay);
+
 			int nmType = 0;
 			int iTemp = 0;
 			if (aType != null) {
@@ -4031,28 +4101,28 @@ public class EpsUserData {
 
 			if (stSubmit != null && stSubmit.length() > 0
 			    || (stFrom != null && stFrom.length() > 0)) {
-				if (stSubmit == null) {
-					stSql = this.ebEnt.ebUd.request.getParameter("stSql");
-					iFrom = Integer.parseInt(stFrom);
-				} else {
-					stSql = makeUserSql(nmType, stLcList, stDivList, stSearchType,
-					    stSearch, stWhere);
-				}
+				// if (stSubmit == null) {
+				// stSql = this.ebEnt.ebUd.request.getParameter("stSql");
+				// iFrom = Integer.parseInt(stFrom);
+				// } else {
+				stSql = makeUserSql(nmType, stLcList, stDivList, stSearchType,
+				    stSearch, stWhere);
+				// }
 
-				iTo = iFrom + this.rsMyDiv.getInt("MaxRecords");
-				iToPrevious = iFrom - this.rsMyDiv.getInt("MaxRecords");
-				int iCount = this.ebEnt.dbDyn.ExecuteSql1n(stSql
-				    + " order by LastName,FirstName,stEMail");
 				ResultSet rs = this.ebEnt.dbDyn.ExecuteSql(stSql
-				    + " order by LastName,FirstName,stEMail limit " + iFrom + ","
-				    + this.rsMyDiv.getInt("MaxRecords"));
+				    + " order by FirstName,LastName,stEMail");
+				rs.last();
+				int iCount = rs.getRow();
+				rs = this.ebEnt.dbDyn.ExecuteSql(stSql
+				    + " order by FirstName,LastName,stEMail limit " + iFrom + ","
+				    + iDisplay);
 				rs.last();
 				iMax = rs.getRow();
 				String stLink2 = "./?stAction=admin&t=9";
 				String stClass = "";
 				if (iMax > 0) {
 					stReturn1 += "<tr><td colspan=4 class=l1td align=center><table class=l2table cellpadding=1 cellspacing=1>"
-					    + "<tr><th class=l2th>Action</td><th class=l2th>First Name</th><th class=l2th>Last Name</th><th class=l2th>Email</th></tr>";
+					    + "<tr><th class=l2th>Action</th><th class=l2th>First Name</th><th class=l2th>Last Name</th><th class=l2th>Email</th></tr>";
 					for (int iR = 1; iR <= iMax; iR++) {
 						rs.absolute(iR);
 						if ((iR & 1) != 0) {
@@ -4111,35 +4181,31 @@ public class EpsUserData {
 					boolean addAnchor = false;
 					String stLookupLink = (stLookup != null && stLookup.equals("n") ? "&h=n&list=0"
 					    : "");
-					if (iFrom >= this.rsMyDiv.getInt("MaxRecords")) {
-						addAnchor = true;
-						stNext = "<a href='./?stAction=admin&t=9&do=users&stFrom=" + 0
-						    + "&stSql=" + java.net.URLEncoder.encode(stSql) + stLookupLink
-						    + "#next'>First</a>";
-						stNext += stNext = "&nbsp;<a href='./?stAction=admin&t=9&do=users&stFrom="
-						    + iToPrevious
-						    + "&stSql="
-						    + java.net.URLEncoder.encode(stSql)
-						    + stLookupLink
-						    + "#next'>Previous "
-						    + this.rsMyDiv.getInt("MaxRecords") + "</a>&nbsp;";
-					}
-					if (iMax >= this.rsMyDiv.getInt("MaxRecords")) {
-						if (!addAnchor)
-							stNext = "";
-						addAnchor = true;
-						stNext += "<a href='./?stAction=admin&t=9&do=users&stFrom=" + iTo
-						    + "&stSql=" + java.net.URLEncoder.encode(stSql) + stLookupLink
-						    + "#next'>Next " + this.rsMyDiv.getInt("MaxRecords") + "</a>";
-						stNext += "&nbsp;<a href='./?stAction=admin&t=9&do=users&stFrom="
-						    + (iCount - iCount % this.rsMyDiv.getInt("MaxRecords"))
-						    + "&stSql=" + java.net.URLEncoder.encode(stSql) + stLookupLink
-						    + "#next'>Last</a>";
-					}
-					if (addAnchor) {
-						stReturn1 += "<a name='next'></a>";
-						stReturn1 += "</table><br>" + stNext + "</td></tr>";
-					}
+					/*
+					 * if (iFrom >= this.rsMyDiv.getInt("MaxRecords")) { addAnchor = true;
+					 * stNext = "<a href='./?stAction=admin&t=9&do=users&stFrom=" + 0 +
+					 * "&stSql=" + java.net.URLEncoder.encode(stSql) + stLookupLink +
+					 * "#next'>First</a>"; stNext += stNext =
+					 * "&nbsp;<a href='./?stAction=admin&t=9&do=users&stFrom=" +
+					 * iToPrevious + "&stSql=" + java.net.URLEncoder.encode(stSql) +
+					 * stLookupLink + "#next'>Previous " +
+					 * this.rsMyDiv.getInt("MaxRecords") + "</a>&nbsp;"; } if (iMax >=
+					 * this.rsMyDiv.getInt("MaxRecords")) { if (!addAnchor) stNext = "";
+					 * addAnchor = true; stNext +=
+					 * "<a href='./?stAction=admin&t=9&do=users&stFrom=" + iTo + "&stSql="
+					 * + java.net.URLEncoder.encode(stSql) + stLookupLink + "#next'>Next "
+					 * + this.rsMyDiv.getInt("MaxRecords") + "</a>"; stNext +=
+					 * "&nbsp;<a href='./?stAction=admin&t=9&do=users&stFrom=" + (iCount -
+					 * iCount % this.rsMyDiv.getInt("MaxRecords")) + "&stSql=" +
+					 * java.net.URLEncoder.encode(stSql) + stLookupLink +
+					 * "#next'>Last</a>"; } if (addAnchor) { stReturn1 +=
+					 * "<a name='next'></a>"; stReturn1 += "</table><br>" + stNext +
+					 * "</td></tr>"; }
+					 */
+					stReturn1 += "</table><br>"
+					    + makeToolbar(true, iCount, iFrom, iDisplay,
+					        "./?stAction=admin&t=9&do=users") + "</td></tr>";
+
 				} else {
 					stReturn1 += "<tr><td colspan=4 class=l1td align=left>No users found. Please refine search</td></tr>";
 				}
@@ -4147,8 +4213,8 @@ public class EpsUserData {
 			String stList = this.ebEnt.ebUd.request.getParameter("list");
 			if (stLookup != null && stLookup.equals("n") && stList != null
 			    && !stList.equals("0")) {
-				stReturn += this.epsEf
-				    .selectUsers(rsTable, stReturn2, iMax, iTo, stSql);
+				stReturn += this.epsEf.selectUsers(rsTable, stReturn2, iMax, iFrom,
+				    stSql);
 			} else {
 				stReturn += stReturn1;
 			}
@@ -4327,11 +4393,11 @@ public class EpsUserData {
 			stEdit += "\n<input type=button onclick=\"moveOptions(document.form"
 			    + this.nmTableId + ".f" + iF + "_list, document.form"
 			    + this.nmTableId + ".f" + iF + "_selected);\"  name=f" + iF
-			    + "_add  id=n" + iF + "_add  value='&gt;&gt; ADD'><br>&nbsp;<br>"
+			    + "_add  id=n" + iF + "_add  value='ADD &gt;&gt;'><br>&nbsp;<br>"
 			    + "<input type=button onclick=\"moveOptions(document.form"
 			    + this.nmTableId + ".f" + iF + "_selected, document.form"
 			    + this.nmTableId + ".f" + iF + "_list);\"  name=f" + iF
-			    + "_remove id=n" + iF + "_remove  value='REMOVE &lt;&lt;'>";
+			    + "_remove id=n" + iF + "_remove  value='&lt;&lt; REMOVE'>";
 			stEdit += "</td><td valign=top align=center>"
 			    + "<select style='width:150px' MULTIPLE SIZE=" + ii + " "
 			    + stDblClick + " name='f" + iF + "_selected' id='f" + iF
@@ -4392,7 +4458,7 @@ public class EpsUserData {
 			int iMax = rs.getRow();
 			if (iMax > 0) {
 				rs.absolute(1);
-				stPageTitle += " " + rs.getString("stTableName") + "</h1>";
+				stPageTitle += " " + rs.getString("stTableName") + " Report</h1>";
 			} else {
 				stPageTitle += "</h1>";
 			}
@@ -4745,7 +4811,7 @@ public class EpsUserData {
 	}
 
 	private String processApprove() {
-		String stReturn = "<cnter></form><form method=post><h1>Processing Special Day Approvals</h1><table class=l1small>";
+		String stReturn = "<center></form><form method=post><h1>Processing Special Day Approvals</h1><table class=l1small>";
 		try {
 			this.setPageTitle(this.getPageTitle() + " Approval");
 			String stSave = this.ebEnt.ebUd.request.getParameter("submit");
@@ -6202,7 +6268,8 @@ public class EpsUserData {
 		} catch (Exception e) {
 			this.stError += "<BR>ERROR runEOB " + e;
 		}
-		System.out.println("Finish runEOB: " + (System.nanoTime() - startTime)/10E9 + " seconds");
+		System.out.println("Finish runEOB: " + (System.nanoTime() - startTime)
+		    / 10E9 + " seconds");
 		return stReturn;
 	}
 
@@ -6485,6 +6552,10 @@ public class EpsUserData {
 			ResultSet rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
 			rs.last();
 			int iMax = rs.getRow();
+			if (iMax == 0) {
+				stReturn += "<center><h2>No Selected Project</h2></center>";
+				return stReturn;
+			}
 			stReturn += "<center><h2>" + rs.getString("ProjectName")
 			    + "</h2></center>";
 			stReturn += "</form><form method=post><table border=0><tr><th class=l1th>Criteria</th><th class=l1th>Division</th><th class=l1th>Weight (importance)</th>"
@@ -7254,6 +7325,114 @@ public class EpsUserData {
 		}
 		this.ebEnt.ebUd.clearPopupMessage();
 		return stReturn;
+	}
+
+	public String makeToolbar(boolean twoLines, int totalRecords, int fromPos,
+	    int displayPerList, String stLink) {
+
+		displayPerList = (displayPerList > 5 ? displayPerList : 5);
+		fromPos = (fromPos > 0 ? fromPos : 0);
+		String firstAction = "#";
+		String lastAction = "#";
+		String nextAction = "#";
+		String previousAction = "#";
+		String upAction = "#";
+		String downAction = "#";
+		if (stLink != null && !stLink.isEmpty()) {
+			if (fromPos > 0)
+				firstAction = stLink + "&from=0" + "&display=" + displayPerList;
+			if (fromPos + displayPerList < totalRecords)
+				lastAction = stLink
+				    + "&from="
+				    + (totalRecords - (totalRecords % displayPerList == 0 ? displayPerList
+				        : totalRecords % displayPerList)) + "&display="
+				    + displayPerList;
+			if (fromPos > displayPerList) {
+				previousAction = stLink + "&from=" + (fromPos - displayPerList)
+				    + "&display=" + displayPerList;
+			} else if (fromPos > 0) {
+				previousAction = stLink + "&from=0" + "&display=" + displayPerList;
+			}
+			if (fromPos + displayPerList < totalRecords)
+				nextAction = stLink + "&from=" + (fromPos + displayPerList)
+				    + "&display=" + displayPerList;
+			if (fromPos > 0)
+				upAction = stLink + "&from=" + (fromPos - 1) + "&display="
+				    + displayPerList;
+			if (fromPos < totalRecords)
+				downAction = stLink + "&from=" + (fromPos + 1) + "&display="
+				    + displayPerList;
+		}
+
+		StringBuilder stReturn = new StringBuilder("<div class='toolbar-wrapper'>");
+
+		stReturn.append("<div class='button-wrapper'>");
+		stReturn.append(" <a class='first-button' href='" + firstAction
+		    + "'>First</a>");
+		stReturn.append(" <div class='vsplitter'><span/></div>");
+		stReturn.append(" <a class='previous-button' href='" + previousAction
+		    + "'>Previous</a>");
+		stReturn.append(" <div class='vsplitter'><span/></div>");
+		stReturn.append(" <a class='up-button' href='" + upAction + "'>Up One</a>");
+		stReturn.append(" <div class='vsplitter'><span/></div>");
+		stReturn.append(" <a class='down-button' href='" + downAction
+		    + "'>Down One</a>");
+		stReturn.append(" <div class='vsplitter'><span/></div>");
+		stReturn.append(" <a class='next-button' href='" + nextAction
+		    + "'>Next</a>");
+		stReturn.append(" <div class='vsplitter'><span/></div>");
+		stReturn.append(" <a class='last-button' href='" + lastAction
+		    + "'>Last</a>");
+		stReturn.append(" <div class='vsplitter'><span/></div>");
+		stReturn.append(" <div class='clr'><span/></div>");
+		stReturn.append("</div>");
+
+		stReturn.append("<div class='options-wrapper'>");
+		stReturn.append(" <div class='options-left'>");
+		stReturn
+		    .append("  <div><label>Display per list:</label><select class='display-per-list' onchange='location.href=\""
+		        + (stLink + "&from=" + fromPos + "&display=") + "\"+this.value'>");
+		int[] displays = { 5, 10, 20, 50, 100 };
+		for (int i = 0; i < displays.length; i++) {
+			stReturn.append("   <option")
+			    .append(displays[i] == displayPerList ? " selected" : "")
+			    .append(" value='").append(displays[i]).append("'>")
+			    .append(displays[i]).append("</option>");
+		}
+		stReturn.append("  </select></div>");
+		stReturn
+		    .append("  <div><label>Starting position:</label><select class='starting-position' onchange='location.href=\""
+		        + (stLink + "&display=" + displayPerList + "&from=")
+		        + "\"+this.value'>");
+		Set<Integer> posSet = new HashSet<Integer>();
+		int iLastPos = Math.round(totalRecords / 10) * 10;
+		posSet.add(0);
+		posSet.add(Math.round(iLastPos / 16));
+		posSet.add(Math.round(iLastPos / 8));
+		posSet.add(Math.round(iLastPos / 4));
+		posSet.add(Math.round(iLastPos / 2));
+		posSet.add(iLastPos);
+		posSet.add(fromPos);
+		List<Integer> posList = new ArrayList<Integer>(posSet);
+		Collections.sort(posList);
+		for (Integer pos : posList) {
+			stReturn.append("   <option ").append(pos == fromPos ? " selected" : "")
+			    .append(" value='").append(pos).append("'>")
+			    .append(pos.intValue() + 1).append("</option>");
+		}
+		stReturn.append("  </select></div>");
+		stReturn.append(" </div>");
+		stReturn.append(" <div class='options-right'>");
+		stReturn.append("  <div><label>Last Record:</label></div>");
+		stReturn.append("  <div><input value='").append(totalRecords)
+		    .append("' disabled /></div>");
+		stReturn.append(" </div>");
+		stReturn.append(" <div class='clr'><span/></div>");
+		stReturn.append("</div>");
+
+		stReturn.append("<div class='clr'><span/></div>");
+		stReturn.append("</div>");
+		return stReturn.toString();
 	}
 
 }

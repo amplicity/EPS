@@ -144,9 +144,11 @@ public class EpsReport {
 			if (rs != null) {
 				rs.last();
 				int iMax = rs.getRow();
-				String stClass = "style='background-color:yellow;font-size:12px;padding:0px 10px 0px 10px;'";
+				String stClass = "class=l1th";
+//				String stClass = "style='background-color:yellow;font-size:12px;padding:0px 10px 0px 10px;'";
 				// <th " + stClass + ">Report Type</th>
-				stReturn += "<table border=0 bgcolor=white cellspacing=1 cellpadding=2>"
+//				stReturn += "<table border=0 bgcolor=white cellspacing=1 cellpadding=2>"
+				stReturn += "<table class=l1tableb>"
 				    + "<tr>"
 				    + "<th "
 				    + stClass
@@ -159,7 +161,8 @@ public class EpsReport {
 				    + stClass
 				    + ">&nbsp;</th></tr>";
 				// <th " + stClass + " colspan=2>Download Report</th>
-				stClass = "style='background-color:white;font-size:10px;padding:0px 10px 0px 10px;'";
+//				stClass = "style='background-color:white;font-size:10px;padding:0px 10px 0px 10px;'";
+				stClass = "class=l1td";
 				for (int iR = 1; iR <= iMax; iR++) {
 					rs.absolute(iR);
 					stReturn += "<tr>";
@@ -285,7 +288,7 @@ public class EpsReport {
 						// " align=center>" + stPageTitle + "</th></tr>";
 						stReturn += "<tr><th colspan="
 						    + (aFields.length - 1)
-						    + " align=center STYLE='font-size: 18px; background-color: yellow;'>"
+						    + " align=center class=l1th>"
 						    + stPageTitle + "</th></tr>";
 
 						/*

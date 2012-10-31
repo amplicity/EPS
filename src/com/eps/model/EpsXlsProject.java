@@ -72,6 +72,14 @@ class EpsXlsProject // extends EpsUserData
 			    + "&parent=" + stTemp + "&child=" + stChild;
 			int iFrom = 0;
 			int iBlock = this.epsUd.rsMyDiv.getInt("ReqSchRows");
+			String stBlock = this.ebEnt.ebUd.request.getParameter("display");
+			if (stBlock != null && !stBlock.isEmpty()) {
+				try {
+					iBlock = Integer.parseInt(stBlock);
+				} catch (Exception e) {
+
+				}
+			}
 			this.rsProject = this.ebEnt.dbDyn
 			    .ExecuteSql("select * from Projects where RecId=" + stPk);
 			this.rsProject.absolute(1);
@@ -461,6 +469,11 @@ class EpsXlsProject // extends EpsUserData
 				    stPk));
 			}
 			sbReturn.append("</table></form><br/>");
+			if (iMax > 0) {
+				sbReturn.append(epsUd.makeToolbar(false, iMaxRecords, iFrom, iBlock,
+				    "./?stAction=projects&t=12&do=xls&pk=" + stPk + "&parent=12&child="
+				        + stChild + ""));
+			}
 		} catch (Exception e) {
 			this.stError += "<br>ERROR xlsRequirementsEdit: " + e;
 		}
@@ -480,6 +493,14 @@ class EpsXlsProject // extends EpsUserData
 			    + "&parent=" + stTemp + "&child=" + stChild;
 			int iFrom = 0;
 			int iBlock = this.epsUd.rsMyDiv.getInt("ReqSchRows");
+			String stBlock = this.ebEnt.ebUd.request.getParameter("display");
+			if (stBlock != null && !stBlock.isEmpty()) {
+				try {
+					iBlock = Integer.parseInt(stBlock);
+				} catch (Exception e) {
+
+				}
+			}
 			this.rsProject = this.ebEnt.dbDyn
 			    .ExecuteSql("select * from Projects where RecId=" + stPk);
 			this.rsProject.absolute(1);
@@ -812,6 +833,11 @@ class EpsXlsProject // extends EpsUserData
 				    stPk));
 			}
 			sbReturn.append("</table></form><br/>");
+			if (iMax > 0) {
+				sbReturn.append(epsUd.makeToolbar(false, iMaxRecords, iFrom, iBlock,
+				    "./?stAction=projects&t=12&do=xls&pk=" + stPk + "&parent=12&child="
+				        + stChild + ""));
+			}
 		} catch (Exception e) {
 			this.stError += "<br>ERROR xlsTestEdit: " + e;
 		}
@@ -831,6 +857,14 @@ class EpsXlsProject // extends EpsUserData
 			    + "&parent=" + stTemp + "&child=" + stChild;
 			int iFrom = 0;
 			int iBlock = this.epsUd.rsMyDiv.getInt("ReqSchRows");
+			String stBlock = this.ebEnt.ebUd.request.getParameter("display");
+			if (stBlock != null && !stBlock.isEmpty()) {
+				try {
+					iBlock = Integer.parseInt(stBlock);
+				} catch (Exception e) {
+
+				}
+			}
 			this.rsProject = this.ebEnt.dbDyn
 			    .ExecuteSql("select * from Projects where RecId=" + stPk);
 			this.rsProject.absolute(1);
@@ -1249,15 +1283,15 @@ class EpsXlsProject // extends EpsUserData
 							// categories and process below all fields
 							laborcat = stValue;
 						} else {
+							tbstyle = stClass + stId + iF + stNm + iF + " " + getStyle(0);
 							if (rsFields.getInt("nmDataType") == 3
 							    || rsFields.getInt("nmDataType") == 4
 							    || rsFields.getInt("nmDataType") == 41)
-								sbReturn.append("<td " + stClass + stId + iF + stNm + iF + " "
-								    + getStyle(0) + " align='left'>"); // align text left
+								sbReturn.append("<td " + tbstyle + " align='left'>"); // align
+								                                                      // text
+								                                                      // left
 							else
-								sbReturn.append("<td " + stClass + stId + iF + stNm + iF + " "
-								    + getStyle(0) + ">");
-							tbstyle = stClass + stId + iF + stNm + iF + " " + getStyle(0);
+								sbReturn.append("<td " + tbstyle + ">");
 							if (iF == 1)
 								sbReturn.append("<a name='row" + rs.getString("SchId")
 								    + "'></a>");
@@ -1535,6 +1569,14 @@ class EpsXlsProject // extends EpsUserData
 
 					iPrevLevel = rs.getInt("SchLevel");
 				}
+
+				/*
+				 * sbReturn .append(
+				 * "<input type=button onClick=\"parent.location='./?stAction=projects&t=12&do=xls&pk="
+				 * ); sbReturn.append(stPk); sbReturn.append("&parent=12&child=");
+				 * sbReturn.append(stChild); sbReturn.append("&from=");
+				 */
+
 				sbReturn.append(doNext(stChild, iMaxFields, iMaxRecords, iFrom, iBlock,
 				    stGoBack, stPk));
 			} else {
@@ -1542,6 +1584,11 @@ class EpsXlsProject // extends EpsUserData
 				    stPk));
 			}
 			sbReturn.append("</table></form><br/>");
+			if (iMax > 0) {
+				sbReturn.append(epsUd.makeToolbar(false, iMaxRecords, iFrom, iBlock,
+				    "./?stAction=projects&t=12&do=xls&pk=" + stPk + "&parent=12&child="
+				        + stChild + ""));
+			}
 		} catch (Exception e) {
 			this.stError += "<br>ERROR xlsSchedulesEdit: " + e;
 		}
@@ -1741,87 +1788,55 @@ class EpsXlsProject // extends EpsUserData
 		sbReturn.append("<tr><td colspan=");
 		sbReturn.append(iCol);
 		sbReturn
-		    .append(" width='100%' ><table border=0 bgcolor=skyblue width='100%'><tr><td width='33%' align=left>");
+		    .append(" width='100%' ><table border=0 bgcolor=skyblue width='100%'><tr><td align=center>");
 		// http://localhost:8084/eps/?stAction=projects&t=0&do=xls&pk=5&parent=12&child=46#next
 		sbReturn.append("<input type=button onClick=\"parent.location='").append(
 		    stGoBack);
 		sbReturn.append("&pk=");
 		sbReturn.append(stPk);
 		sbReturn.append("&do=edit'\" value='Go Back to Projects'>");
-		sbReturn.append("</td><td width='33%' align=center>");
-		// sbReturn.append(
-		// "<input type=button onClick=\"parent.location='./?stAction=projects&t=12&do=xls&pk="
-		// + stPk + "&parent=12&child=46&child2=" + stChild +
-		// "'\" value='Analyze'>";
-		if (iMaxRecords > 0) {
-			sbReturn
-			    .append("<td width='33%' align=right ><input type=button onClick=\"parent.location='./?stAction=projects&t=12&do=xls&pk=");
-			sbReturn.append(stPk);
-			sbReturn.append("&parent=12&child=");
-			sbReturn.append(stChild);
-			sbReturn
-			    .append("&from=0'\" value='&lt;&lt First'>&nbsp;&nbsp;&nbsp;&nbsp;");
-			int i = iFrom - iBlock;
-			if (i < 0)
-				i = 0;
-			sbReturn
-			    .append("<input type=button onClick=\"parent.location='./?stAction=projects&t=12&do=xls&pk=");
-			sbReturn.append(stPk);
-			sbReturn.append("&parent=12&child=");
-			sbReturn.append(stChild);
-			sbReturn.append("&from=");
-			sbReturn.append(i);
-			sbReturn.append("'\" value='&lt; Previous'>&nbsp;&nbsp;&nbsp;&nbsp;");
-			i = iFrom + iBlock;
-			sbReturn
-			    .append("<input type=button onClick=\"parent.location='./?stAction=projects&t=12&do=xls&pk=");
-			sbReturn.append(stPk);
-			sbReturn.append("&parent=12&child=");
-			sbReturn.append(stChild);
-			sbReturn.append("&from=");
-			sbReturn.append(i);
-			sbReturn.append("'\" value='&gt; Next'>&nbsp;&nbsp;&nbsp;&nbsp;");
-			int i2 = iMaxRecords / iBlock;
-			i = i2 * iBlock;
-			sbReturn
-			    .append("<input type=button onClick=\"parent.location='./?stAction=projects&t=12&do=xls&pk=");
-			sbReturn.append(stPk);
-			sbReturn.append("&parent=12&child=");
-			sbReturn.append(stChild);
-			sbReturn.append("&from=");
-			sbReturn.append(i);
-			sbReturn.append("'\" value='&gt;&gt; Last' >&nbsp;&nbsp;&nbsp;&nbsp;");
-		} else {
-			sbReturn
-			    .append("<td align=right>No records found: </td><td align=right>");
-			String s1 = "";
-			if ((stChild.equals("21") && (this.ebEnt.ebUd.getLoginPersonFlags() & 0x60) != 0)
-			    || // Only PM and PPM
-			    (stChild.equals("19") && (this.ebEnt.ebUd.getLoginPersonFlags() & 0xA0) != 0)) // Only
-			                                                                                   // PM
-			                                                                                   // and
-			                                                                                   // PPM
-			{
-				s1 = "<input type=button onClick=\"parent.location='./?stAction=projects&t=12&do=xls&pk="
-				    + stPk
-				    + "&parent=12&child="
-				    + stChild
-				    + "&from=0&a=insert&what=below&r=-1#row1'\" value='Insert New'>";
-				sbReturn.append(s1);
-			} else if (stChild.equals("34")
-			    && (this.ebEnt.ebUd.getLoginPersonFlags() & 0xF0) != 0) // Test,
-			                                                            // everyone
-			                                                            // for now
-			{
-				s1 = "<input type=button onClick=\"parent.location='./?stAction=projects&t=12&do=xls&pk="
-				    + stPk
-				    + "&parent=12&child="
-				    + stChild
-				    + "&from=0&a=insert&what=below&r=-1#row1'\" value='Insert New'>";
-				sbReturn.append(s1);
-			}
-			sbReturn.append("</td></tr>");
-		}
+		/*
+		 * sbReturn.append("</td><td width='33%' align=center>"); //
+		 * sbReturn.append( //
+		 * "<input type=button onClick=\"parent.location='./?stAction=projects&t=12&do=xls&pk="
+		 * // + stPk + "&parent=12&child=46&child2=" + stChild + //
+		 * "'\" value='Analyze'>"; if (iMaxRecords > 0) { sbReturn .append(
+		 * "<td width='33%' align=right ><input type=button onClick=\"parent.location='./?stAction=projects&t=12&do=xls&pk="
+		 * ); sbReturn.append(stPk); sbReturn.append("&parent=12&child=");
+		 * sbReturn.append(stChild); sbReturn
+		 * .append("&from=0'\" value='&lt;&lt First'>&nbsp;&nbsp;&nbsp;&nbsp;"); int
+		 * i = iFrom - iBlock; if (i < 0) i = 0; sbReturn .append(
+		 * "<input type=button onClick=\"parent.location='./?stAction=projects&t=12&do=xls&pk="
+		 * ); sbReturn.append(stPk); sbReturn.append("&parent=12&child=");
+		 * sbReturn.append(stChild); sbReturn.append("&from="); sbReturn.append(i);
+		 * sbReturn.append("'\" value='&lt; Previous'>&nbsp;&nbsp;&nbsp;&nbsp;"); i
+		 * = iFrom + iBlock; sbReturn .append(
+		 * "<input type=button onClick=\"parent.location='./?stAction=projects&t=12&do=xls&pk="
+		 * ); sbReturn.append(stPk); sbReturn.append("&parent=12&child=");
+		 * sbReturn.append(stChild); sbReturn.append("&from="); sbReturn.append(i);
+		 * sbReturn.append("'\" value='&gt; Next'>&nbsp;&nbsp;&nbsp;&nbsp;"); int i2
+		 * = iMaxRecords / iBlock; i = i2 * iBlock; sbReturn .append(
+		 * "<input type=button onClick=\"parent.location='./?stAction=projects&t=12&do=xls&pk="
+		 * ); sbReturn.append(stPk); sbReturn.append("&parent=12&child=");
+		 * sbReturn.append(stChild); sbReturn.append("&from="); sbReturn.append(i);
+		 * sbReturn.append("'\" value='&gt;&gt; Last' >&nbsp;&nbsp;&nbsp;&nbsp;"); }
+		 * else { sbReturn
+		 * .append("<td align=right>No records found: </td><td align=right>");
+		 * String s1 = ""; if ((stChild.equals("21") &&
+		 * (this.ebEnt.ebUd.getLoginPersonFlags() & 0x60) != 0) || // Only PM and
+		 * PPM (stChild.equals("19") && (this.ebEnt.ebUd.getLoginPersonFlags() &
+		 * 0xA0) != 0)) // Only // PM // and // PPM { s1 =
+		 * "<input type=button onClick=\"parent.location='./?stAction=projects&t=12&do=xls&pk="
+		 * + stPk + "&parent=12&child=" + stChild +
+		 * "&from=0&a=insert&what=below&r=-1#row1'\" value='Insert New'>";
+		 * sbReturn.append(s1); } else if (stChild.equals("34") &&
+		 * (this.ebEnt.ebUd.getLoginPersonFlags() & 0xF0) != 0) // Test, // everyone
+		 * // for now { s1 =
+		 * "<input type=button onClick=\"parent.location='./?stAction=projects&t=12&do=xls&pk="
+		 * + stPk + "&parent=12&child=" + stChild +
+		 * "&from=0&a=insert&what=below&r=-1#row1'\" value='Insert New'>";
+		 * sbReturn.append(s1); } sbReturn.append("</td></tr>"); }
+		 */
 		sbReturn.append("</td></tr></table></td></tr>");
 		return sbReturn.toString();
 	}
@@ -1965,26 +1980,31 @@ class EpsXlsProject // extends EpsUserData
 		String stStyle = "";
 		try {
 			stStyle = rsFields.getString("stCustom");
-			if (stStyle == null || stStyle.length() <= 0 || stStyle.equals("null")) {
-				double d1 = this.epsUd.rsMyDiv.getDouble("PageWidthPx");
-				double d2 = rsFields.getDouble("nmWidth") - dReduce; // Take 1 pct off
-				                                                     // for borders etc
-				int iWidth = (int) ((d1 * d2) / 100);
+			double d1 = this.epsUd.rsMyDiv.getDouble("PageWidthPx");
+			double d2 = rsFields.getDouble("nmWidth") - dReduce; // Take 1 pct off
+			// for borders etc
+			int iWidth = (int) ((d1 * d2) / 100);
+			stStyle = " style='width:" + iWidth + "px;";
 
-				stStyle = " style='width:" + iWidth + "px;";
-				String stAlign = rsFields.getString("stCustom");
-				if (stAlign != null && stAlign.length() > 0)
-					stStyle += "text-align:" + stAlign + ";";
-				if (rsFields.getInt("nmDataType") == 1
-				    || rsFields.getInt("nmDataType") == 31
-				    || rsFields.getInt("nmDataType") == 5) {
-					if (stAlign.length() <= 0 || stAlign.equals("null"))
-						stStyle += "text-align:right;";
+			String stAlign = rsFields.getString("stCustom");
+			if (stAlign == null || stAlign.length() <= 0 || stAlign.equals("null")) {
+				switch (rsFields.getInt("nmDataType")) {
+				case 1:
+				case 9:
+				case 42:
+					stStyle += "text-align:center;";
+					break;
+				case 5:
+				case 31:
+					stStyle += "text-align:right;";
+					break;
 				}
-				if (dReduce > 0)
-					stStyle += "margin:1px;padding:1px;";
-				stStyle += "'";
+			} else {
+				stStyle += "text-align:" + stAlign + ";";
 			}
+			if (dReduce > 0)
+				stStyle += "margin:1px;padding:1px;";
+			stStyle += "'";
 		} catch (Exception e) {
 			this.stError += "<br>ERROR getStyle " + e;
 		}

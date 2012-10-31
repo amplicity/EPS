@@ -116,6 +116,7 @@ public class EpsController extends HttpServlet {
 							int iPos = stRedir.indexOf("#");
 							if (iPos > 0)
 								stRedir = stRedir.substring(0, iPos);
+							stRedir += (stRedir.indexOf("?") >= 0 ? "" : "?");
 							stRedir += "&popupmessage="
 							    + java.net.URLEncoder.encode(ebEnt.ebUd.getPopupMessage());
 						}

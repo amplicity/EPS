@@ -2243,17 +2243,13 @@ function setActionsClick(iReqSched, iRecId, iId, iFlags, iLevel, iNextLevel, iPr
     for( i=1 ; i <= iMaxCol ; i++ )
     {
       oObj = getObject( "r" + oldRecId + "_" + i );
-      if ( oObj.className != null )
-        oObj.className  = "l1td2";
-      oObj.setAttribute("class", "l1td2");
+      $(oObj).removeClass("l1td3");
     }
   }
   for( i=1 ; i <= iMaxCol ; i++ )
   {
     oObj = getObject( "r" + iRecId + "_" + i );
-    if ( oObj.className != null )
-      oObj.className  = "l1td3";
-    oObj.setAttribute("class", "l1td3");
+    $(oObj).addClass("l1td3");
   }
   oldRecId = iRecId;
 }

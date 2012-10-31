@@ -396,21 +396,21 @@ public class EbDatabase {
 			stOut = "0";
 		return stOut;
 	}
-}
-
-class EbResultSet {
-	public ResultSet rs = null;
-	public Statement stmt = null;
-	public int iRows = 0;
-
-	public String ebClose() {
-		String stError = "";
-		try {
-			this.rs.close();
-			this.stmt.close();
-		} catch (Exception e) {
-			stError = stError + "<br> EbResultSet.ebClose " + e;
+	
+	public class EbResultSet {
+		public ResultSet rs = null;
+		public Statement stmt = null;
+		public int iRows = 0;
+		
+		public String ebClose() {
+			String stError = "";
+			try {
+				this.rs.close();
+				this.stmt.close();
+			} catch (Exception e) {
+				stError = stError + "<br> EbResultSet.ebClose " + e;
+			}
+			return stError;
 		}
-		return stError;
 	}
 }

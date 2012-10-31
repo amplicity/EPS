@@ -101,3 +101,16 @@ INSERT INTO  `dbeps01`.`teb_epsfields` (
 VALUES (
 '1096',  '999',  'int',  '',  '',  '', NULL ,  '32',  '',  ''
 );
+
+
+UPDATE  `teb_fields` SET  `nmDataType` =  '9' WHERE  `teb_fields`.`nmForeignId` =94 OR `teb_fields`.`nmForeignId`=135;
+UPDATE  `teb_epsfields` SET `stValidationFlags` = 'int' WHERE  `teb_epsfields`.`nmForeignId` =94 OR `teb_epsfields`.`nmForeignId`=135;
+INSERT INTO  `dbeps01`.`teb_choices` (
+`UniqIdChoice` ,
+`stChoiceValue` ,
+`nmFieldId`
+)
+VALUES ('5', '5', '94'),('10', '10', '94'),('20', '20', '94'),('50', '50', '94'),('100', '100', '94'), ('5', '5', '135'),('10', '10', '135'),('20', '20', '135'),('50', '50', '135'),('100', '100', '135');
+
+UPDATE  `dbeps01`.`teb_fields` SET  `nmMaxBytes` =  '100',`nmCols` =  '100' WHERE  `teb_fields`.`nmForeignId` =3;
+UPDATE  `dbeps01`.`teb_fields` SET  `nmMaxBytes` =  '100',`nmCols` =  '100' WHERE  `teb_fields`.`nmForeignId` =4;

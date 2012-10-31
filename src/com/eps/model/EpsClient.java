@@ -7,13 +7,14 @@ package com.eps.model;
 
 import com.ederbase.model.*;
 import java.sql.ResultSet;
+import java.util.Enumeration;
 
 /**
  * 
  * @author Rob Eder
  */
 public class EpsClient {
-	public String stVersion = "Version: 8/13/12 8:00AM";
+	public String stVersion = "EPPORA Version: 29 October 2012";
 	private int iUserId = -1;
 	private int nmPrivUser = 0;
 	private String stAction = "";
@@ -91,27 +92,42 @@ public class EpsClient {
 			}
 
 			// Replace global tags with real values
-			stReturn = stReturn.replace("~~stPageTitle~", this.epsUd.getPageTitle());
+			stReturn = stReturn.replace("~~stPageTitle~",
+			    this.epsUd.getPageTitle() != null ? this.epsUd.getPageTitle().trim()
+			        : "");
 			String stA = this.ebEnt.ebUd.request.getParameter("a");
-			if (stA == null || !stA.equals("28"))
-				stReturn = stReturn.replace("PageWidthPx",
-				    this.epsUd.rsMyDiv.getString("PageWidthPx") + "px");
+			if (stA == null || !stA.equals("28")) {
+				double pageWidth = this.epsUd.rsMyDiv.getDouble("PageWidthPx");
+				stReturn = stReturn.replace("PageWidthPx", (pageWidth > 0 ? pageWidth
+				    + "px" : "auto"));
+			}
 			if (iUserId > 0) {
 				stReturn = stReturn
 				    .replace(
 				        "~~stWelcome~",
 				        "<div id='gen3'>"
 				            + "<form method=post id=loginout name=loginout>"
-				            + "<font class=medium>Welcome: </font><font class=mediumbold>"
+				            + "<font class=medium>Welcome: </font><font class=mediumbold><a class='welcome-name' href='./?stAction=admin&t=9&do=edit&pk="
+				            + this.iUserId
+				            + "'>"
 				            + this.ebEnt.dbDyn
 				                .ExecuteSql1("select concat(FirstName,' ',LastName) from Users where nmUserId="
 				                    + this.iUserId)
-				            + "</b></font>"
+				            + "</a></font>"
 				            + "<input type=hidden name=Logout value=Logout onClick=\"setSubmitId(9998);\">"
 				            + "<div class='vsplitter'><span/></div>"
 				            + "<span onClick='setSubmitId(9998);document.loginout.submit();' style='cursor:pointer;'><b>Sign Out</b></span>"
 				            + "</form></div><div class='clr'><span/></div>");
-				stReturn = stReturn.replaceAll("~BodyStyleClass~", "body");
+				String stClass = "";
+				Enumeration<String> paramNames = this.ebEnt.ebUd.request
+				    .getParameterNames();
+				while (paramNames.hasMoreElements()) {
+					String paramName = (String) paramNames.nextElement();
+					stClass += " " + paramName + "_"
+					    + this.ebEnt.ebUd.request.getParameter(paramName);
+				}
+				stReturn = stReturn.replaceAll("~BodyStyleClass~", "body " + stAction
+				    + stClass);
 			} else {
 				stReturn = stReturn.replace("~~stWelcome~", "");
 				stReturn = stReturn.replaceAll("~BodyStyleClass~", "body-login");
@@ -152,10 +168,7 @@ public class EpsClient {
 							}
 						} else if (asFields[0].equals("~~MainBody")) {
 							if (iUserId <= 0) {
-								this.epsUd.setPageTitle("<div class='login-pagetitle'>"
-								    + "	<div class='login-title'>Login</div>"
-								    + "	<div class='login-title-shadow'><span/></div>"
-								    + "</div>");
+								this.epsUd.setPageTitle("Login");
 								stReturn += this.epsUd.getLoginPage();
 							} else {
 								String stA = this.ebEnt.ebUd.request.getParameter("a");
@@ -206,7 +219,7 @@ public class EpsClient {
 
 	public String makeMenuBar() {
 		String stReturn = "";
-		stReturn += "<li><a class='topnav' href='./?stAction=home'>Home</a>";
+		stReturn += "<li class='top-nav nav-home'><a class='topnav' href='./?stAction=home'>Home</a>";
 		// stReturn += "<li><a href='./?stAction=tasks'>Tasks</a></li>";
 		// stReturn += "<li><a href='./?stAction=wf'>Workflow</a></li>
 		stReturn += "</li>";
@@ -217,10 +230,12 @@ public class EpsClient {
 			int iMax = rs.getRow();
 			String stReport = "";
 			String stAdmin = "";
+			String stEdit = "";
 			String stProject = "";
 			for (int iR = 1; iR <= iMax; iR++) {
 				rs.absolute(iR);
 				if ((rs.getInt("nmProjectPriv") & nmPrivUser) != 0) {
+					stProject += "<li><a href='./?stAction=admin&t=12&do=insert'>Create Project</a></li>";
 					stProject += "<li><a href='./?stAction=projects&c=allocate'>Allocate</a></li>";
 					// stProject +=
 					// "<li><a href='./?stAction=projects&c=analprj'>Analyze Project</a></li>";
@@ -234,22 +249,95 @@ public class EpsClient {
 					// "<li><a href='./?stAction=projects&c=apprreq'>Approve Requirement</a></li>";
 					// stProject +=
 					// "<li><a href='./?stAction=projects&c=apprsch'>Approve Schedule</a></li>";
-					stProject += "<li><a href='./?stAction=projects&c=critscor'>Criterion Scoring</a></li>";
-					if (this.epsUd.stPrj != null && this.epsUd.stPrj.length() > 0)
-						stProject += "<li><a href='./?stAction=projects&t=12&pk="
-						    + this.epsUd.stPrj + "&do=edit'>Current Project</a></li>";
+					// stProject +=
+					// "<li><a href='./?stAction=projects&c=critscor'>Criterion Scoring</a></li>";
 					stProject += "<li><a href='./?stAction=projects&t="
 					    + rs.getInt("nmTableId") + "'>" + rs.getString("stTableName")
 					    + "</a></li>";
+					stProject += "<li><a href='javascript:void(0);'>Template</a></li>";
+					if (epsUd.stPrj != null && epsUd.stPrj.length() > 0
+					    && !epsUd.stPrj.equals("0")) {
+						String stPrjLink = "./?stAction=projects&t=12&pk="
+						    + this.epsUd.stPrj;
+						stProject += "<li><a href='"
+						    + stPrjLink
+						    + "&do=edit'>Current Project</a>"
+						    + "	<li><a class='sub-item' href='"
+						    + stPrjLink
+						    + "&do=xls&child=46'>Analyze Project</a></li>"
+						    + "	<li><a class='sub-item' href='javascript:void(0);'>Approve</a></li>"
+						    + "	<li><a class='sub-item' href='javascript:void(0);'>Project Attributes</a></li>"
+						    + "	<li><a class='sub-item' href='./?stAction=projects&c=critscor'>Criterion Score</a></li>"
+						    + "	<li><a class='sub-item' href='"
+						    + stPrjLink
+						    + "&do=xls&child=26'>Baseline</a></li>"
+						    + "	<li><a class='sub-item' href='"
+						    + stPrjLink
+						    + "&do=xls&child=19'>Requirements</a></li>"
+						    + "	<li><a class='sub-item' href='"
+						    + stPrjLink
+						    + "&do=xls&child=21'>Schedule</a></li>"
+						    + "	<li><a class='sub-item' href='"
+						    + stPrjLink
+						    + "&do=xls&child=34'>Test</a></li>"
+						    + "	<li><a class='sub-item' href='javascript:void(0);'>WBS</a></li>"
+						    + "</li>";
+					}
+					
+					{
+						stEdit +="<li><a href=''>Customize</a></li>";
+						stEdit +="<li><a class='collapsed' href=''>Insert</a>" +
+								"<ul>" +
+								"<li><a href=''>Above</a></li>" +
+								"<li><a href=''>Below</a></li>" +
+								"</ul></li>";
+						stEdit +="<li><a class='collapsed' href=''>Edit</a>" +
+								"<ul>" +
+								"<li><a href=''>Full Record</a></li>" +
+								"<li><a href=''>Inline</a></li>" +
+								"</ul></li>";
+						stEdit +="<li><a class='collapsed' href=''>Delete</a>" +
+								"<ul>" +
+								"<li><a href=''>This Item Only</a></li>" +
+								"<li><a href=''>With Children</a></li>" +
+								"</ul></li>";
+						stEdit +="<li><a class='collapsed' href=''>Map</a>" +
+								"<ul>" +
+								"<li><a href=''>WBS to Requirements</a></li>" +
+								"<li><a href=''>Requirements to </a></li>" +
+								"<li><a href=''>Requirements to Test Cases</a></li>" +
+								"<li><a href=''>Schedule Tasks to Requirements</a></li>" +
+								"</ul></li>";
+						stEdit +="<li><a class='collapsed' href=''>Promote</a>" +
+								"<ul>" +
+								"<li><a href=''>This Item Only</a></li>" +
+								"<li><a href=''>With Children</a></li>" +
+								"</ul></li>";
+						stEdit +="<li><a href=''>Demote</a></li>";
+					}
 				}
 				if ((rs.getInt("nmReportPriv") & nmPrivUser) != 0) {
-					stReport += "<li><a href='./?stAction=reports&t="
-					    + rs.getInt("nmTableId") + "'>" + rs.getString("stTableName")
-					    + "</a></li>";
+					String stLink = "./?stAction=reports&t=" + rs.getInt("nmTableId");
+					String stViewLink = stLink + "&submit2="
+					    + java.net.URLEncoder.encode("View Saved Reports");
+					String stRunLink = stLink + "&submit2="
+					    + java.net.URLEncoder.encode("Run/Execute Report");
+					String stCustomLink = stLink + "&submit2="
+					    + java.net.URLEncoder.encode("Custom Report Designer");
+					stCustomLink += "&customreport="
+					    + epsUd.ebEnt.dbDyn
+					        .ExecuteSql1n("select max(RecId) from teb_customreport where stReportType="
+					            + rs.getInt("nmTableId"));
+					stReport += "<li><a class='collapsed' href='" + stLink + "'>"
+					    + rs.getString("stTableName") + "</a>" + "<ul>" + "<li><a href='"
+					    + stCustomLink + "'>Custom Report Designer</a></li>"
+					    + "<li><a href='" + stRunLink + "'>Run/Execute Report</a></li>"
+					    + "<li><a href='" + stViewLink + "'>View Saved Reports</a></li>"
+					    + "</ul>" + "</li>";
 				}
 				if ((rs.getInt("nmAccessPriv") & nmPrivUser) != 0) {
 					if (stAdmin.length() <= 0 && (nmPrivUser & 0x220) != 0) // Ex and PPM
-						stAdmin += "<li><a href='./?stAction=admin&c=appr'>Approval</a></li>";
+						stAdmin += "<li><a href='./?stAction=admin&c=appr'>Approve Special Days</a></li>";
 
 					if (rs.getInt("nmTableId") == 15) // Options
 						stAdmin += "<li><a href='./?stAction=admin&t="
@@ -260,25 +348,40 @@ public class EpsClient {
 						stAdmin += "<li><a href='./?stAction=admin&t="
 						    + rs.getInt("nmTableId") + "&do=users'>"
 						    + rs.getString("stTableName") + "</a></li>";
-					} else
+					} else if (rs.getInt("nmTableId") == 17) { //Calendar
+						stAdmin += "<li><a class='collapsed' href='./?stAction=admin&t="
+						    + rs.getInt("nmTableId") + "'>" + rs.getString("stTableName")
+						    + "</a><ul>" +
+						    "  <li><a href='./?stAction=admin&t="
+						    + rs.getInt("nmTableId") + "&do=insert'>Create New Calendar</a></li>";
+//						ResultSet rsCalendar = this.ebEnt.dbDyn.ExecuteSql("SELECT * FROM Calendar where year(dtDay)=year(curdate())");
+//						while (rsCalendar.next()) {
+//							stAdmin += "<li><a>" + rsCalendar.getString("stEvent") + " - " + (1900+rsCalendar.getDate("dtDay").getYear()) + "</a></li>";
+//						}
+				    stAdmin += "</ul></li>";
+					} else {
 						stAdmin += "<li><a href='./?stAction=admin&t="
 						    + rs.getInt("nmTableId") + "'>" + rs.getString("stTableName")
 						    + "</a></li>";
+					}
 				}
 			}
 			if (stReport.length() > 0)
-				stReturn += "<li><a class='topnav' href='#'>Reports</a><ul>" + stReport
-				    + "</ul></li>";
+				stReturn += "<li class='top-nav nav-reports'><a class='topnav' href='#'>Reports</a><ul>"
+				    + stReport + "</ul></li>";
 
 			if (stProject.length() > 0)
-				stReturn += "<li><a class='topnav' href='#'>Project</a><ul>"
+				stReturn += "<li class='top-nav nav-projects'><a class='topnav' href='#'>Project</a><ul>"
 				    + stProject + "</ul></li>";
 
 			if (stAdmin.length() > 0)
-				stReturn += "<li><a class='topnav' href='#'>Administration</a><ul>"
+				stReturn += "<li class='top-nav nav-admin'><a class='topnav' href='#'>Administration</a><ul>"
 				    + stAdmin + "</ul></li>";
+			if (stEdit.length() > 0)
+				stReturn += "<li class='top-nav nav-edit'><a class='topnav' href='#'>Edit</a><ul>"
+						+ stEdit + "</ul></li>";
 
-			stReturn += "<li><a class='topnav' href='#'>Help</a><ul>";
+			stReturn += "<li class='top-nav nav-help'><a class='topnav' href='#'>Help</a><ul>";
 			stReturn += "<li><a href='./?stAction=help&i=about'>About</a></li>";
 			/* AS -- 28Sept2011 -- Issue #66 */
 			// stReturn +=
@@ -287,7 +390,7 @@ public class EpsClient {
 
 			if ((this.ebEnt.ebUd.getLoginPersonFlags() & 0x800) != 0) { // Super User
 				                                                          // only
-				stReturn += "<li><a class='topnav' href='#'>System Admin</a><ul>";
+				stReturn += "<li class='top-nav nav-system'><a class='topnav' href='#'>System Admin</a><ul>";
 				// stReturn +=
 				// "<li><a href='./?a=28&tb=1.d.teb_division'>Division Setup</a></li>";
 				stReturn += "<li><a href='./?stAction=tablefield&rebuild=tblcol'>Table/Field Manager</a></li>";
