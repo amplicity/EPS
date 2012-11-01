@@ -5,9 +5,14 @@ package com.eps.model;
  *
  */
 
-import com.ederbase.model.*;
 import java.sql.ResultSet;
 import java.util.Enumeration;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+
+import com.ederbase.model.EbDynamic;
+import com.ederbase.model.EbEnterprise;
 
 /**
  * 
@@ -47,6 +52,10 @@ public class EpsClient {
 
 	public String getEpsPage() {
 		String stReturn = "";
+		Map<String, String> recentURLs = (Map<String, String>) this.ebEnt.ebUd.request
+		    .getSession().getAttribute("recentURLs");
+		if (recentURLs == null)
+			recentURLs = new LinkedHashMap<String, String>();
 
 		String stSql = "SELECT * FROM X25RefContent where nmRefPageId=1 order by nmUserId";
 		try {
@@ -91,10 +100,11 @@ public class EpsClient {
 				stReturn += "<hr>Trace:<br>" + stTrace + "</td></tr></table><hr>";
 			}
 
+			String stPageTittle = this.epsUd.getPageTitle();
+			stPageTittle = stPageTittle != null ? stPageTittle.trim() : "";
 			// Replace global tags with real values
-			stReturn = stReturn.replace("~~stPageTitle~",
-			    this.epsUd.getPageTitle() != null ? this.epsUd.getPageTitle().trim()
-			        : "");
+			stReturn = stReturn.replace("~~stPageTitle~", stPageTittle);
+
 			String stA = this.ebEnt.ebUd.request.getParameter("a");
 			if (stA == null || !stA.equals("28")) {
 				double pageWidth = this.epsUd.rsMyDiv.getDouble("PageWidthPx");
@@ -131,6 +141,13 @@ public class EpsClient {
 			} else {
 				stReturn = stReturn.replace("~~stWelcome~", "");
 				stReturn = stReturn.replaceAll("~BodyStyleClass~", "body-login");
+			}
+
+			// add recent URL
+			if (!stAction.equals("home") && !this.ebEnt.ebUd.request.getQueryString().contains("delete")) {
+				if (recentURLs.containsKey(stPageTittle.toLowerCase())) recentURLs.remove(stPageTittle.toLowerCase());
+				if (recentURLs.size() < 30) recentURLs.put(stPageTittle.toLowerCase(), this.ebEnt.ebUd.request.getQueryString());
+				this.ebEnt.ebUd.request.getSession().setAttribute("recentURLs", recentURLs);
 			}
 		} catch (Exception e) {
 			this.stError += "<BR>ERROR getEpsPage: " + e;
@@ -220,8 +237,17 @@ public class EpsClient {
 	public String makeMenuBar() {
 		String stReturn = "";
 		stReturn += "<li class='top-nav nav-home'><a class='topnav' href='./?stAction=home'>Home</a>";
-		// stReturn += "<li><a href='./?stAction=tasks'>Tasks</a></li>";
-		// stReturn += "<li><a href='./?stAction=wf'>Workflow</a></li>
+		Map<String, String> recentURLs = (Map<String, String>) this.ebEnt.ebUd.request
+		    .getSession().getAttribute("recentURLs");
+		if (recentURLs != null && recentURLs.size() > 0) {
+			stReturn += "<ul>";
+			String[] keys = new String[recentURLs.keySet().size()]; 
+			keys = recentURLs.keySet().toArray(keys);
+			for (int i = keys.length-1; i >= 0; i--) {
+				stReturn +="<li><a href='./?" + recentURLs.get(keys[i]) + "'>" + keys[i] + "</a></li>";
+			}
+			stReturn += "</ul>";
+		}
 		stReturn += "</li>";
 		try {
 			String stSql = "SELECT * FROM teb_table where nmTableType > 0 order by stTableName";
@@ -256,31 +282,41 @@ public class EpsClient {
 					stProject += "<li><a href='javascript:void(0);'>Template</a></li>";
 					if (epsUd.stPrj != null && epsUd.stPrj.length() > 0
 					    && !epsUd.stPrj.equals("0")) {
-						String stPrjLink = "./?stAction=projects&t=12&pk="
-						    + this.epsUd.stPrj;
-						stProject += "<li><a href='javascript:void(0);'>Current Project</a>"
-						    + "	<li><a class='sub-item' href='"
-						    + stPrjLink
-						    + "&do=xls&child=46'>Analyze Project</a></li>"
-						    + "	<li><a class='sub-item' href='javascript:void(0);'>Approve</a></li>"
-						    + "	<li><a class='sub-item' href='"
-						    + stPrjLink
-						    + "&do=edit'>Project Attributes</a></li>"
-						    + "	<li><a class='sub-item' href='./?stAction=projects&c=critscor'>Criterion Score</a></li>"
-						    + "	<li><a class='sub-item' href='"
-						    + stPrjLink
-						    + "&do=xls&child=26'>Baseline</a></li>"
-						    + "	<li><a class='sub-item' href='"
-						    + stPrjLink
-						    + "&do=xls&child=19'>Requirements</a></li>"
-						    + "	<li><a class='sub-item' href='"
-						    + stPrjLink
-						    + "&do=xls&child=21'>Schedule</a></li>"
-						    + "	<li><a class='sub-item' href='"
-						    + stPrjLink
-						    + "&do=xls&child=34'>Test</a></li>"
-						    + "	<li><a class='sub-item' href='javascript:void(0);'>WBS</a></li>"
-						    + "</li>";
+						ResultSet rsProject = this.ebEnt.dbDyn
+						    .ExecuteSql("SELECT * FROM Projects WHERE RecId=" + epsUd.stPrj);
+						if (rsProject.next()) {
+							String stPrjLink = "./?stAction=projects&t=12&pk="
+							    + this.epsUd.stPrj;
+							stProject += "<li><a href='javascript:void(0);'>Current Project</a>"
+							    + "	<li><a class='sub-item' href='"
+							    + stPrjLink
+							    + "&do=xls&child=46'>Analyze Project</a></li>"
+							    + "	<li><a class='sub-item' href='"
+							    + stPrjLink
+							    + "&do=xls&child=26&stType=Approve&nmFrom="
+							    + rsProject.getInt("CurrentBaseline")
+							    + "&submit="
+							    + java.net.URLEncoder.encode("Create Baseline")
+							    + "'>Approve</a></li>"
+							    + "	<li><a class='sub-item' href='"
+							    + stPrjLink
+							    + "&do=edit'>Project Attributes</a></li>"
+							    + "	<li><a class='sub-item' href='./?stAction=projects&c=critscor'>Criterion Score</a></li>"
+							    + "	<li><a class='sub-item' href='"
+							    + stPrjLink
+							    + "&do=xls&child=26'>Baseline</a></li>"
+							    + "	<li><a class='sub-item' href='"
+							    + stPrjLink
+							    + "&do=xls&child=19'>Requirements</a></li>"
+							    + "	<li><a class='sub-item' href='"
+							    + stPrjLink
+							    + "&do=xls&child=21'>Schedule</a></li>"
+							    + "	<li><a class='sub-item' href='"
+							    + stPrjLink
+							    + "&do=xls&child=34'>Test</a></li>"
+							    + "	<li><a class='sub-item' href='javascript:void(0);'>WBS</a></li>"
+							    + "</li>";
+						}
 					}
 				}
 				if ((rs.getInt("nmReportPriv") & nmPrivUser) != 0) {
@@ -315,19 +351,6 @@ public class EpsClient {
 						stAdmin += "<li><a href='./?stAction=admin&t="
 						    + rs.getInt("nmTableId") + "&do=users'>"
 						    + rs.getString("stTableName") + "</a></li>";
-					} else if (rs.getInt("nmTableId") == 17) { // Calendar
-						stAdmin += "<li><a class='collapsed' href='./?stAction=admin&t="
-						    + rs.getInt("nmTableId") + "'>" + rs.getString("stTableName")
-						    + "</a><ul>" + "  <li><a href='./?stAction=admin&t="
-						    + rs.getInt("nmTableId")
-						    + "&do=insert'>Create New Calendar</a></li>";
-						// ResultSet rsCalendar =
-						// this.ebEnt.dbDyn.ExecuteSql("SELECT * FROM Calendar where year(dtDay)=year(curdate())");
-						// while (rsCalendar.next()) {
-						// stAdmin += "<li><a>" + rsCalendar.getString("stEvent") + " - " +
-						// (1900+rsCalendar.getDate("dtDay").getYear()) + "</a></li>";
-						// }
-						stAdmin += "</ul></li>";
 					} else {
 						stAdmin += "<li><a href='./?stAction=admin&t="
 						    + rs.getInt("nmTableId") + "'>" + rs.getString("stTableName")

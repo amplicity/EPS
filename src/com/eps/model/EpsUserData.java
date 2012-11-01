@@ -308,6 +308,7 @@ public class EpsUserData {
 				}
 				this.ebEnt.ebUd.request.getSession().getServletContext()
 				    .setAttribute("LOG_IN_USERS", ids);
+				this.ebEnt.ebUd.request.getSession().invalidate();
 				this.ebEnt.ebUd.aLogin[1] = "0";
 				Cookie userCookie2 = new Cookie("ut", this.ebEnt.ebUd.aLogin[1]);
 				response.addCookie(userCookie2);
@@ -871,6 +872,7 @@ public class EpsUserData {
 		String stHelp = "";
 		String stInfo = this.ebEnt.ebUd.request.getParameter("i");
 		if (stInfo == null || stInfo.equals("about")) {
+			this.setPageTitle("Help About");
 			// This version, V1.5, was released 1 August 2011.
 			stHelp = "<h1>Help About</h1><p>Enterprise Project Portfolio Optimized Resource Allocation (EPPORA) is an "
 			    + "Enterprise Portfolio Software, Inc. (EPS) product.  This "
@@ -884,6 +886,7 @@ public class EpsUserData {
 			stHelp += "<tr><td>&nbsp;&nbsp;</td><td>Employment</td><td><a href='mailto:e@EPPORA.com'>e@EPPORA.com</a></td></tr></table><br>&nbsp;";
 		} else {
 			// openurl|./common/help/index.html
+			this.setPageTitle("Help Contents");
 			stHelp = this.ebEnt.ebUd.UrlReader("./common/help/index.html");
 		}
 		return stReturn + stHelp + "</td></tr></table><br/>";
@@ -2109,7 +2112,7 @@ public class EpsUserData {
 			        + "from Projects p, Schedule s"
 			        + " LEFT JOIN teb_reflaborcategory rlc ON rlc.nmLaborCategoryId = SUBSTRING_INDEX( s.SchLaborCategories, '~', 1 )"
 			        + " LEFT JOIN users u ON rlc.nmRefId=u.nmUserId"
-			        + " where p.CurrentBaseline=s.nmBaseline and p.RecId=s.nmProjectId and p.ProjectStatus=0 and s.lowlvl=1"
+			        + " where p.CurrentBaseline=s.nmBaseline and p.RecId=s.nmProjectId and p.ProjectStatus=1 and s.lowlvl=1"
 			        + " 	and u.nmUserId="
 			        + this.ebEnt.ebUd.getLoginId()
 			        + " and p.RecId IN ("
@@ -2121,7 +2124,7 @@ public class EpsUserData {
 			        + "from Projects p, Schedule s"
 			        + " LEFT JOIN teb_reflaborcategory rlc ON rlc.nmLaborCategoryId = SUBSTRING_INDEX( s.SchLaborCategories, '~', 1 )"
 			        + " LEFT JOIN users u ON rlc.nmRefId=u.nmUserId"
-			        + " where p.CurrentBaseline=s.nmBaseline and p.RecId=s.nmProjectId and p.ProjectStatus=0 and s.lowlvl=1"
+			        + " where p.CurrentBaseline=s.nmBaseline and p.RecId=s.nmProjectId and p.ProjectStatus=1 and s.lowlvl=1"
 			        + " 	and u.nmUserId="
 			        + this.ebEnt.ebUd.getLoginId()
 			        + " and p.RecId IN ("
@@ -2275,7 +2278,7 @@ public class EpsUserData {
 			iTotalRecords = this.ebEnt.dbDyn
 			    .ExecuteSql1n("select count(*) "
 			        + " from Projects p, Schedule s, teb_workflow wf, Users u"
-			        + " where p.CurrentBaseline=s.nmBaseline and p.RecId=s.nmProjectId and p.ProjectStatus=0 and s.lowlvl=1"
+			        + " where p.CurrentBaseline=s.nmBaseline and p.RecId=s.nmProjectId and p.ProjectStatus=1 and s.lowlvl=1"
 			        + " and wf.nmProjectId=s.nmProjectId and wf.nmBaseline=s.nmBaseline and wf.nmSchId=s.RecId and wf.nmUserId=u.nmUserId and wf.nmStatus=0"
 			        + " and (p.ProjectManagerAssignment="
 			        + this.ebEnt.ebUd.getLoginId()
@@ -2285,7 +2288,7 @@ public class EpsUserData {
 			rs = this.ebEnt.dbDyn
 			    .ExecuteSql("select p.ProjectName, p.RecId AS ProjectId, s.RecId, s.SchDescription, s.nmBaseline,wf.SchEstimatedEffort, wf.SchEfforttoDate, wf.SchDone,CONCAT(u.FirstName, ' ', u.LastName) AS UserName"
 			        + " from Projects p, Schedule s, teb_workflow wf, Users u"
-			        + " where p.CurrentBaseline=s.nmBaseline and p.RecId=s.nmProjectId and p.ProjectStatus=0 and s.lowlvl=1"
+			        + " where p.CurrentBaseline=s.nmBaseline and p.RecId=s.nmProjectId and p.ProjectStatus=1 and s.lowlvl=1"
 			        + " and wf.nmProjectId=s.nmProjectId and wf.nmBaseline=s.nmBaseline and wf.nmSchId=s.RecId and wf.nmUserId=u.nmUserId and wf.nmStatus=0"
 			        + " and (p.ProjectManagerAssignment="
 			        + this.ebEnt.ebUd.getLoginId()
@@ -2516,11 +2519,11 @@ public class EpsUserData {
 		if (stPart == null || stPart.isEmpty())
 			stPart = "0";
 		stReturn += "</div></form>"
-		    + "<script>"
+		    + "<script>$(document).ready(function() {"
 		    + "$('#home-accordion').accordion({active: "
 		    + stPart
 		    + ", autoHeight: false, collapsible: true, change: function(e, ui){if(ui.newHeader.length>0)location.href=ui.newHeader.find('a').attr('href')}});"
-		    + "initWorkflowEditButtons();" + "updateCPISPIlines();</script>";
+		    + "initWorkflowEditButtons();" + "updateCPISPIlines();});</script>";
 		return stReturn;
 	}
 
@@ -2537,8 +2540,10 @@ public class EpsUserData {
 				if (stC != null && stC.equals("critscor")) {
 					stReturn += processCritScor();
 				} else if (stC != null && stC.equals("appr")) {
+					this.setPageTitle("Approve Special Days");
 					stReturn += processApprove();
 				} else if (stC != null && stC.equals("allocate")) {
+					this.setPageTitle("Allocate");
 					stReturn += this.epsEf.processAllocate(this, 0);
 				} else {
 					stError += "<BR>Not a valid command: " + stC;
@@ -2608,26 +2613,33 @@ public class EpsUserData {
 				} else {
 					if (rs.getInt("nmTableId") == 12 && stTemp != null
 					    && stTemp.equals("edit")) {
-						stPageTitle += " Project Attributes</h1>";
+						stPageTitle += " Project Attributes";
 					} else if (rs.getInt("nmTableId") == 9) {
-						if (stTemp.equals("users")) {
-							stPageTitle += " User Search</h1>";
+						if ("edit".equals(stTemp)) {
+							stPageTitle += " User Attributes";
 						} else {
-							stPageTitle += " User Attributes</h1>";
+							stPageTitle += " User Search";
 						}
 					} else {
 						stTemp = this.ebEnt.ebUd.request.getParameter("child");
-						if (stTemp != null && stTemp.equals("19")) {
-							stPageTitle += " Requirements</h1>";
-						} else if (stTemp != null && stTemp.equals("21") && stA != null
-						    && stA.equals("editfull")) {
-							stPageTitle += " Full Edit Schedule Tasks</h1>";
+						if (stTemp != null && "19".equals(stTemp)) {
+							if ("editfull".equals(stA)) {
+								stPageTitle += " Full Edit Requirement";
+							} else {
+								if ("1".equals(this.ebEnt.ebUd.request.getParameter("edit"))) stPageTitle += " Inline Edit Requirement";
+								else stPageTitle += " Requirements";
+							}
 						} else if (stTemp != null && stTemp.equals("21")) {
-							stPageTitle += " Schedule Tasks</h1>";
+							if ("editfull".equals(stA)) {
+								stPageTitle += " Full Edit Schedule Task";
+							} else {
+								if ("1".equals(this.ebEnt.ebUd.request.getParameter("edit"))) stPageTitle += " Inline Edit Schedule Task";
+								else stPageTitle += " Schedule Tasks";
+							}
 						} else if (stTemp != null && stTemp.equals("34")) {
-							stPageTitle += " Test</h1>";
+							stPageTitle += " Test";
 						} else {
-							stPageTitle += " " + rs.getString("stTableName") + "</h1>";
+							stPageTitle += " " + rs.getString("stTableName");
 						}
 					}
 					switch (iState) {
@@ -4464,9 +4476,9 @@ public class EpsUserData {
 			int iMax = rs.getRow();
 			if (iMax > 0) {
 				rs.absolute(1);
-				stPageTitle += " " + rs.getString("stTableName") + " Report</h1>";
+				stPageTitle += " " + rs.getString("stTableName") + " Report";
 			} else {
-				stPageTitle += "</h1>";
+				stPageTitle += "";
 			}
 			EpsReport epsReport = new EpsReport();
 			stReturn += epsReport.doReport(rs, this);

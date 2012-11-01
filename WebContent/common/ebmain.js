@@ -110,7 +110,6 @@ function getPopupValue4 (DisplayField,IdField,Multi, stList, stLc)
 
 function getPopupValue2 (nmFieldId,id,fAll,f0,f1,f2,f3,f4,f5,f6,stPk)
 {
-	console.log(nmFieldId,id,fAll,f0,f1,f2,f3,f4,f5,f6,stPk);
   dialogMulti = nmFieldId;
   if( nmFieldId == 492 )
   {

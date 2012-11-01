@@ -25,16 +25,6 @@ public class EpsListener implements HttpSessionListener {
 			ids.remove(userId);
 			event.getSession().getServletContext().setAttribute("LOG_IN_USERS", ids);
 
-			// EbConnect eb = new EbConnect(0, "localhost", "eps", "eps", "ebeps01",
-			// "");
-			// String stSql = "update X25User set nmLastLoginTime=0 where RecId=" +
-			// userId.toString();
-			// try {
-			// Statement stmt = eb.getEbConn().createStatement();
-			// stmt.executeUpdate(stSql);
-			// } catch (Exception e) {
-			// e.printStackTrace();
-			// }
 			System.out.println("Reset timeout: " + userId);
 		}
 	}
