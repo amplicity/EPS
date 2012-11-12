@@ -8,6 +8,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Properties;
+
 import javax.mail.Address;
 import javax.mail.Authenticator;
 import javax.mail.BodyPart;
@@ -534,7 +535,7 @@ public class EbMail {
 				    .replace("~~stMiddleName", stMiddleName.trim());
 				this.stBody = this.stBody.replace("~~stLastName", stLastName.trim());
 				this.stBody = this.stBody.replace("~~stEMailEncode",
-				    URLEncoder.encode(this.ebEnt.EBEncrypt(stTo)));
+				    URLEncoder.encode(this.ebEnt.EBEncrypt(stTo), "UTF-8"));
 				this.stBody = this.stBody.replace("~~stEMail", stTo);
 				this.stBody = this.stBody.replace("~~stFullName", stToName);
 				this.stBody = this.stBody.replace("~~stCampaignId", stCampaignId);

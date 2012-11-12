@@ -5,11 +5,11 @@ package com.eps.model;
  *
  */
 
+import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 import com.ederbase.model.EbDynamic;
 import com.ederbase.model.EbEnterprise;
@@ -19,7 +19,7 @@ import com.ederbase.model.EbEnterprise;
  * @author Rob Eder
  */
 public class EpsClient {
-	public String stVersion = "EPPORA Version: 1 November 2012";
+	public String stVersion = "EPPORA Version: 12 November 2012";
 	private int iUserId = -1;
 	private int nmPrivUser = 0;
 	private String stAction = "";
@@ -131,25 +131,33 @@ public class EpsClient {
 				String stClass = "";
 				Enumeration<String> paramNames = this.ebEnt.ebUd.request
 				    .getParameterNames();
+				String queryString = this.ebEnt.ebUd.request.getQueryString();
 				while (paramNames.hasMoreElements()) {
 					String paramName = (String) paramNames.nextElement();
-					stClass += " " + paramName + "_"
-					    + this.ebEnt.ebUd.request.getParameter(paramName);
+					if (queryString.contains(paramName + "=")) {
+						stClass += " " + paramName + "_"
+						    + this.ebEnt.ebUd.request.getParameter(paramName);
+					}
 				}
-				stReturn = stReturn.replaceAll("~BodyStyleClass~", "body " + stAction
-				    + stClass);
+				stReturn = stReturn.replaceAll("~BodyStyleClass~", "body " + stClass);
 			} else {
 				stReturn = stReturn.replace("~~stWelcome~", "");
 				stReturn = stReturn.replaceAll("~BodyStyleClass~", "body-login");
 			}
 
 			// add recent URL
-			if (!stAction.equals("home") && !this.ebEnt.ebUd.request.getQueryString().contains("delete")) {
-				if (recentURLs.containsKey(stPageTittle.toLowerCase())) recentURLs.remove(stPageTittle.toLowerCase());
-				if (recentURLs.size() < 30) recentURLs.put(stPageTittle.toLowerCase(), this.ebEnt.ebUd.request.getQueryString());
-				this.ebEnt.ebUd.request.getSession().setAttribute("recentURLs", recentURLs);
+			if (!stAction.equals("home")
+			    && !this.ebEnt.ebUd.request.getQueryString().contains("delete")) {
+				if (recentURLs.containsKey(stPageTittle.toLowerCase()))
+					recentURLs.remove(stPageTittle.toLowerCase());
+				if (recentURLs.size() < 30)
+					recentURLs.put(stPageTittle.toLowerCase(),
+					    this.ebEnt.ebUd.request.getQueryString());
+				this.ebEnt.ebUd.request.getSession().setAttribute("recentURLs",
+				    recentURLs);
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			this.stError += "<BR>ERROR getEpsPage: " + e;
 		}
 		return stReturn;
@@ -241,10 +249,11 @@ public class EpsClient {
 		    .getSession().getAttribute("recentURLs");
 		if (recentURLs != null && recentURLs.size() > 0) {
 			stReturn += "<ul>";
-			String[] keys = new String[recentURLs.keySet().size()]; 
+			String[] keys = new String[recentURLs.keySet().size()];
 			keys = recentURLs.keySet().toArray(keys);
-			for (int i = keys.length-1; i >= 0; i--) {
-				stReturn +="<li><a href='./?" + recentURLs.get(keys[i]) + "'>" + keys[i] + "</a></li>";
+			for (int i = keys.length - 1; i >= 0; i--) {
+				stReturn += "<li><a href='./?" + recentURLs.get(keys[i]) + "'>"
+				    + keys[i] + "</a></li>";
 			}
 			stReturn += "</ul>";
 		}
@@ -296,15 +305,15 @@ public class EpsClient {
 							    + "&do=xls&child=26&stType=Approve&nmFrom="
 							    + rsProject.getInt("CurrentBaseline")
 							    + "&submit="
-							    + java.net.URLEncoder.encode("Create Baseline")
+							    + URLEncoder.encode("Create Baseline", "UTF-8")
 							    + "'>Approve</a></li>"
 							    + "	<li><a class='sub-item' href='"
 							    + stPrjLink
-							    + "&do=edit'>Project Attributes</a></li>"
+							    + "&do=xls&child=26'>Baseline</a></li>"
 							    + "	<li><a class='sub-item' href='./?stAction=projects&c=critscor'>Criterion Score</a></li>"
 							    + "	<li><a class='sub-item' href='"
 							    + stPrjLink
-							    + "&do=xls&child=26'>Baseline</a></li>"
+							    + "&do=edit'>Project Attributes</a></li>"
 							    + "	<li><a class='sub-item' href='"
 							    + stPrjLink
 							    + "&do=xls&child=19'>Requirements</a></li>"
@@ -322,21 +331,39 @@ public class EpsClient {
 				if ((rs.getInt("nmReportPriv") & nmPrivUser) != 0) {
 					String stLink = "./?stAction=reports&t=" + rs.getInt("nmTableId");
 					String stViewLink = stLink + "&submit2="
-					    + java.net.URLEncoder.encode("View Saved Reports");
+					    + URLEncoder.encode("View Saved Reports", "UTF-8");
 					String stRunLink = stLink + "&submit2="
-					    + java.net.URLEncoder.encode("Run/Execute Report");
+					    + URLEncoder.encode("Run/Execute Report", "UTF-8");
 					String stCustomLink = stLink + "&submit2="
-					    + java.net.URLEncoder.encode("Custom Report Designer");
-					stCustomLink += "&customreport="
-					    + epsUd.ebEnt.dbDyn
-					        .ExecuteSql1n("select max(RecId) from teb_customreport where stReportType="
-					            + rs.getInt("nmTableId"));
-					stReport += "<li><a class='collapsed' href='" + stLink + "'>"
-					    + rs.getString("stTableName") + "</a>" + "<ul>" + "<li><a href='"
-					    + stCustomLink + "'>Custom Report Designer</a></li>"
-					    + "<li><a href='" + stRunLink + "'>Run/Execute Report</a></li>"
-					    + "<li><a href='" + stViewLink + "'>View Saved Reports</a></li>"
-					    + "</ul>" + "</li>";
+					    + URLEncoder.encode("Custom Report Designer", "UTF-8");
+					ResultSet rsR = epsUd.ebEnt.dbDyn
+					    .ExecuteSql("SELECT * FROM teb_customreport where stReportType = '"
+					        + rs.getString("nmTableId")
+					        + "' order by nmDefaultReport DESC,stReportName limit 0,30");
+
+					String stRun = "";
+					String stCustom = "";
+					while (rsR.next()) {
+						stRun += "<li><a href='" + stRunLink + "&customreport="
+						    + rsR.getString("RecId") + "'>" + rsR.getString("stReportName")
+						    + "</a></li>";
+						stCustom += "<li><a href='" + stCustomLink + "&customreport="
+								+ rsR.getString("RecId") + "'>" + rsR.getString("stReportName")
+								+ "</a></li>";
+					}
+					stReport += "<li><a class='collapsed' href='"
+					    + stLink
+					    + "'>"
+					    + rs.getString("stTableName")
+					    + "</a>"
+					    + "<ul>"
+					    + "<li><a class='collapsed' href='javascript:void(0);'>Custom Report Designer</a><ul>" +
+					    stCustom +
+					    "</ul></li>"
+					    + "<li><a class='collapsed' href='javascript:void(0);'>Run/Execute Report</a><ul>"
+					    + stRun + "</ul></li>" 
+					    + "<li><a href='" + stViewLink
+					    + "'>View Saved Reports</a></li>" + "</ul>" + "</li>";
 				}
 				if ((rs.getInt("nmAccessPriv") & nmPrivUser) != 0) {
 					if (stAdmin.length() <= 0 && (nmPrivUser & 0x220) != 0) // Ex and PPM
@@ -398,8 +425,8 @@ public class EpsClient {
 				// stReturn +=
 				// "<li><a href='./?stAction=runeob&commtrace=i'>Run EOB now</a></li>";
 				stReturn += "<li><a href='./?stAction=loadpage&m="
-				    + java.net.URLEncoder.encode("End-of-Business Processing") + "&r="
-				    + java.net.URLEncoder.encode("./?stAction=runeob&commtrace=i")
+				    + URLEncoder.encode("End-of-Business Processing", "UTF-8") + "&r="
+				    + URLEncoder.encode("./?stAction=runeob&commtrace=i", "UTF-8")
 				    + "'>Run EOB now</a></li>";
 				stReturn += "</ul></li>";
 			}

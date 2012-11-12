@@ -1399,7 +1399,6 @@ class EpsXlsProject // extends EpsUserData
 										sbReturn.append("(LL) ");
 									}
 
-									// System.out.println(stValue);
 									stValue = makeListValue(rsFields, stValue);
 									sbReturn.append(stValue.replace("\n", "<BR>"));
 								} else {
@@ -5526,7 +5525,8 @@ class EpsXlsProject // extends EpsUserData
 				    + "</td>";
 				stReturn1 += "<td class=l1td align=right>" + rsB.getString("nmEffort")
 				    + "</td>";
-				stReturn1 += "<td class=l1td align=right>" + rsB.getString("nmCost")
+				String moneySign = this.ebEnt.dbDyn.ExecuteSql1("select stMoneySymbol from teb_division where nmDivision=" + this.rsProject.getInt("nmDivision"));
+				stReturn1 += "<td class=l1td align=right>" + moneySign + " " + rsB.getString("nmCost")
 				    + "</td>";
 				stReturn1 += "</tr>";
 				stSelect += this.ebEnt.ebUd.addOption(rsB.getString("nmBaseline"),

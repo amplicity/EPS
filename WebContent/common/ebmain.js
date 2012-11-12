@@ -2152,11 +2152,12 @@ function buildText(iReqSched, iRecId, iId, iFlags, iLevel,iNextLevel, iPrevLevel
     text+="</ul></li>";
   }
   
-  text+="<li><a class='collapsed' href='javascript:void(0);'>Edit</a><ul>";
-  text+="<li><a href='./"+stLink+"&a=editfull&r="+iRecId+"#row"+iId+"'>Full record</a></li>";
-  if ( iReqSched < 3 )
-    text+="<li><a href='./"+stLink+"&edit="+iRecId+"#row"+iId+"'>Inline</a></li>";
-  text+="</ul></li>";
+  text+="<li><a href='./"+stLink+"&a=editfull&r="+iRecId+"#row"+iId+"'>Edit</a></li>";
+//  text+="<li><a class='collapsed' href='javascript:void(0);'>Edit</a><ul>";
+//  text+="<li><a href='./"+stLink+"&a=editfull&r="+iRecId+"#row"+iId+"'>Full record</a></li>";
+//  if ( iReqSched < 3 )
+//    text+="<li><a href='./"+stLink+"&edit="+iRecId+"#row"+iId+"'>Inline</a></li>";
+//  text+="</ul></li>";
   
   text+="<li><a class='collapsed' href='javascript:void(0);'>Insert</a><ul>";
   text+="<li><a href='./"+stLink+"&a=insert&what=above&r="+iRecId+"#row"+iId+"'>Above</a></li>";

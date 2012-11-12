@@ -2,16 +2,20 @@
  */
 package org.mypackage.eps;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.URLEncoder;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.ederbase.model.EbDynamic;
 import com.ederbase.model.EbEnterprise;
 import com.ederbase.model.QaManager;
 import com.eps.model.EpsClient;
 import com.eps.model.EpsReport;
-import java.io.IOException;
-import java.io.PrintWriter;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
 
 /**
  * @author Robert Eder Feb 2010 to ... Oct 2010 This file controls all dynamic
@@ -118,7 +122,7 @@ public class EpsController extends HttpServlet {
 								stRedir = stRedir.substring(0, iPos);
 							stRedir += (stRedir.indexOf("?") >= 0 ? "" : "?");
 							stRedir += "&popupmessage="
-							    + java.net.URLEncoder.encode(ebEnt.ebUd.getPopupMessage());
+							    + URLEncoder.encode(ebEnt.ebUd.getPopupMessage(), "UTF-8");
 						}
 						response.sendRedirect(response.encodeRedirectURL(stRedir));
 						return;

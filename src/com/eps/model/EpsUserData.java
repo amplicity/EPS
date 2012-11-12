@@ -9,6 +9,7 @@ import it.sauronsoftware.cron4j.Scheduler;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -601,7 +602,7 @@ public class EpsUserData {
 		String[] aLines;
 		try {
 			String stTa = this.ebEnt.ebUd.request.getParameter("taNOTUSED");
-			stTa = "";
+//			stTa = "";
 			this.ebEnt.dbDyn
 			    .ExecuteUpdate("delete from Calendar where stType='Holiday' ");
 			if (stTa != null) {
@@ -1933,7 +1934,7 @@ public class EpsUserData {
 	}
 
 	public String makeHomePage() {
-		this.setPageTitle("Home Page");
+		this.setPageTitle("Home");
 		String stReturn = "";
 		String stProjects = "";
 		String stSql = "";
@@ -2254,14 +2255,15 @@ public class EpsUserData {
 							    + "<td class='l1td td3'>" + prjArr[1] + "</td>";
 						} else {
 							stReturn += "<td class='l1td td1'>&nbsp;</td>"
-								    + "<td class='l1td td2'>" + rs.getString("stTitle") + "</td>"
-								    + "<td class='l1td td3'>" + prjArr[0] + "</td>";
+							    + "<td class='l1td td2'>" + rs.getString("stTitle") + "</td>"
+							    + "<td class='l1td td3'>" + prjArr[0] + "</td>";
 						}
 					} else if (nmTaskFlag == 1) {
 						iCount++;
 						stReturn += "<td class='l1td td1'>&nbsp;</td>"
 						    + "<td class='l1td td2'>" + rs.getString("stTitle") + "</td>"
-						    + "<td class='l1td td3'>" + rs.getString("stDescription") + "</td>";
+						    + "<td class='l1td td3'>" + rs.getString("stDescription")
+						    + "</td>";
 					}
 					stReturn += "</tr>";
 				}
@@ -2624,17 +2626,21 @@ public class EpsUserData {
 						stTemp = this.ebEnt.ebUd.request.getParameter("child");
 						if (stTemp != null && "19".equals(stTemp)) {
 							if ("editfull".equals(stA)) {
-								stPageTitle += " Full Edit Requirement";
+								stPageTitle += " Requirement Attributes";
 							} else {
-								if ("1".equals(this.ebEnt.ebUd.request.getParameter("edit"))) stPageTitle += " Inline Edit Requirement";
-								else stPageTitle += " Requirements";
+								if ("1".equals(this.ebEnt.ebUd.request.getParameter("edit")))
+									stPageTitle += " Inline Edit Requirement";
+								else
+									stPageTitle += " Requirements";
 							}
 						} else if (stTemp != null && stTemp.equals("21")) {
 							if ("editfull".equals(stA)) {
-								stPageTitle += " Full Edit Schedule Task";
+								stPageTitle += " Schedule Task Attributes";
 							} else {
-								if ("1".equals(this.ebEnt.ebUd.request.getParameter("edit"))) stPageTitle += " Inline Edit Schedule Task";
-								else stPageTitle += " Schedule Tasks";
+								if ("1".equals(this.ebEnt.ebUd.request.getParameter("edit")))
+									stPageTitle += " Inline Edit Schedule Task";
+								else
+									stPageTitle += " Schedule Tasks";
 							}
 						} else if (stTemp != null && stTemp.equals("34")) {
 							stPageTitle += " Test";
@@ -3466,7 +3472,7 @@ public class EpsUserData {
 								if (stError.length() > 0) {
 									this.ebEnt.ebUd
 									    .setRedirect("./?stAction=admin&t=9&do=edit&pk=" + stPk
-									        + "&poperr=" + java.net.URLEncoder.encode(stError));
+									        + "&poperr=" + URLEncoder.encode(stError, "UTF-8"));
 									return " ERROR ";
 								}
 								this.ebEnt.ebUd.setRedirect("./?stAction=admin&t=9&do=users");
@@ -3815,14 +3821,14 @@ public class EpsUserData {
 				// + "&stFrom="
 				// + 0
 				// + "&stSql="
-				// + java.net.URLEncoder.encode(stSql) + "'\"" + " value='First'>";
+				// + URLEncoder.encode(stSql, "UTF-8") + "'\"" + " value='First'>";
 				// stReturn +=
 				// "&nbsp;&nbsp;&nbsp;<input type=button onClick=\"parent.location='./?stAction=admin&t="
 				// + rsTable.getInt("nmTableId")
 				// + "&stFrom="
 				// + iToPrevious
 				// + "&stSql="
-				// + java.net.URLEncoder.encode(stSql)
+				// + URLEncoder.encode(stSql, "UTF-8")
 				// + "'\""
 				// + " value='Previous " + this.rsMyDiv.getInt("MaxRecords") + "'>";
 				// }
@@ -3837,7 +3843,7 @@ public class EpsUserData {
 				// + "&stFrom="
 				// + iTo
 				// + "&stSql="
-				// + java.net.URLEncoder.encode(stSql)
+				// + URLEncoder.encode(stSql, "UTF-8")
 				// + "'\""
 				// + " value='Next "
 				// + this.rsMyDiv.getInt("MaxRecords") + "'>";
@@ -3848,10 +3854,10 @@ public class EpsUserData {
 				// + "&stFrom="
 				// + iLast
 				// + "&stSql="
-				// + java.net.URLEncoder.encode(stSql) + "'\"" + " value='Last'>";
+				// + URLEncoder.encode(stSql, "UTF-8") + "'\"" + " value='Last'>";
 				// }
 				// + "<a href='./?stAction=admin&t=" + rsTable.getInt("nmTableId")
-				// + "&stFrom=" + iTo + "&stSql=" + java.net.URLEncoder.encode(stSql) +
+				// + "&stFrom=" + iTo + "&stSql=" + URLEncoder.encode(stSql, "UTF-8") +
 				// "'>Next " + this.rsMyDiv.getInt("MaxRecords") + "</a>";
 
 				stReturn += "</td></tr>";
@@ -4119,13 +4125,12 @@ public class EpsUserData {
 
 			if (stSubmit != null && stSubmit.length() > 0
 			    || (stFrom != null && stFrom.length() > 0)) {
-				// if (stSubmit == null) {
-				// stSql = this.ebEnt.ebUd.request.getParameter("stSql");
-				// iFrom = Integer.parseInt(stFrom);
-				// } else {
-				stSql = makeUserSql(nmType, stLcList, stDivList, stSearchType,
-				    stSearch, stWhere);
-				// }
+				if (this.ebEnt.ebUd.request.getParameter("stSql") != null) {
+					stSql = this.ebEnt.ebUd.request.getParameter("stSql");
+				} else {
+					stSql = makeUserSql(nmType, stLcList, stDivList, stSearchType,
+					    stSearch, stWhere);
+				}
 
 				ResultSet rs = this.ebEnt.dbDyn.ExecuteSql(stSql
 				    + " order by FirstName,LastName,stEMail");
@@ -4202,27 +4207,32 @@ public class EpsUserData {
 					/*
 					 * if (iFrom >= this.rsMyDiv.getInt("MaxRecords")) { addAnchor = true;
 					 * stNext = "<a href='./?stAction=admin&t=9&do=users&stFrom=" + 0 +
-					 * "&stSql=" + java.net.URLEncoder.encode(stSql) + stLookupLink +
+					 * "&stSql=" + URLEncoder.encode(stSql, "UTF-8") + stLookupLink +
 					 * "#next'>First</a>"; stNext += stNext =
 					 * "&nbsp;<a href='./?stAction=admin&t=9&do=users&stFrom=" +
-					 * iToPrevious + "&stSql=" + java.net.URLEncoder.encode(stSql) +
+					 * iToPrevious + "&stSql=" + URLEncoder.encode(stSql, "UTF-8") +
 					 * stLookupLink + "#next'>Previous " +
 					 * this.rsMyDiv.getInt("MaxRecords") + "</a>&nbsp;"; } if (iMax >=
 					 * this.rsMyDiv.getInt("MaxRecords")) { if (!addAnchor) stNext = "";
 					 * addAnchor = true; stNext +=
 					 * "<a href='./?stAction=admin&t=9&do=users&stFrom=" + iTo + "&stSql="
-					 * + java.net.URLEncoder.encode(stSql) + stLookupLink + "#next'>Next "
+					 * + URLEncoder.encode(stSql, "UTF-8") + stLookupLink + "#next'>Next "
 					 * + this.rsMyDiv.getInt("MaxRecords") + "</a>"; stNext +=
 					 * "&nbsp;<a href='./?stAction=admin&t=9&do=users&stFrom=" + (iCount -
 					 * iCount % this.rsMyDiv.getInt("MaxRecords")) + "&stSql=" +
-					 * java.net.URLEncoder.encode(stSql) + stLookupLink +
+					 * URLEncoder.encode(stSql, "UTF-8") + stLookupLink +
 					 * "#next'>Last</a>"; } if (addAnchor) { stReturn1 +=
 					 * "<a name='next'></a>"; stReturn1 += "</table><br>" + stNext +
 					 * "</td></tr>"; }
 					 */
 					stReturn1 += "</table><br>"
-					    + makeToolbar(true, iCount, iFrom, iDisplay,
-					        "./?stAction=admin&t=9&do=users") + "</td></tr>";
+					    + makeToolbar(
+					        true,
+					        iCount,
+					        iFrom,
+					        iDisplay,
+					        "./?stAction=admin&t=9&do=users&stSql="
+					            + URLEncoder.encode(stSql, "UTF-8")) + "</td></tr>";
 
 				} else {
 					stReturn1 += "<tr><td colspan=4 class=l1td align=left>No users found. Please refine search</td></tr>";
@@ -7350,12 +7360,12 @@ public class EpsUserData {
 
 		displayPerList = (displayPerList > 5 ? displayPerList : 5);
 		fromPos = (fromPos > 0 ? fromPos : 0);
-		String firstAction = "#";
-		String lastAction = "#";
-		String nextAction = "#";
-		String previousAction = "#";
-		String upAction = "#";
-		String downAction = "#";
+		String firstAction = "javascript:void(0);";
+		String lastAction = "javascript:void(0);";
+		String nextAction = "javascript:void(0);";
+		String previousAction = "javascript:void(0);";
+		String upAction = "javascript:void(0);";
+		String downAction = "javascript:void(0);";
 		if (stLink != null && !stLink.isEmpty()) {
 			if (fromPos > 0)
 				firstAction = stLink + "&from=0" + "&display=" + displayPerList;
