@@ -132,13 +132,16 @@ public class EpsClient {
 				Enumeration<String> paramNames = this.ebEnt.ebUd.request
 				    .getParameterNames();
 				String queryString = this.ebEnt.ebUd.request.getQueryString();
-				while (paramNames.hasMoreElements()) {
-					String paramName = (String) paramNames.nextElement();
-					if (queryString.contains(paramName + "=")) {
-						stClass += " " + paramName + "_"
-						    + this.ebEnt.ebUd.request.getParameter(paramName);
+				if (queryString != null && queryString.trim().length() > 0) {
+					while (paramNames.hasMoreElements()) {
+						String paramName = (String) paramNames.nextElement();
+						if (queryString.contains(paramName + "=")) {
+							stClass += " " + paramName + "_"
+							    + this.ebEnt.ebUd.request.getParameter(paramName);
+						}
 					}
 				}
+				if (stClass.trim().length() == 0) stClass = "stAction_home";
 				stReturn = stReturn.replaceAll("~BodyStyleClass~", "body " + stClass);
 			} else {
 				stReturn = stReturn.replace("~~stWelcome~", "");
