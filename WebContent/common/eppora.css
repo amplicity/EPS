@@ -47,6 +47,10 @@ a {
 	padding: 0;
 }
 
+#header {
+	margin-top: 20px;
+}
+
 #header h1 {
 	margin: 0;
 }
@@ -318,7 +322,6 @@ body { /*font-family: HelveticaNeueLT;*/
 	font-weight: normal;
 	color: #e6e6e6;
 	margin-left: -28px;
-	margin-right: -28px;
 	text-transform: uppercase;
 }
 
@@ -332,6 +335,10 @@ body { /*font-family: HelveticaNeueLT;*/
 /* START LOGIN PAGE */
 .body-login .welcome-wrapper,.body-login .hbar,.body-login .header-right {
 	display: none;
+}
+
+.body-login #header-wrap {
+	width: auto;
 }
 
 .body-login #header-content {
@@ -414,6 +421,9 @@ body { /*font-family: HelveticaNeueLT;*/
 	background: -o-linear-gradient(top, #ffffff 0%, #f0f0f0 100%);
 	background: -ms-linear-gradient(top, #ffffff 0%, #f0f0f0 100%);
 	background: linear-gradient(to bottom, #ffffff 0%, #f0f0f0 100%);
+	margin-left: 30px;
+	padding-left: 	27px;
+	border: 1px solid #eee;
 }
 
 .body .logo-wrapper {
@@ -433,6 +443,8 @@ body { /*font-family: HelveticaNeueLT;*/
 	background: -o-linear-gradient(top, #2da948 0%, #078042 100%);
 	background: -ms-linear-gradient(top, #2da948 0%, #078042 100%);
 	background: linear-gradient(to bottom, #2da948 0%, #078042 100%);
+	margin-left: 30px;
+	padding-left: 28px;
 }
 
 .welcome-wrapper>table {

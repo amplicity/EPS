@@ -8,8 +8,10 @@ package com.eps.model;
 import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import com.ederbase.model.EbDynamic;
 import com.ederbase.model.EbEnterprise;
@@ -100,16 +102,15 @@ public class EpsClient {
 				stReturn += "<hr>Trace:<br>" + stTrace + "</td></tr></table><hr>";
 			}
 
-			String stPageTittle = this.epsUd.getPageTitle();
-			stPageTittle = stPageTittle != null ? stPageTittle.trim() : "";
+			String stPageTitle = this.epsUd.getPageTitle();
+			stPageTitle = stPageTitle != null ? stPageTitle.trim() : "";
 			// Replace global tags with real values
-			stReturn = stReturn.replace("~~stPageTitle~", stPageTittle);
+			stReturn = stReturn.replace("~~stPageTitle~", stPageTitle);
 
 			String stA = this.ebEnt.ebUd.request.getParameter("a");
 			if (stA == null || !stA.equals("28")) {
 				double pageWidth = this.epsUd.rsMyDiv.getDouble("PageWidthPx");
-				stReturn = stReturn.replace("PageWidthPx", (pageWidth > 0 ? pageWidth
-				    + "px" : "auto"));
+				stReturn = stReturn.replaceAll("~PageWidthPx~", (pageWidth > 0 ? ""+pageWidth : "auto"));
 			}
 			if (iUserId > 0) {
 				stReturn = stReturn
@@ -149,16 +150,44 @@ public class EpsClient {
 			}
 
 			// add recent URL
+			Set<String> keySet = recentURLs.keySet();
 			if (!stAction.equals("home")
 			    && !this.ebEnt.ebUd.request.getQueryString().contains("delete")) {
-				if (recentURLs.containsKey(stPageTittle.toLowerCase()))
-					recentURLs.remove(stPageTittle.toLowerCase());
-				if (recentURLs.size() < 30)
-					recentURLs.put(stPageTittle.toLowerCase(),
-					    this.ebEnt.ebUd.request.getQueryString());
-				this.ebEnt.ebUd.request.getSession().setAttribute("recentURLs",
-				    recentURLs);
+				if (stPageTitle != null && stPageTitle.trim().length() > 0) {
+					Iterator<String> keyIterator = keySet.iterator();
+					while (keyIterator.hasNext()) {
+						String key = keyIterator.next();
+						if (recentURLs.get(key).equals(this.ebEnt.ebUd.request.getQueryString())) {
+							recentURLs.clear();
+							break;
+						}
+					}
+					if (recentURLs.containsKey(stPageTitle.toLowerCase())) {
+						recentURLs.remove(stPageTitle.toLowerCase());
+					}
+					if (recentURLs.size() > 30) {
+						String[] keyArr = new String[recentURLs.keySet().size()];
+						recentURLs.keySet().toArray(keyArr);
+						recentURLs.remove(keyArr[0]);
+					}
+					recentURLs.put(stPageTitle.toLowerCase(),
+							this.ebEnt.ebUd.request.getQueryString());
+					this.ebEnt.ebUd.request.getSession().setAttribute("recentURLs",
+					    recentURLs);
+				}
 			}
+			
+			String stRecents = "";
+			if (keySet != null && keySet.size() > 0) {
+				stRecents += "<ul>";
+				for (String key : keySet) {
+					stRecents += "<li><a href='./?" + recentURLs.get(key) + "'>" + key + "</a></li>";
+				}
+				stRecents += "</ul>";
+			}
+			
+			stReturn += "<script>" +
+					"$(document).ready(function() {$('#topNavItems .nav-home').append(\""+stRecents+"\")});</script>";
 		} catch (Exception e) {
 			e.printStackTrace();
 			this.stError += "<BR>ERROR getEpsPage: " + e;
@@ -250,16 +279,16 @@ public class EpsClient {
 		stReturn += "<li class='top-nav nav-home'><a class='topnav' href='./?stAction=home'>Home</a>";
 		Map<String, String> recentURLs = (Map<String, String>) this.ebEnt.ebUd.request
 		    .getSession().getAttribute("recentURLs");
-		if (recentURLs != null && recentURLs.size() > 0) {
-			stReturn += "<ul>";
-			String[] keys = new String[recentURLs.keySet().size()];
-			keys = recentURLs.keySet().toArray(keys);
-			for (int i = keys.length - 1; i >= 0; i--) {
-				stReturn += "<li><a href='./?" + recentURLs.get(keys[i]) + "'>"
-				    + keys[i] + "</a></li>";
-			}
-			stReturn += "</ul>";
-		}
+//		if (recentURLs != null && recentURLs.size() > 0) {
+//			stReturn += "<ul>";
+//			String[] keys = new String[recentURLs.keySet().size()];
+//			keys = recentURLs.keySet().toArray(keys);
+//			for (int i = keys.length - 1; i >= 0; i--) {
+//				stReturn += "<li><a href='./?" + recentURLs.get(keys[i]) + "'>"
+//				    + keys[i] + "</a></li>";
+//			}
+//			stReturn += "</ul>";
+//		}
 		stReturn += "</li>";
 		try {
 			String stSql = "SELECT * FROM teb_table where nmTableType > 0 order by stTableName";
