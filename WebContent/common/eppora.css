@@ -752,6 +752,7 @@ ul#topNavItems ul li:hover>ul {
 	height: auto;
 	text-indent: 0px;
 	text-align: center;
+	white-space: nowrap;
 }
 
 .spi-header .greencolor div,.cpi-header .greencolor div {

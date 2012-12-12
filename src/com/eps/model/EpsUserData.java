@@ -2415,8 +2415,8 @@ public class EpsUserData {
 				    + "'>Executive Project Portfolio Dashboard</a></div>"
 				    + "<div id='prj-content'><table class=l1tablenarrow>"
 				    + "<tr><th class=l1th>Project Name</th><th class=l1th>Start Date</th><th class=l1th>End Date</th><th class=l1th>Estimated Hours</th><th class=l1th>Expended Hours</th><th class=l1th>Estimated Cost</th><th class=l1th>Expended to 	Date</th>"
-				    + "<th class='l1th spi-header'><table><tr><td colspan=3 align=center>SPI</td></tr><tr><td class=greencolor><div>&nbsp;</div>1.1</td><td class=yellowcolor><div>&nbsp;</div>1.2</td><td class=redcolor><div>&nbsp;</div>1.3</td></tr></table></th>"
-				    + "<th class='l1th cpi-header'><table><tr><td colspan=3 align=center>CPI</td></tr><tr><td class=greencolor><div>&nbsp;</div>1.1</td><td class=yellowcolor><div>&nbsp;</div>1.2</td><td class=redcolor><div>&nbsp;</div>1.3</td></tr></table></th></tr>";
+				    + "<th class='l1th spi-header'><table><tr><td colspan=3 align=center>SPI</td></tr><tr><td class=redcolor><div>&nbsp;</div>&lt;0.85</td><td class=yellowcolor><div>&nbsp;</div>0.85-1</td><td class=greencolor><div>&nbsp;</div>&gt;1</td></tr></table></th>"
+				    + "<th class='l1th cpi-header'><table><tr><td colspan=3 align=center>CPI</td></tr><tr><td class=redcolor><div>&nbsp;</div>&lt;0.85</td><td class=yellowcolor><div>&nbsp;</div>0.85-1</td><td class=greencolor><div>&nbsp;</div>&gt;1</td></tr></table></th></tr>";
 				for (int iR = 1; iR <= iMax; iR++) {
 					rs.absolute(iR);
 					iCount++;
@@ -6060,7 +6060,7 @@ public class EpsUserData {
 									        + rs2.getString("ProjectManagerAssignment"),
 									    "Schedule Warning",
 									    "Schedule low-level task ID " + rs2.getString("RecId")
-									        + "’s description needs to start with a verb.",
+									        + "ï¿½s description needs to start with a verb.",
 									    dateEnd);
 								}
 							}
