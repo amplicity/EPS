@@ -49,6 +49,7 @@ a {
 
 #header {
 	margin-top: 20px;
+	text-align: center;
 }
 
 #header h1 {
@@ -421,8 +422,9 @@ body { /*font-family: HelveticaNeueLT;*/
 	background: -o-linear-gradient(top, #ffffff 0%, #f0f0f0 100%);
 	background: -ms-linear-gradient(top, #ffffff 0%, #f0f0f0 100%);
 	background: linear-gradient(to bottom, #ffffff 0%, #f0f0f0 100%);
-	margin-left: 30px;
-	padding-left: 	27px;
+	display: inline-block;
+	margin-left: -28px;
+	padding-left: 28px;
 	border: 1px solid #eee;
 }
 
@@ -443,7 +445,8 @@ body { /*font-family: HelveticaNeueLT;*/
 	background: -o-linear-gradient(top, #2da948 0%, #078042 100%);
 	background: -ms-linear-gradient(top, #2da948 0%, #078042 100%);
 	background: linear-gradient(to bottom, #2da948 0%, #078042 100%);
-	margin-left: 30px;
+	display: inline-block;
+	margin-left: -28px;
 	padding-left: 28px;
 }
 
