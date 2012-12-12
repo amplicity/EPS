@@ -21,7 +21,7 @@ import com.ederbase.model.EbEnterprise;
  * @author Rob Eder
  */
 public class EpsClient {
-	public String stVersion = "EPPORA Version: 11 December 2012";
+	public String stVersion = "EPPORA Version: 12 December 2012";
 	private int iUserId = -1;
 	private int nmPrivUser = 0;
 	private String stAction = "";
