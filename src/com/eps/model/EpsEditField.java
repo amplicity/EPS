@@ -6,7 +6,9 @@ import java.sql.ResultSetMetaData;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 /**
  * 
@@ -2861,7 +2863,8 @@ public class EpsEditField {
 		return stReturn;
 	}
 
-	public String getMissingLc(int iType) {
+	public List<List<String>> getMissingLc(int iType) {
+		List<List<String>> listByPrjSch = new ArrayList<List<String>>();
 		String stByPrjSch = "";
 		String stSql = "";
 		ResultSet rs = null;
@@ -2932,6 +2935,12 @@ public class EpsEditField {
 						    + "</td><td align=right>" + rs.getString("SchId") + "</td><td>"
 						    + aLcName[iLc] + "</td><td align=right>"
 						    + (iLcNumUsers - aLcAvailableUsers[iLc]) + "</td></tr>";
+						List<String> returnItem = new ArrayList<String>();
+						returnItem.add(rs.getString("ProjectName"));
+						returnItem.add(rs.getString("SchId"));
+						returnItem.add(aLcName[iLc]);
+						returnItem.add(""+(iLcNumUsers - aLcAvailableUsers[iLc]));
+						listByPrjSch.add(returnItem);
 						if (iType == 1) {
 							this.ebEnt.dbDyn
 							    .ExecuteUpdate("insert into Missing_Labor_Report"
@@ -2943,8 +2952,6 @@ public class EpsEditField {
 						}
 						if ((iLcNumUsers - aLcAvailableUsers[iLc]) < aLcMissingUsers[iLc]) {
 							aLcMissingUsers[iLc] = (iLcNumUsers - aLcAvailableUsers[iLc]); // Set
-																																						 // max
-																																						 // missing
 						}
 					}
 				}
@@ -2952,7 +2959,8 @@ public class EpsEditField {
 		} catch (Exception e) {
 			stError += "<BR>ERROR getMissingLc: " + e;
 		}
-		return stByPrjSch;
+//		return stByPrjSch;
+		return listByPrjSch;
 	}
 
 	public String makeCostEffectiveness(ResultSet rsFields, String stValue,
