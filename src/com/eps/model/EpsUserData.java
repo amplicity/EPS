@@ -5316,7 +5316,6 @@ public class EpsUserData {
 	private String processApprove() {
 		String stReturn = "<center></form><form method=post><h1>Processing Special Day Approvals</h1><table class=l1small>";
 		try {
-			this.setPageTitle(this.getPageTitle() + " Approval");
 			String stSave = this.ebEnt.ebUd.request.getParameter("submit");
 			String stSql = "select c.*,u.FirstName,u.LastName from Calendar c left join Users u on u.nmUserId=c.nmUser where c.dtDay >= now() and  c.nmUser > 0 and c.nmFlags = 2 order by c.dtDay";
 			ResultSet rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
