@@ -319,8 +319,8 @@ public class EpsClient {
 			for (int iR = 1; iR <= iMax; iR++) {
 				rs.absolute(iR);
 				if ((rs.getInt("nmProjectPriv") & nmPrivUser) != 0) {
-					stProject += "<li><a href='./?stAction=admin&t=12&do=insert'>Create Project</a></li>";
 					stProject += "<li><a href='./?stAction=projects&c=allocate'>Allocate</a></li>";
+					stProject += "<li><a href='./?stAction=admin&t=12&do=insert'>Create Project</a></li>";
 					// stProject +=
 					// "<li><a href='./?stAction=projects&c=analprj'>Analyze Project</a></li>";
 					// stProject +=
@@ -335,10 +335,6 @@ public class EpsClient {
 					// "<li><a href='./?stAction=projects&c=apprsch'>Approve Schedule</a></li>";
 					// stProject +=
 					// "<li><a href='./?stAction=projects&c=critscor'>Criterion Scoring</a></li>";
-					stProject += "<li><a href='./?stAction=projects&t="
-							+ rs.getInt("nmTableId") + "'>"
-							+ rs.getString("stTableName") + "</a></li>";
-					stProject += "<li><a href='javascript:void(0);'>Template</a></li>";
 					if (epsUd.stPrj != null && epsUd.stPrj.length() > 0
 							&& !epsUd.stPrj.equals("0")) {
 						ResultSet rsProject = this.ebEnt.dbDyn
@@ -374,6 +370,10 @@ public class EpsClient {
 									+ "</li>";
 						}
 					}
+					stProject += "<li><a href='./?stAction=projects&t="
+							+ rs.getInt("nmTableId") + "'>"
+							+ rs.getString("stTableName") + "</a></li>";
+					stProject += "<li><a href='javascript:void(0);'>Template</a></li>";
 				}
 				if ((rs.getInt("nmReportPriv") & nmPrivUser) != 0) {
 					String stLink = "./?stAction=reports&t="
