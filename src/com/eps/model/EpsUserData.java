@@ -3052,23 +3052,24 @@ public class EpsUserData {
 							+ ") order by ef.nmOrderDisplay;");
 			rsF.last();
 			int iMax = rsF.getRow();
-			if (stPk != null && stPk.equals("-1") && this.nmTableId == 9) // insert
-																			// NEW
-																			// USER:
-			{
-				int nmUserId = this.ebEnt.dbEnterprise
-						.ExecuteSql1n("select max(RecId) from X25User");
-				nmUserId++;
-				this.ebEnt.dbEnterprise
-						.ExecuteUpdate("replace into X25User (RecId) values("
-								+ nmUserId + ") ");
-				this.ebEnt.dbDyn
-						.ExecuteUpdate("replace into Users (nmUserId,Answers,StartDate,SpecialDays) values("
-								+ nmUserId + ",'',now(),'') ");
-				makeTask(17, "Added new user");
-				this.ebEnt.ebUd.setRedirect("./?stAction=admin&t=9&do=edit&pk="
-						+ nmUserId);
-				return ""; // ----------------------------->
+			if (this.nmTableId == 9) {
+				if (stPk != null && stPk.equals("-1")) // insert NEW USER:
+				{
+					int nmUserId = this.ebEnt.dbEnterprise
+							.ExecuteSql1n("select max(RecId) from X25User");
+					nmUserId++;
+					this.ebEnt.dbEnterprise
+							.ExecuteUpdate("replace into X25User (RecId) values("
+									+ nmUserId + ") ");
+					this.ebEnt.dbDyn
+							.ExecuteUpdate("replace into Users (nmUserId,Answers,StartDate,SpecialDays) values("
+									+ nmUserId + ",'',now(),'') ");
+					makeTask(17, "Added new user");
+					this.ebEnt.ebUd
+							.setRedirect("./?stAction=admin&t=9&do=edit&requestedPk=-1&pk="
+									+ nmUserId);
+					return ""; // ----------------------------->
+				}
 			}
 			if (stPk != null && stPk.length() > 0) // primarily Login has no
 													// data
@@ -3856,7 +3857,18 @@ public class EpsUserData {
 							if (this.ebEnt.ebUd.getRedirect().length() > 0) {
 								return ""; // ----------------------------------------->
 							}
-						} // else: Cancel
+						} else { // cancel
+							if (rsTable.getInt("nmTableId") == 9
+									&& "-1".equals(this.ebEnt.ebUd.request
+											.getParameter("requestedPk"))) {// user
+								this.ebEnt.dbEnterprise
+										.ExecuteUpdate("delete from X25User where RecId="
+												+ stPk);
+								this.ebEnt.dbDyn
+										.ExecuteUpdate("delete from Users where nmUserId="
+												+ stPk);
+							}
+						}
 						if (stDo.equals("xls") || this.stChild.equals("19")
 								|| this.stChild.equals("21")
 								|| this.stChild.equals("34")

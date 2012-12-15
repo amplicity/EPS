@@ -191,9 +191,12 @@ public class EpsClient {
 					this.ebEnt.ebUd.request.getSession().setAttribute(
 							"recentURLs", recentURLs);
 				}
+			} else if (stAction.equals("home")) {
+				recentURLs.clear();
 			}
 
 			String stRecents = "";
+			keySet = recentURLs.keySet();
 			if (keySet != null && keySet.size() > 0) {
 				stRecents += "<ul>";
 				for (String key : keySet) {
