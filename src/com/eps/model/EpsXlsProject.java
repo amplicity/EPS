@@ -3231,6 +3231,7 @@ class EpsXlsProject // extends EpsUserData
 			String ba = rsProject.getString("BusinessAnalystAssignment");
 			String sp = rsProject.getString("Sponsor");
 			String stProjectName = this.rsProject.getString("ProjectName");
+			int iProjectId = this.rsProject.getInt("ProjectStatus");
 
 			sbReturn.append("<tr>");
 			sbReturn.append("<td align=right>" + stPk + "</td>");
@@ -3322,7 +3323,7 @@ class EpsXlsProject // extends EpsUserData
 									+ nmBaseline
 									+ " and RecId in (" + stRecIdList4 + ")");
 				rs.close();
-				// 3) Set LOW LEVEL inidcator
+				// 3) Set LOW LEVEL indicator
 				stSql = "SELECT * FROM Requirements where nmProjectId=" + stPk
 						+ " and nmBaseline=" + nmBaseline
 						+ " order by ReqId desc";
@@ -3371,11 +3372,13 @@ class EpsXlsProject // extends EpsUserData
 			} else {
 				sbReturn.append("<td colspan=2 style='color:red;'>No requirements found</td><td style='color:red;'>fail</td>");
 				iAnalyzeStatus |= 0x1;
-				this.epsUd.makeMessage(stProjectName, ppm + "," + pm + "," + ba
-						+ "," + sp, "Requirement Warning",
-						"No requirements found", new SimpleDateFormat(
-								"MM/dd/yyyy").format(Calendar.getInstance()
-								.getTime()));
+				// if (iProjectId == 1) {
+				// this.epsUd.makeMessage(stProjectName, ppm + "," + pm + ","
+				// + ba + "," + sp, "Requirement Warning",
+				// "No requirements found", new SimpleDateFormat(
+				// "MM/dd/yyyy").format(Calendar.getInstance()
+				// .getTime()));
+				// }
 			}
 			// 4) Process Low-leves, Rollups, check LC
 			// in Req -> must get from Schecule
@@ -3703,6 +3706,8 @@ class EpsXlsProject // extends EpsUserData
 		int iHoliday = 0;
 		int iSchedule = 0;
 		int iRecId = 0;
+		int iCurrId = 0;
+		int iLastId = 0;
 		int iAssignLaborCategoy = 0;
 		try {
 			long startTime = System.nanoTime();
@@ -4181,12 +4186,16 @@ class EpsXlsProject // extends EpsUserData
 									}
 								}
 
-								stSql = "insert into teb_project (nmProjectId,nmBaseline,nmFieldId,nmType) "
-										+ "select "
-										+ aFields[0]
-										+ " as nmProjectId, 1 as nmBaseline, RecId, 2 as nmType from Criteria where nmDivision="
-										+ aFields[1];
-								this.ebEnt.dbDyn.ExecuteUpdate(stSql);
+								for (int i = 1; i <= iBaseline; i++) {
+									stSql = "insert into teb_project (nmProjectId,nmBaseline,nmFieldId,nmType) "
+											+ "select "
+											+ aFields[0]
+											+ " as nmProjectId, "
+											+ i
+											+ " as nmBaseline, RecId, 2 as nmType from Criteria where nmDivision="
+											+ aFields[1];
+									this.ebEnt.dbDyn.ExecuteUpdate(stSql);
+								}
 
 								for (int i = 1; i <= iBaseline; i++) {
 									this.ebEnt.dbDyn
@@ -4212,7 +4221,7 @@ class EpsXlsProject // extends EpsUserData
 										+ "ProjectPortfolioManagerAssignment,ProjectName,Sponsor,"
 										+ "BusinessAnalystAssignment,NumberBaselines,CurrentBaseline"
 										+ ProjectStartDate1
-										+ ",ProjectStatus) VALUES ("
+										+ ",ProjectStatus,ProjectEstimatedHours,EstimatedCompletionDate) VALUES ("
 										+ aFields[0]
 										+ ","
 										+ aFields[1]
@@ -4233,281 +4242,317 @@ class EpsXlsProject // extends EpsUserData
 										+ iBaseline
 										+ ProjectProjectStartDate
 										+ ","
-										+ aFields[8] + ")";
+										+ aFields[8]
+										+ ","
+										+ aFields[12]
+										+ ","
+										+ this.ebEnt.dbDyn
+												.fmtDbString(this.ebEnt.ebUd
+														.fmtDateToDb(aFields[15]))
+										+ ")";
 								break;
 							case 5:
-								/*
-								 * if (iCurrId != iLastId) { nmBaseline =
-								 * this.ebEnt.dbDyn.ExecuteSql1n (
-								 * "SELECT CurrentBaseline FROM Projects where RecId="
-								 * + aFields[0]); }
-								 */
-								nmBaseline = 1;
+								iCurrId = Integer.parseInt(aFields[0]);
+								if (iCurrId != iLastId) {
+									nmBaseline = this.ebEnt.dbDyn
+											.ExecuteSql1n("SELECT CurrentBaseline FROM Projects where RecId="
+													+ aFields[0]);
+								}
+								iLastId = iCurrId;
 								iRecId++;
 								if (aFields.length < 8)
 									stError += "<br>REQ ERROR on Line: "
 											+ iRecId;
-								if (aFields.length >= 7
-										&& aFields[5].length() > 0
-										&& aFields[6].length() > 0) {
-									String[] aMap = aFields[5].trim()
-											.split(",");
-									String[] aPercent = aFields[6].trim()
-											.split(",");
-									int iPrjId = Integer.parseInt(aFields[0]);
-									int iReqId = Integer.parseInt(aFields[1]);
-									int iSchId = 0;
-									double dPercent = 0;
-									String stComment = "";
-									int iRemainder = 0;
-									int iAmortize = 0;
-									for (int iM = 0; iM < aMap.length; iM++) {
-										try {
-											iSchId = Integer.parseInt(aMap[iM]
-													.trim());
-											stComment = "";
-											iAmortize = iRemainder = 0;
-											if (aPercent[iM].toLowerCase()
-													.trim().equals("a")) {
-												iAmortize = 1;
-												dPercent = 0; // Amortize
-											} else if (aPercent[iM]
-													.toLowerCase().trim()
-													.equals("r")) {
-												iRemainder = 1;
-												dPercent = 0; // Remainder
-											} else {
-												dPercent = Double
-														.parseDouble(aPercent[iM]
+								for (int iBL = 1; iBL < nmBaseline; iBL++) {
+									if (aFields.length >= 7
+											&& aFields[5].length() > 0
+											&& aFields[6].length() > 0) {
+										String[] aMap = aFields[5].trim()
+												.split(",");
+										String[] aPercent = aFields[6].trim()
+												.split(",");
+										int iReqId = Integer
+												.parseInt(aFields[1]);
+										int iSchId = 0;
+										double dPercent = 0;
+										String stComment = "";
+										int iRemainder = 0;
+										int iAmortize = 0;
+										for (int iM = 0; iM < aMap.length; iM++) {
+											try {
+												iSchId = Integer
+														.parseInt(aMap[iM]
 																.trim());
+												stComment = "";
+												iAmortize = iRemainder = 0;
+												if (aPercent[iM].toLowerCase()
+														.trim().equals("a")) {
+													iAmortize = 1;
+													dPercent = 0; // Amortize
+												} else if (aPercent[iM]
+														.toLowerCase().trim()
+														.equals("r")) {
+													iRemainder = 1;
+													dPercent = 0; // Remainder
+												} else {
+													dPercent = Double
+															.parseDouble(aPercent[iM]
+																	.trim());
+												}
+												linkMap(1, aFields[0], iBL,
+														aFields[0], iReqId,
+														aFields[0], iSchId,
+														dPercent, stComment,
+														iAmortize, iRemainder);
+											} catch (Exception e) {
+												stError += "<br>Error in mapping: ReqId "
+														+ aFields[1]
+														+ " ["
+														+ aFields[5]
+														+ "] ["
+														+ aFields[6] + "]";
 											}
-											linkMap(1, aFields[0], nmBaseline,
-													aFields[0], iReqId,
-													aFields[0], iSchId,
-													dPercent, stComment,
-													iAmortize, iRemainder);
-										} catch (Exception e) {
-											stError += "<br>Error in mapping: ReqId "
-													+ aFields[1]
-													+ " ["
-													+ aFields[5]
-													+ "] ["
-													+ aFields[6] + "]";
 										}
 									}
+									stSql = "INSERT INTO Requirements "
+											+ "(RecId,nmProjectId,nmBaseline,ReqId,ReqTitle,ReqLevel,ReqDescription)VALUES("
+											+ aFields[1]
+											+ ","
+											+ aFields[0]
+											+ ","
+											+ iBL
+											+ ","
+											+ aFields[1]
+											+ ","
+											+ this.ebEnt.dbDyn
+													.fmtDbString(aFields[2])
+											+ ","
+											+ aFields[3]
+											+ ","
+											+ this.ebEnt.dbDyn
+													.fmtDbString(aFields[4])
+											+ ")";
 								}
-								stSql = "INSERT INTO Requirements "
-										+ "(RecId,nmProjectId,nmBaseline,ReqId,ReqTitle,ReqLevel,ReqDescription)VALUES("
-										+ aFields[1]
-										+ ","
-										+ aFields[0]
-										+ ","
-										+ nmBaseline
-										+ ","
-										+ aFields[1]
-										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(aFields[2])
-										+ ","
-										+ aFields[3]
-										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(aFields[4]) + ")";
 								break;
 							case 6:
-								/*
-								 * if (iCurrId != iLastId) { nmBaseline =
-								 * this.ebEnt.dbDyn.ExecuteSql1n (
-								 * "SELECT CurrentBaseline FROM Projects where RecId="
-								 * + aFields[0]); }
-								 */
-								nmBaseline = 1;
-								iRecId++;
-								stTemp = aFields[8].trim();
-								if (stTemp.length() > 0) {
-									try {
-										String[] aDep = stTemp.split(",");
-										for (int i = 0; i < aDep.length; i++) {
-											// 9FS+260 days or 1,2,3
-											int iDep = 0;
-											double dLag = 0;
-											String stComment = "fs";
-											if (aDep[i].trim().toLowerCase()
-													.contains("fs")) {
-												stComment = "fs";
-												aDep[i] = aDep[i].trim()
-														.toLowerCase()
-														.replace("fs", "");
-											} else if (aDep[i].trim()
-													.toLowerCase()
-													.contains("ss")) {
-												stComment = "ss";
-												aDep[i] = aDep[i].trim()
-														.toLowerCase()
-														.replace("ss", "");
-											} else if (aDep[i].trim()
-													.toLowerCase()
-													.contains("sf")) {
-												stComment = "sf";
-												aDep[i] = aDep[i].trim()
-														.toLowerCase()
-														.replace("sf", "");
-											} else if (aDep[i].trim()
-													.toLowerCase()
-													.contains("ff")) {
-												stComment = "ff";
-												aDep[i] = aDep[i].trim()
-														.toLowerCase()
-														.replace("ff", "");
-											}
-
-											if (aDep[i].trim().contains("+")) {
-												String[] aV2 = aDep[i].trim()
-														.split("\\+");
-												iDep = Integer.parseInt(aV2[0]
-														.trim());
-												dLag = Double
-														.parseDouble(aV2[1]
-																.trim()
-																.replace(" ",
-																		"")
-																.replace(
-																		"days",
-																		""));
-											} else {
-												iDep = Integer.parseInt(aDep[i]
-														.trim());
-											}
-											if (stComment.equals("sf")) // we
-																		// reverse
-																		// START
-																		// TO
-																		// FINISH
-																		// to FS
-												linkMap(2,
-														aFields[0],
-														nmBaseline,
-														aFields[0],
-														Integer.parseInt(aFields[1]),
-														aFields[0], iDep, dLag,
-														stComment, 0, 0);
-											else
-												linkMap(2,
-														aFields[0],
-														nmBaseline,
-														aFields[0],
-														iDep,
-														aFields[0],
-														Integer.parseInt(aFields[1]),
-														dLag, stComment, 0, 0);
-										}
-									} catch (Exception e) {
-										stError += "<BR> Error with Dependencies Schedule: "
-												+ aFields[1]
-												+ " Dep: "
-												+ aFields[8].trim();
-									}
+								iCurrId = Integer.parseInt(aFields[0]);
+								if (iCurrId != iLastId) {
+									nmBaseline = this.ebEnt.dbDyn
+											.ExecuteSql1n("SELECT CurrentBaseline FROM Projects where RecId="
+													+ aFields[0]);
 								}
-								String stLc = "";
-								if (aFields[10].trim().length() > 0) {
-									aV = aFields[10].trim().split(",");
-									for (int iV = 0; iV < aV.length; iV++) {
-										int nmLaborCategoryId = this.ebEnt.dbDyn
-												.ExecuteSql1n("select nmLcId from LaborCategory where "
-														+ "LaborCategory = "
-														+ this.ebEnt.dbDyn
-																.fmtDbString(aV[iV]
-																		.trim()));
-										if (nmLaborCategoryId > 0) {
-											if (iV > 0)
-												stLc += "|";
-											double nmHours = 0;
-											try {
-												nmHours = Double
-														.parseDouble(this.epsUd
-																.makeHours(aFields[5]))
-														/ aV.length;
-											} catch (Exception e) {
+								iLastId = iCurrId;
+
+								iRecId++;
+								for (int iBL = 1; iBL <= nmBaseline; iBL++) {
+									stTemp = aFields[8].trim();
+									if (stTemp.length() > 0) {
+										try {
+											String[] aDep = stTemp.split(",");
+											for (int i = 0; i < aDep.length; i++) {
+												// 9FS+260 days or 1,2,3
+												int iDep = 0;
+												double dLag = 0;
+												String stComment = "fs";
+												if (aDep[i].trim()
+														.toLowerCase()
+														.contains("fs")) {
+													stComment = "fs";
+													aDep[i] = aDep[i].trim()
+															.toLowerCase()
+															.replace("fs", "");
+												} else if (aDep[i].trim()
+														.toLowerCase()
+														.contains("ss")) {
+													stComment = "ss";
+													aDep[i] = aDep[i].trim()
+															.toLowerCase()
+															.replace("ss", "");
+												} else if (aDep[i].trim()
+														.toLowerCase()
+														.contains("sf")) {
+													stComment = "sf";
+													aDep[i] = aDep[i].trim()
+															.toLowerCase()
+															.replace("sf", "");
+												} else if (aDep[i].trim()
+														.toLowerCase()
+														.contains("ff")) {
+													stComment = "ff";
+													aDep[i] = aDep[i].trim()
+															.toLowerCase()
+															.replace("ff", "");
+												}
+
+												if (aDep[i].trim()
+														.contains("+")) {
+													String[] aV2 = aDep[i]
+															.trim()
+															.split("\\+");
+													iDep = Integer
+															.parseInt(aV2[0]
+																	.trim());
+													dLag = Double
+															.parseDouble(aV2[1]
+																	.trim()
+																	.replace(
+																			" ",
+																			"")
+																	.replace(
+																			"days",
+																			""));
+												} else {
+													iDep = Integer
+															.parseInt(aDep[i]
+																	.trim());
+												}
+												if (stComment.equals("sf")) // we
+																			// reverse
+																			// START
+																			// TO
+																			// FINISH
+																			// to
+																			// FS
+													linkMap(2,
+															aFields[0],
+															iBL,
+															aFields[0],
+															Integer.parseInt(aFields[1]),
+															aFields[0], iDep,
+															dLag, stComment, 0,
+															0);
+												else
+													linkMap(2,
+															aFields[0],
+															iBL,
+															aFields[0],
+															iDep,
+															aFields[0],
+															Integer.parseInt(aFields[1]),
+															dLag, stComment, 0,
+															0);
+											}
+										} catch (Exception e) {
+											stError += "<BR> Error with Dependencies Schedule: "
+													+ aFields[1]
+													+ " Dep: "
+													+ aFields[8].trim();
+										}
+									}
+									String stLc = "";
+									if (aFields[10].trim().length() > 0) {
+										aV = aFields[10].trim().split(",");
+										for (int iV = 0; iV < aV.length; iV++) {
+											int nmLaborCategoryId = this.ebEnt.dbDyn
+													.ExecuteSql1n("select nmLcId from LaborCategory where "
+															+ "LaborCategory = "
+															+ this.ebEnt.dbDyn
+																	.fmtDbString(aV[iV]
+																			.trim()));
+											if (nmLaborCategoryId > 0) {
+												if (iV > 0)
+													stLc += "|";
+												double nmHours = 0;
+												try {
+													nmHours = Double
+															.parseDouble(this.epsUd
+																	.makeHours(aFields[5]))
+															/ aV.length;
+												} catch (Exception e) {
+													stError += "<br>ProjectId "
+															+ aFields[0]
+															+ " Task ID: "
+															+ aFields[1]
+															+ " Labor Category invalid EFFORT: "
+															+ aV[iV].trim();
+												}
+												stLc += nmLaborCategoryId
+														+ "~1~" + nmHours
+														+ "~~~~";
+											} else
 												stError += "<br>ProjectId "
 														+ aFields[0]
 														+ " Task ID: "
 														+ aFields[1]
-														+ " Labor Category invalid EFFORT: "
+														+ " Labor Category not found: "
 														+ aV[iV].trim();
-											}
-											stLc += nmLaborCategoryId + "~1~"
-													+ nmHours + "~~~~";
-										} else
-											stError += "<br>ProjectId "
-													+ aFields[0]
-													+ " Task ID: "
-													+ aFields[1]
-													+ " Labor Category not found: "
-													+ aV[iV].trim();
+										}
 									}
+									stSql = "INSERT INTO Schedule (RecId,nmProjectId,nmBaseline,SchId,SchDescription,SchTitle,SchLevel,"
+											+ "SchEstimatedEffort,SchDependencies,SchPriority,SchLaborCategories)VALUES("
+											+ aFields[1]
+											+ ","
+											+ aFields[0]
+											+ ","
+											+ iBL
+											+ ","
+											+ aFields[1]
+											+ ","
+											+ this.ebEnt.dbDyn
+													.fmtDbString(aFields[2])
+											+ ","
+											+ this.ebEnt.dbDyn
+													.fmtDbString(aFields[3])
+											+ ","
+											+ aFields[4]
+											+ ","
+											+ this.epsUd.makeHours(aFields[5])
+											+ ","
+											+ this.ebEnt.dbDyn
+													.fmtDbString(aFields[8])
+											+ ","
+											+ this.epsUd.makeYesNo(aFields[9])
+											+ ","
+											+ this.ebEnt.dbDyn
+													.fmtDbString(stLc)
+											// +
+											// this.ebEnt.dbDyn.fmtDbString(aFields[11])
+											// --
+											// SchIndicators
+											+ ")";
+									iSchedule++;
 								}
-								stSql = "INSERT INTO Schedule (RecId,nmProjectId,nmBaseline,SchId,SchDescription,SchTitle,SchLevel,"
-										+ "SchEstimatedEffort,SchDependencies,SchPriority,SchLaborCategories)VALUES("
-										+ aFields[1]
-										+ ","
-										+ aFields[0]
-										+ ","
-										+ nmBaseline
-										+ ","
-										+ aFields[1]
-										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(aFields[2])
-										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(aFields[3])
-										+ ","
-										+ aFields[4]
-										+ ","
-										+ this.epsUd.makeHours(aFields[5])
-										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(aFields[8])
-										+ ","
-										+ this.epsUd.makeYesNo(aFields[9])
-										+ ","
-										+ this.ebEnt.dbDyn.fmtDbString(stLc)
-										// +
-										// this.ebEnt.dbDyn.fmtDbString(aFields[11])
-										// --
-										// SchIndicators
-										+ ")";
-								iSchedule++;
 								break;
 							case 8:
 								if (aFields.length < 7) {
 									continue;
 								}
+								iCurrId = Integer.parseInt(aFields[0]);
+								if (iCurrId != iLastId) {
+									nmBaseline = this.ebEnt.dbDyn
+											.ExecuteSql1n("SELECT CurrentBaseline FROM Projects where RecId="
+													+ aFields[0]);
+								}
+								iLastId = iCurrId;
+
 								iRecId++;
-								stSql = "INSERT INTO test (RecId, nmProjectId, nmBaseLine, ReqMap, TstType, TstMethod,"
-										+ " TstId, TstTitle, TstDescription) VALUES ("
-										+ iRecId
-										+ ","
-										+ aFields[0]
-										+ ","
-										+ "(SELECT CurrentBaseline FROM projects WHERE RecId="
-										+ aFields[0]
-										+ "),"
-										+ aFields[1]
-										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(aFields[4])
-										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(aFields[5])
-										+ ","
-										+ aFields[3]
-										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(aFields[2])
-										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(aFields[6]) + ")";
+								for (int iBL = 1; iBL <= nmBaseline; iBL++) {
+									stSql = "INSERT INTO test (RecId, nmProjectId, nmBaseLine, ReqMap, TstType, TstMethod,"
+											+ " TstId, TstTitle, TstDescription) VALUES ("
+											+ iRecId
+											+ ","
+											+ aFields[0]
+											+ ","
+											+ "(SELECT CurrentBaseline FROM projects WHERE RecId="
+											+ aFields[0]
+											+ "),"
+											+ aFields[1]
+											+ ","
+											+ this.ebEnt.dbDyn
+													.fmtDbString(aFields[4])
+											+ ","
+											+ this.ebEnt.dbDyn
+													.fmtDbString(aFields[5])
+											+ ","
+											+ aFields[3]
+											+ ","
+											+ this.ebEnt.dbDyn
+													.fmtDbString(aFields[2])
+											+ ","
+											+ this.ebEnt.dbDyn
+													.fmtDbString(aFields[6])
+											+ ")";
+								}
 								break;
 							default:
 								stError += "<BR>ERROR LOADING: Table: "

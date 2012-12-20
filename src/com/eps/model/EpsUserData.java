@@ -6115,10 +6115,10 @@ public class EpsUserData {
 			// compute project ranking -- activity #3,#4, #20, #21
 			EpsReport epsReport = new EpsReport();
 			epsReport.doProjectRanking(this);
-			makeMessage("All", getAllUsers(getPriviledge("ppm")) + ","
+			/*makeMessage("All", getAllUsers(getPriviledge("ppm")) + ","
 					+ getAllUsers(getPriviledge("ex")), "Projects",
 					"The ranking of the active projects has been updated",
-					dateEnd);
+					dateEnd);*/
 
 			// Missing Divisions
 			// verify atleast one division exists -- activity #8
@@ -6454,7 +6454,7 @@ public class EpsUserData {
 
 			// Lookup missing project information and send message -- activity
 			// #27
-			stSql = "select * from Projects where nmReq IS NULL OR nmReq=0 OR nmReq=''";
+			stSql = "select * from Projects where ProjectStatus=1 AND (nmReq IS NULL OR nmReq=0 OR nmReq='')";
 			rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
 			rs.last();
 			iMax = rs.getRow();
