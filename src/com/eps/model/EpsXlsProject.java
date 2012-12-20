@@ -4263,7 +4263,7 @@ class EpsXlsProject // extends EpsUserData
 								if (aFields.length < 8)
 									stError += "<br>REQ ERROR on Line: "
 											+ iRecId;
-								for (int iBL = 1; iBL < nmBaseline; iBL++) {
+								for (int iBL = 1; iBL <= nmBaseline; iBL++) {
 									if (aFields.length >= 7
 											&& aFields[5].length() > 0
 											&& aFields[6].length() > 0) {
