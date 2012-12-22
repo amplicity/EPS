@@ -343,6 +343,10 @@ body { /*font-family: HelveticaNeueLT;*/
 	display: none;
 }
 
+.body-login #header {
+	position: static;
+}
+
 .body-login #header-wrap {
 	width: auto;
 }
