@@ -2635,11 +2635,12 @@ public class EpsUserData {
 									+ " FROM teb_baseline where nmProjectId="
 									+ rs.getString("RecId")
 									+ " and stType='Approve'");
-					int iIniticalBaseline = this.ebEnt.dbDyn
-							.ExecuteSql1n("SELECT max(nmBaseline)"
-									+ " FROM teb_baseline where nmProjectId="
-									+ rs.getString("RecId")
-									+ " and nmBaseline < " + iFirstApprove);
+//					int iIniticalBaseline = this.ebEnt.dbDyn
+//							.ExecuteSql1n("SELECT max(nmBaseline)"
+//									+ " FROM teb_baseline where nmProjectId="
+//									+ rs.getString("RecId")
+//									+ " and nmBaseline < " + iFirstApprove);
+					int iIniticalBaseline = rs.getInt("CurrentBaseline");
 
 					double InitialEstimatedCost = this.ebEnt.dbDyn
 							.ExecuteSql1n("select sum(SchCost) from Schedule"
@@ -2679,24 +2680,23 @@ public class EpsUserData {
 					double CPI = 0;
 					double SPI = 0;
 
-					double BCWP = this.ebEnt.dbDyn
+					double EV = this.ebEnt.dbDyn
 							.ExecuteSql1n("select sum(nmExpenditureToDate) from Schedule"
 									+ " where nmProjectId="
 									+ rs.getInt("RecId")
 									+ " and nmBaseline="
 									+ iIniticalBaseline
 									+ " and SchEfforttoDate>0 and lowlvl=1");
-					double ACWP = this.ebEnt.dbDyn
+					double AC = this.ebEnt.dbDyn
 							.ExecuteSql1n("select sum(SchCost) from Schedule"
 									+ " where nmProjectId="
 									+ rs.getInt("RecId") + " and nmBaseline="
 									+ iIniticalBaseline
 									+ " and SchEfforttoDate>0 and lowlvl=1");
-					if (ACWP != 0) {
-						CPI = 1.0 * Math.round(BCWP * 100 / ACWP) / 100;
+					if (AC != 0) {
+						CPI = 1.0 * Math.round(EV * 100 / AC) / 100;
 					}
 
-					double EV = BCWP;
 					double PV = this.ebEnt.dbDyn
 							.ExecuteSql1n("select sum(SchCost) from Schedule"
 									+ " where nmProjectId="
@@ -2705,6 +2705,8 @@ public class EpsUserData {
 					if (PV != 0) {
 						SPI = 1.0 * Math.round(EV * 100 / PV) / 100;
 					}
+					
+					System.out.println("Project ID " + rs.getInt("RecId") + " EV: " + EV + " AC: "+ AC +" PV: "+ PV + " ====> CPI:" + CPI +" SPI: " + SPI);
 
 					stReturn += "<td class='l1td spi-content'>"
 							+ "<table><tr class=spibg><td colspan=4><div class=spiline data-val='"
