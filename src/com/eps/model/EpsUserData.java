@@ -2740,12 +2740,7 @@ public class EpsUserData {
 		if (stPart == null || stPart.isEmpty())
 			stPart = "0";
 		stReturn += "</div></form>"
-				+ "<script>$(document).ready(function() {"
-				+ "$('#home-accordion').accordion({active: "
-				+ stPart
-				+ ", autoHeight: false, collapsible: true, change: function(e, ui){if(ui.newHeader.length>0)location.href=ui.newHeader.find('a').attr('href')}});"
-				+ "initWorkflowEditButtons();"
-				+ "updateCPISPIlines();});</script>";
+				+ "<script>$(document).ready(winReady("+stPart+"));</script>";
 		return stReturn;
 	}
 
@@ -8175,23 +8170,23 @@ public class EpsUserData {
 		stReturn.append("<div class='button-wrapper'>");
 		stReturn.append(" <a class='first-button' href='" + firstAction
 				+ "'>First</a>");
-		stReturn.append(" <div class='vsplitter'><span/></div>");
+		stReturn.append(" <div class='vsplitter'><span></span></div>");
 		stReturn.append(" <a class='previous-button' href='" + previousAction
 				+ "'>Previous</a>");
-		stReturn.append(" <div class='vsplitter'><span/></div>");
+		stReturn.append(" <div class='vsplitter'><span></span></div>");
 		stReturn.append(" <a class='up-button' href='" + upAction
 				+ "'>Up One</a>");
-		stReturn.append(" <div class='vsplitter'><span/></div>");
+		stReturn.append(" <div class='vsplitter'><span></span></div>");
 		stReturn.append(" <a class='down-button' href='" + downAction
 				+ "'>Down One</a>");
-		stReturn.append(" <div class='vsplitter'><span/></div>");
+		stReturn.append(" <div class='vsplitter'><span></span></div>");
 		stReturn.append(" <a class='next-button' href='" + nextAction
 				+ "'>Next</a>");
-		stReturn.append(" <div class='vsplitter'><span/></div>");
+		stReturn.append(" <div class='vsplitter'><span></span></div>");
 		stReturn.append(" <a class='last-button' href='" + lastAction
 				+ "'>Last</a>");
-		stReturn.append(" <div class='vsplitter'><span/></div>");
-		stReturn.append(" <div class='clr'><span/></div>");
+		stReturn.append(" <div class='vsplitter'><span></span></div>");
+		stReturn.append(" <div class='clr'><span></span></div>");
 		stReturn.append("</div>");
 
 		stReturn.append("<div class='options-wrapper'>");
@@ -8234,10 +8229,10 @@ public class EpsUserData {
 		stReturn.append("  <div><input value='").append(totalRecords)
 				.append("' disabled /></div>");
 		stReturn.append(" </div>");
-		stReturn.append(" <div class='clr'><span/></div>");
+		stReturn.append(" <div class='clr'><span></span></div>");
 		stReturn.append("</div>");
 
-		stReturn.append("<div class='clr'><span/></div>");
+		stReturn.append("<div class='clr'><span></span></div>");
 		stReturn.append("</div>");
 		return stReturn.toString();
 	}

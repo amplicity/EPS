@@ -20,7 +20,7 @@ import com.ederbase.model.EbEnterprise;
  * @author Rob Eder
  */
 public class EpsClient {
-	public String stVersion = "EPPORA Version: 22 December 2012";
+	public String stVersion = "EPPORA Version: 26 December 2012";
 	private int iUserId = -1;
 	private int nmPrivUser = 0;
 	private String stAction = "";
@@ -343,31 +343,17 @@ public class EpsClient {
 						if (rsProject.next()) {
 							String stPrjLink = "./?stAction=projects&t=12&pk="
 									+ this.epsUd.stPrj;
-							stProject += "<li><a href='javascript:void(0);'>Current Project</a>"
-									+ "	<li><a class='sub-item' href='"
-									+ stPrjLink
-									+ "&do=xls&child=46'>Analyze Project</a></li>"
-									+ "	<li><a class='sub-item' href='"
-									+ stPrjLink
-									+ "&do=approve'>Approve</a></li>"
-									+ "	<li><a class='sub-item' href='"
-									+ stPrjLink
-									+ "&do=xls&child=26'>Baseline</a></li>"
+							stProject += 
+									"<li><a href='javascript:void(0);'>Current Project</a></li>"
+									+ "	<li><a class='sub-item' href='"+ stPrjLink+ "&do=xls&child=46'>Analyze Project</a></li>"
+									+ "	<li><a class='sub-item' href='"+ stPrjLink+ "&do=approve'>Approve</a></li>"
+									+ "	<li><a class='sub-item' href='"+ stPrjLink+ "&do=xls&child=26'>Baseline</a></li>"
 									+ "	<li><a class='sub-item' href='./?stAction=projects&c=critscor'>Criterion Score</a></li>"
-									+ "	<li><a class='sub-item' href='"
-									+ stPrjLink
-									+ "&do=edit'>Project Attributes</a></li>"
-									+ "	<li><a class='sub-item' href='"
-									+ stPrjLink
-									+ "&do=xls&child=19'>Requirements</a></li>"
-									+ "	<li><a class='sub-item' href='"
-									+ stPrjLink
-									+ "&do=xls&child=21'>Schedule</a></li>"
-									+ "	<li><a class='sub-item' href='"
-									+ stPrjLink
-									+ "&do=xls&child=34'>Test</a></li>"
-									+ "	<li><a class='sub-item' href='javascript:void(0);'>WBS</a></li>"
-									+ "</li>";
+									+ "	<li><a class='sub-item' href='"+ stPrjLink+ "&do=edit'>Project Attributes</a></li>"
+									+ "	<li><a class='sub-item' href='"+ stPrjLink+ "&do=xls&child=19'>Requirements</a></li>"
+									+ "	<li><a class='sub-item' href='"+ stPrjLink+ "&do=xls&child=21'>Schedule</a></li>"
+									+ "	<li><a class='sub-item' href='"+ stPrjLink+ "&do=xls&child=34'>Test</a></li>"
+									+ "	<li><a class='sub-item' href='javascript:void(0);'>WBS</a></li>";
 						}
 					}
 					stProject += "<li><a href='./?stAction=projects&t="

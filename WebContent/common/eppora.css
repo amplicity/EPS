@@ -48,9 +48,9 @@ a {
 }
 
 #header {
-	position: fixed;
+	/*position: fixed;
 	top: 0px;
-	z-index: 99999;
+	z-index: 99999;*/
 	padding-top: 20px;
 	text-align: center;
 	background: #fff;
@@ -65,7 +65,7 @@ a {
 	height: 90%;
 	position: relative;
 	min-height: 100px;
-	margin-top: 188px;
+	/*margin-top: 188px;*/
 }
 
 #footer {
@@ -800,15 +800,14 @@ ul#topNavItems ul li:hover>ul {
 
 .spi-content .spibg td {
 	vertical-align: bottom;
+	position: relative;
 }
 
 .spi-content .spiline {
-	height: 38px;
-	width: 2px;
+	height: 2px;
+	width: 76px;
 	margin: 0 auto;
-	background: black;
-	-webkit-transform-origin: 50% 100%;
-	transform-origin: 50% 100%;
+	background: url('b_spiline.png') left center no-repeat;
 }
 
 .l1tablenarrow .spi-content td {
