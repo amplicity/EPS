@@ -5,11 +5,14 @@ package com.eps.model;
  *
  */
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import com.ederbase.model.EbDynamic;
@@ -20,7 +23,7 @@ import com.ederbase.model.EbEnterprise;
  * @author Rob Eder
  */
 public class EpsClient {
-	public String stVersion = "EPPORA Version: 26 December 2012";
+	public String stVersion = "";
 	private int iUserId = -1;
 	private int nmPrivUser = 0;
 	private String stAction = "";
@@ -46,6 +49,15 @@ public class EpsClient {
 			}
 		}
 		this.epsUd = new EpsUserData();
+
+		try {
+			InputStream is = this.getClass().getClassLoader()
+					.getResourceAsStream("config.properties");
+			Properties props = new Properties();
+			props.load(is);
+			stVersion = props.getProperty("epporaVersion");
+		} catch (IOException e) {
+		}
 		this.epsUd.setEbEnt(ebEnt, this.stVersion);
 		this.epsUd.epsEf.setEbEnt(ebEnt, this);
 		this.epsUd.setUser(iUserId, 0);
@@ -343,16 +355,29 @@ public class EpsClient {
 						if (rsProject.next()) {
 							String stPrjLink = "./?stAction=projects&t=12&pk="
 									+ this.epsUd.stPrj;
-							stProject += 
-									"<li><a href='javascript:void(0);'>Current Project</a></li>"
-									+ "	<li><a class='sub-item' href='"+ stPrjLink+ "&do=xls&child=46'>Analyze Project</a></li>"
-									+ "	<li><a class='sub-item' href='"+ stPrjLink+ "&do=approve'>Approve</a></li>"
-									+ "	<li><a class='sub-item' href='"+ stPrjLink+ "&do=xls&child=26'>Baseline</a></li>"
+							stProject += "<li><a href='javascript:void(0);'>Current Project</a></li>"
+									+ "	<li><a class='sub-item' href='"
+									+ stPrjLink
+									+ "&do=xls&child=46'>Analyze Project</a></li>"
+									+ "	<li><a class='sub-item' href='"
+									+ stPrjLink
+									+ "&do=approve'>Approve</a></li>"
+									+ "	<li><a class='sub-item' href='"
+									+ stPrjLink
+									+ "&do=xls&child=26'>Baseline</a></li>"
 									+ "	<li><a class='sub-item' href='./?stAction=projects&c=critscor'>Criterion Score</a></li>"
-									+ "	<li><a class='sub-item' href='"+ stPrjLink+ "&do=edit'>Project Attributes</a></li>"
-									+ "	<li><a class='sub-item' href='"+ stPrjLink+ "&do=xls&child=19'>Requirements</a></li>"
-									+ "	<li><a class='sub-item' href='"+ stPrjLink+ "&do=xls&child=21'>Schedule</a></li>"
-									+ "	<li><a class='sub-item' href='"+ stPrjLink+ "&do=xls&child=34'>Test</a></li>"
+									+ "	<li><a class='sub-item' href='"
+									+ stPrjLink
+									+ "&do=edit'>Project Attributes</a></li>"
+									+ "	<li><a class='sub-item' href='"
+									+ stPrjLink
+									+ "&do=xls&child=19'>Requirements</a></li>"
+									+ "	<li><a class='sub-item' href='"
+									+ stPrjLink
+									+ "&do=xls&child=21'>Schedule</a></li>"
+									+ "	<li><a class='sub-item' href='"
+									+ stPrjLink
+									+ "&do=xls&child=34'>Test</a></li>"
 									+ "	<li><a class='sub-item' href='javascript:void(0);'>WBS</a></li>";
 						}
 					}

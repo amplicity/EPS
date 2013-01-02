@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Properties;
 
 public class EbConnect {
 	private Connection dbConn;
@@ -29,17 +30,19 @@ public class EbConnect {
 				this.dbConn.close();
 			}
 		} catch (Exception e) {
-			this.stError = (this.stError + "<br>ERROR  ebClose: " + e.toString());
+			this.stError = (this.stError + "<br>ERROR  ebClose: " + e
+					.toString());
 		}
 	}
 
 	public EbConnect(int iDbType, String stHost, String stUser,
-	    String stPassword, String stDbName, String stConnectString) {
-		EbConnect2(iDbType, stHost, stUser, stPassword, stDbName, stConnectString);
+			String stPassword, String stDbName, String stConnectString) {
+		EbConnect2(iDbType, stHost, stUser, stPassword, stDbName,
+				stConnectString);
 	}
 
 	public void EbConnect2(int iDbType, String stHost, String stUser,
-	    String stPassword, String stDbName, String stConnectString) {
+			String stPassword, String stDbName, String stConnectString) {
 		this.dbConn = null;
 		this.iDbType = iDbType;
 		this.stHost = stHost;
@@ -53,29 +56,41 @@ public class EbConnect {
 				try {
 					Class.forName("com.mysql.jdbc.Driver").newInstance();
 
+					InputStream is = this.getClass().getClassLoader()
+							.getResourceAsStream("config.properties");
+					String suffix = "";
+					if (is != null) {
+						Properties props = new Properties();
+						props.load(is);
+						suffix = props.getProperty("databaseSuffix", "");
+					}
 					String stUrl = "jdbc:mysql://localhost:3306/" + stDbName
-					    + "?zeroDateTimeBehavior=convertToNull";
-					this.dbConn = DriverManager.getConnection(stUrl, "eps", "eps");
+							+ (suffix.length() > 0 ? "_" + suffix : "")
+							+ "?zeroDateTimeBehavior=convertToNull";
+					this.dbConn = DriverManager.getConnection(stUrl, "eps",
+							"eps");
 				} catch (Exception e) {
-					this.stError = (this.stError + "<br>ERROR  mysql Exception: " + e
-					    .toString());
+					e.printStackTrace();
+					this.stError = (this.stError
+							+ "<br>ERROR  mysql Exception: " + e.toString());
 				}
 				break;
 
 			case 1:
 				try {
 					Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-					String connectionUrl = "jdbc:sqlserver://" + stHost + ":1433;"
-					    + "databaseName=" + stDbName + ";user=" + stUser + ";password="
-					    + stPassword + ";";
+					String connectionUrl = "jdbc:sqlserver://" + stHost
+							+ ":1433;" + "databaseName=" + stDbName + ";user="
+							+ stUser + ";password=" + stPassword + ";";
 
 					this.dbConn = DriverManager.getConnection(connectionUrl);
 				} catch (SQLException e) {
-					this.stError = (this.stError + "<br>ERROR  sqlserver Exception: " + e
-					    .toString());
+					this.stError = (this.stError
+							+ "<br>ERROR  sqlserver Exception: " + e.toString());
 				} catch (ClassNotFoundException cE) {
 					this.stError = (this.stError
-					    + "<br>ERROR  Class Not Found Exception: " + cE.toString());
+							+ "<br>ERROR  Class Not Found Exception: " + cE
+							.toString());
 				}
 				break;
 
@@ -87,19 +102,20 @@ public class EbConnect {
 
 					this.dbConn = DriverManager.getConnection(connectionUrl);
 				} catch (Exception e) {
-					this.stError = (this.stError + "<br>ERROR  odbc Exception: " + e
-					    .toString());
+					this.stError = (this.stError
+							+ "<br>ERROR  odbc Exception: " + e.toString());
 				}
 				break;
 
 			default:
 				this.stError = (this.stError
-				    + "<br>ERROR  FATAL ERROR: invalid DB TYPE " + iDbType);
+						+ "<br>ERROR  FATAL ERROR: invalid DB TYPE " + iDbType);
 				break;
 			}
 		} catch (Exception e) {
-			this.stError = (this.stError + "<br>ERROR  ERROR EbConnect: " + stHost
-			    + " " + stUser + " type: " + iDbType + " Exception: " + e);
+			this.stError = (this.stError + "<br>ERROR  ERROR EbConnect: "
+					+ stHost + " " + stUser + " type: " + iDbType
+					+ " Exception: " + e);
 		}
 	}
 
@@ -111,8 +127,8 @@ public class EbConnect {
 				}
 			}
 			if (this.dbConn == null) {
-				EbConnect2(this.iDbType, this.stHost, this.stUser, this.stPassword,
-				    this.stDbName, this.stConnectString);
+				EbConnect2(this.iDbType, this.stHost, this.stUser,
+						this.stPassword, this.stDbName, this.stConnectString);
 				this.stError += "<BR> getEbConn is CLOSED ";
 			}
 		} catch (Exception e) {
@@ -137,14 +153,15 @@ public class EbConnect {
 			switch (iDbType) {
 			case 0:
 				Process p = rt.exec(mysqlpath + "mysqldump.exe " + stDbName
-				    + " -hlocalhost -ueps -peps");
+						+ " -hlocalhost -ueps -peps");
 
 				InputStream is = p.getInputStream();
 				File f = new File(dumppath, "EPPORA-BACKUP-" + stDbName + "-"
-				    + formatter.format(aDate) + ".sql");
+						+ formatter.format(aDate) + ".sql");
 				if (!f.exists())
 					f.createNewFile();
-				BufferedReader br = new BufferedReader(new InputStreamReader(is));
+				BufferedReader br = new BufferedReader(
+						new InputStreamReader(is));
 				BufferedWriter bw = new BufferedWriter(new FileWriter(f));
 				int i;
 				do {

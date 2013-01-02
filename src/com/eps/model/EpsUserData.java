@@ -7,10 +7,13 @@ package com.eps.model;
 import it.sauronsoftware.cron4j.Scheduler;
 
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -24,6 +27,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.servlet.http.Cookie;
@@ -37,14 +41,25 @@ import com.ederbase.model.EbStatic;
 
 class DailyEOBTask implements Runnable {
 	public static EpsUserData epsud;
+	boolean autoEOB = false;
 
 	public DailyEOBTask(EpsUserData ud) {
 		epsud = ud;
+		try {
+			InputStream is = this.getClass().getClassLoader()
+					.getResourceAsStream("config.properties");
+			Properties props = new Properties();
+			props.load(is);
+			autoEOB = Boolean.parseBoolean(props.getProperty("autoEOB"));
+		} catch (IOException e) {
+			autoEOB = false;
+		}
 	}
 
 	@Override
 	public void run() {
-		epsud.runEOB();
+		if (autoEOB)
+			epsud.runEOB();
 	}
 }
 
@@ -2012,29 +2027,55 @@ public class EpsUserData {
 				}
 			}
 
-			int nmStatus = Integer.parseInt(stStatus);
-			stStatus = (nmStatus == 0 ? "NULL"
-					: (nmStatus == 1 ? "'N'" : "'Y'"));
+			String stWhere = " WHERE nmProjectId=" + stPrjId
+					+ " AND nmBaseline=" + stBaseline + " AND RecId=" + stSchId;
 
 			if (nmWfStatus == 0) {
-				this.ebEnt.dbDyn.ExecuteUpdate("REPLACE teb_workflow VALUE ("
-						+ stPrjId + "," + stBaseline + "," + stSchId + ","
-						+ stEstimatedHours + "," + stExpendedHours + ","
-						+ stStatus + "," + this.ebEnt.ebUd.getLoginId() + ","
-						+ stWfStatus + ")");
+				// this.ebEnt.dbDyn.ExecuteUpdate("INSERT INTO teb_workflow2 SELECT * FROM Schedule WHERE nmProjectId="
+				// + stPrjId
+				// + " AND nmBaseline="
+				// + stBaseline
+				// + " AND RecId=" + stSchId);
+				ResultSet rsSchedule = this.ebEnt.dbDyn
+						.ExecuteSql("SELECT * FROM Schedule" + stWhere);
+				if (rsSchedule.next()) {
+					String stCols = "";
+					String stValues = "";
+					ResultSetMetaData rsmd = rsSchedule.getMetaData();
+					for (int iCol = 1; iCol <= rsmd.getColumnCount(); iCol++) {
+						if (iCol > 1) {
+							stCols += ",";
+							stValues += ",";
+						}
+						stCols += rsmd.getColumnName(iCol);
+						stValues += rsSchedule.getString(iCol) == null ? "NULL"
+								: this.ebEnt.dbDyn.fmtDbString(rsSchedule
+										.getString(iCol));
+					}
+					this.ebEnt.dbDyn.ExecuteUpdate("INSERT INTO teb_workflow2("
+							+ stCols + ",nmUserId) VALUE (" + stValues + ","
+							+ this.ebEnt.ebUd.getLoginId() + ")");
+					this.ebEnt.dbDyn
+							.ExecuteUpdate("UPDATE teb_workflow2 SET SchEfforttoDate="
+									+ stExpendedHours
+									+ ", SchEstimatedEffort="
+									+ stEstimatedHours
+									+ ", SchStatus="
+									+ this.ebEnt.dbDyn.fmtDbString(stStatus)
+									+ stWhere);
+				}
+				// this.ebEnt.dbDyn.ExecuteUpdate("INSERT INTO teb_workflow2 VALUE ("
+				// + stPrjId + "," + stBaseline + "," + stSchId + ","
+				// + stEstimatedHours + "," + stExpendedHours + ","
+				// + stStatus + "," + this.ebEnt.ebUd.getLoginId() + ","
+				// + stWfStatus + ")");
 				ResultSet rsP = this.ebEnt.dbDyn
-						.ExecuteSql("SELECT * FROM Projects Where RecId="
+						.ExecuteSql("SELECT * FROM Projects WHERE RecId="
 								+ stPrjId);
 				if (rsP.next()) {
-					String msg = "Task "
-							+ stSchId
-							+ ": Estimated \""
-							+ stEstimatedHours
-							+ "\", Expended \""
-							+ stExpendedHours
-							+ "\", Status \""
-							+ (nmStatus == 0 ? "Wait"
-									: (nmStatus == 1 ? "Progress" : "Done"))
+					String msg = "Task " + stSchId + ": Estimated \""
+							+ stEstimatedHours + "\", Expended \""
+							+ stExpendedHours + "\", Status \"" + stStatus
 							+ "\"";
 					makeMessage(
 							rsP.getString("ProjectName"),
@@ -2045,45 +2086,28 @@ public class EpsUserData {
 				}
 			} else if (nmWfStatus == -1) {
 				String nmUserId = this.ebEnt.dbDyn
-						.ExecuteSql1("SELECT nmUserId FROM teb_workflow WHERE nmProjectId="
-								+ stPrjId
-								+ " AND nmBaseline="
-								+ stBaseline
-								+ " AND nmSchId=" + stSchId);
+						.ExecuteSql1("SELECT nmUserId FROM teb_workflow2"
+								+ stWhere);
 				ResultSet rsP = this.ebEnt.dbDyn
-						.ExecuteSql("SELECT * FROM Projects Where RecId="
+						.ExecuteSql("SELECT * FROM Projects WHERE RecId="
 								+ stPrjId);
 				if (rsP.next()) {
-					String msg = "Task "
-							+ stSchId
-							+ ": Estimated \""
-							+ stEstimatedHours
-							+ "\", Expended \""
-							+ stExpendedHours
-							+ "\", Status \""
-							+ (nmStatus == 0 ? "Wait"
-									: (nmStatus == 1 ? "Progress" : "Done"))
+					String msg = "Task " + stSchId + ": Estimated \""
+							+ stEstimatedHours + "\", Expended \""
+							+ stExpendedHours + "\", Status \"" + stStatus
 							+ "\"";
 					makeMessage(rsP.getString("ProjectName"), nmUserId,
 							"A Workflow Task is rejected", msg, dateEnd);
 				}
-				this.ebEnt.dbDyn
-						.ExecuteUpdate("DELETE FROM teb_workflow WHERE nmProjectId="
-								+ stPrjId
-								+ " AND nmBaseline="
-								+ stBaseline
-								+ " AND nmSchId=" + stSchId);
+				this.ebEnt.dbDyn.ExecuteUpdate("DELETE FROM teb_workflow2"
+						+ stWhere);
 			} else if (nmWfStatus == 1) {
 				this.ebEnt.dbDyn
-						.ExecuteUpdate("UPDATE teb_workflow SET nmStatus="
-								+ stWfStatus + " WHERE nmProjectId=" + stPrjId
-								+ " AND nmBaseline=" + stBaseline
-								+ " AND nmSchId=" + stSchId);
-				String stWhere = " WHERE RecId=" + stSchId
-						+ " AND nmProjectId=" + stPrjId + " AND nmBaseLine="
-						+ stBaseline;
-				this.ebEnt.dbDyn.ExecuteUpdate("UPDATE Schedule set SchDone="
-						+ stStatus + ", SchEstimatedEffort=" + stEstimatedHours
+						.ExecuteUpdate("UPDATE teb_workflow2 SET iHandleFlags=1, SchStatus="
+						+ this.ebEnt.dbDyn.fmtDbString(stStatus) + ", SchEstimatedEffort=" + stEstimatedHours
+						+ ", SchEfforttoDate=" + stExpendedHours + stWhere);
+				this.ebEnt.dbDyn.ExecuteUpdate("UPDATE Schedule set SchStatus="
+						+ this.ebEnt.dbDyn.fmtDbString(stStatus) + ", SchEstimatedEffort=" + stEstimatedHours
 						+ ", SchEfforttoDate=" + stExpendedHours
 						+ ", dtSchLastUpdate=now()" + stWhere);
 				calculateScheduleCost(stWhere);
@@ -2310,7 +2334,7 @@ public class EpsUserData {
 				stPrjIds += rsP.getString("RecId");
 			}
 			iTotalRecords = this.ebEnt.dbDyn
-					.ExecuteSql1n("select count(*), (select count(*) from teb_workflow wf where wf.nmBaseline=s.nmBaseline and wf.nmProjectId=s.nmProjectId and wf.nmSchId=s.RecId) AS cnt "
+					.ExecuteSql1n("select count(*), (select count(*) from teb_workflow2 wf where wf.nmBaseline=s.nmBaseline and wf.nmProjectId=s.nmProjectId and wf.RecId=s.RecId) AS cnt "
 							+ "from Projects p, Schedule s"
 							+ " LEFT JOIN teb_reflaborcategory rlc ON rlc.nmLaborCategoryId = SUBSTRING_INDEX( s.SchLaborCategories, '~', 1 )"
 							+ " LEFT JOIN users u ON rlc.nmRefId=u.nmUserId"
@@ -2322,7 +2346,7 @@ public class EpsUserData {
 							+ ") having cnt=0"
 							+ " order by p.ProjectName,s.RecId");
 			rs = this.ebEnt.dbDyn
-					.ExecuteSql("select p.ProjectName, p.RecId AS ProjectId, s.*, (select count(*) from teb_workflow wf where wf.nmBaseline=s.nmBaseline and wf.nmProjectId=s.nmProjectId and wf.nmSchId=s.RecId) AS cnt  "
+					.ExecuteSql("select p.ProjectName, p.RecId AS ProjectId, s.*, (select count(*) from teb_workflow2 wf where wf.nmBaseline=s.nmBaseline and wf.nmProjectId=s.nmProjectId and wf.RecId=s.RecId) AS cnt  "
 							+ "from Projects p, Schedule s"
 							+ " LEFT JOIN teb_reflaborcategory rlc ON rlc.nmLaborCategoryId = SUBSTRING_INDEX( s.SchLaborCategories, '~', 1 )"
 							+ " LEFT JOIN users u ON rlc.nmRefId=u.nmUserId"
@@ -2341,7 +2365,7 @@ public class EpsUserData {
 				String stPrjId = rs.getString("ProjectId");
 				String stBaseLine = rs.getString("nmBaseline");
 				stReturn += "<tr>";
-				stReturn += "<td class='l1td td0'><span class=hiddenfield><input type='submit' value='Save' "
+				stReturn += "<td class='l1td td0'><span class=hiddenfield><input type='submit' value='Send' "
 						+ "onclick='document.form4.workflowtype.value=\"wf\"; document.form4.nmPrjId.value=\""
 						+ stPrjId
 						+ "\"; document.form4.nmBaseline.value=\""
@@ -2377,8 +2401,7 @@ public class EpsUserData {
 						+ "' /></span><span class=showfield data-value='"
 						+ rs.getString("SchEfforttoDate") + "'>"
 						+ rs.getString("SchEfforttoDate") + "</span></td>";
-				String stStatus = (rs.getString("SchDone") == null ? "0" : ("N"
-						.equals(rs.getString("SchDone")) ? "1" : "2"));
+				String stStatus = rs.getString("SchStatus");
 				stReturn += "<td class='l1td td5'>"
 						+ "<span class=hiddenfield><select name='wfStatus-"
 						+ stPrjId
@@ -2387,15 +2410,19 @@ public class EpsUserData {
 						+ "_"
 						+ recId
 						+ "'>"
-						+ this.ebEnt.ebUd.addOption("Wait", "0", stStatus)
-						+ this.ebEnt.ebUd.addOption("Progress", "1", stStatus)
-						+ this.ebEnt.ebUd.addOption("Done", "2", stStatus)
+						+ this.ebEnt.ebUd.addOption("Not Started",
+								"Not Started", stStatus)
+						+ this.ebEnt.ebUd.addOption("In Progress",
+								"In Progress", stStatus)
+						+ this.ebEnt.ebUd.addOption("Approved", "Approved",
+								stStatus)
+						+ this.ebEnt.ebUd.addOption("Suspended", "Suspended",
+								stStatus)
 						+ "</select></span>"
 						+ "<span class=showfield data-value='"
 						+ stStatus
 						+ "'>"
-						+ (stStatus.equals("0") ? "Wait" : (stStatus
-								.equals("1") ? "Progress" : "Done"))
+						+ stStatus
 						+ "</span>" + "</td>";
 				stReturn += "<td class='l1td td6'>"
 						+ rs.getString("SchDescription") + "</td>";
@@ -2488,19 +2515,19 @@ public class EpsUserData {
 			// work flow project team members
 			iTotalRecords = this.ebEnt.dbDyn
 					.ExecuteSql1n("select count(*) "
-							+ " from Projects p, Schedule s, teb_workflow wf, Users u"
+							+ " from Projects p, Schedule s, teb_workflow2 wf, Users u"
 							+ " where p.CurrentBaseline=s.nmBaseline and p.RecId=s.nmProjectId and p.ProjectStatus=1 and s.lowlvl=1"
-							+ " and wf.nmProjectId=s.nmProjectId and wf.nmBaseline=s.nmBaseline and wf.nmSchId=s.RecId and wf.nmUserId=u.nmUserId and wf.nmStatus=0"
+							+ " and wf.nmProjectId=s.nmProjectId and wf.nmBaseline=s.nmBaseline and wf.RecId=s.RecId and wf.nmUserId=u.nmUserId and wf.iHandleFlags=0"
 							+ " and (p.ProjectManagerAssignment="
 							+ this.ebEnt.ebUd.getLoginId()
 							+ " or p.ProjectPortfolioManagerAssignment="
 							+ this.ebEnt.ebUd.getLoginId() + ")"
 							+ " order by p.ProjectName,s.RecId");
 			rs = this.ebEnt.dbDyn
-					.ExecuteSql("select p.ProjectName, p.RecId AS ProjectId, s.RecId, s.SchDescription, s.nmBaseline,wf.SchEstimatedEffort, wf.SchEfforttoDate, wf.SchDone,CONCAT(u.FirstName, ' ', u.LastName) AS UserName"
-							+ " from Projects p, Schedule s, teb_workflow wf, Users u"
+					.ExecuteSql("select p.ProjectName, p.RecId AS ProjectId, s.RecId, s.SchDescription, s.nmBaseline,wf.SchEstimatedEffort, wf.SchEfforttoDate, wf.SchStatus,CONCAT(u.FirstName, ' ', u.LastName) AS UserName"
+							+ " from Projects p, Schedule s, teb_workflow2 wf, Users u"
 							+ " where p.CurrentBaseline=s.nmBaseline and p.RecId=s.nmProjectId and p.ProjectStatus=1 and s.lowlvl=1"
-							+ " and wf.nmProjectId=s.nmProjectId and wf.nmBaseline=s.nmBaseline and wf.nmSchId=s.RecId and wf.nmUserId=u.nmUserId and wf.nmStatus=0"
+							+ " and wf.nmProjectId=s.nmProjectId and wf.nmBaseline=s.nmBaseline and wf.RecId=s.RecId and wf.nmUserId=u.nmUserId and wf.iHandleFlags=0"
 							+ " and (p.ProjectManagerAssignment="
 							+ this.ebEnt.ebUd.getLoginId()
 							+ " or p.ProjectPortfolioManagerAssignment="
@@ -2573,8 +2600,7 @@ public class EpsUserData {
 						+ rs.getString("SchEfforttoDate") + "'>"
 						+ rs.getString("SchEfforttoDate") + "</span></td>";
 
-				String stStatus = (rs.getString("SchDone") == null ? "0" : ("N"
-						.equals(rs.getString("SchDone")) ? "1" : "2"));
+				String stStatus = rs.getString("SchStatus");
 				stReturn += "<td class='l1td td6'>"
 						+ "<span class=hiddenfield><select name='wfPTMStatus-"
 						+ stPrjId
@@ -2583,16 +2609,16 @@ public class EpsUserData {
 						+ "_"
 						+ recId
 						+ "'>"
-						+ this.ebEnt.ebUd.addOption("Wait", "0", stStatus)
-						+ this.ebEnt.ebUd.addOption("Progress", "1", stStatus)
-						+ this.ebEnt.ebUd.addOption("Done", "2", stStatus)
-						+ "</select></span>"
-						+ "<span class=showfield data-value='"
-						+ stStatus
-						+ "'>"
-						+ (stStatus.equals("0") ? "Wait" : (stStatus
-								.equals("1") ? "Progress" : "Done"))
-						+ "</span>" + "</td>";
+						+ this.ebEnt.ebUd.addOption("Not Started",
+								"Not Started", stStatus)
+						+ this.ebEnt.ebUd.addOption("In Progress",
+								"In Progress", stStatus)
+						+ this.ebEnt.ebUd.addOption("Approved", "Approved",
+								stStatus)
+						+ this.ebEnt.ebUd.addOption("Suspended", "Suspended",
+								stStatus) + "</select></span>"
+						+ "<span class=showfield data-value='" + stStatus
+						+ "'>" + stStatus + "</span>" + "</td>";
 				stReturn += "<td class='l1td td7'>"
 						+ rs.getString("SchDescription") + "</td>";
 
@@ -2635,11 +2661,11 @@ public class EpsUserData {
 									+ " FROM teb_baseline where nmProjectId="
 									+ rs.getString("RecId")
 									+ " and stType='Approve'");
-//					int iIniticalBaseline = this.ebEnt.dbDyn
-//							.ExecuteSql1n("SELECT max(nmBaseline)"
-//									+ " FROM teb_baseline where nmProjectId="
-//									+ rs.getString("RecId")
-//									+ " and nmBaseline < " + iFirstApprove);
+					// int iIniticalBaseline = this.ebEnt.dbDyn
+					// .ExecuteSql1n("SELECT max(nmBaseline)"
+					// + " FROM teb_baseline where nmProjectId="
+					// + rs.getString("RecId")
+					// + " and nmBaseline < " + iFirstApprove);
 					int iIniticalBaseline = rs.getInt("CurrentBaseline");
 
 					double InitialEstimatedCost = this.ebEnt.dbDyn
@@ -2680,33 +2706,56 @@ public class EpsUserData {
 					double CPI = 0;
 					double SPI = 0;
 
-					double EV = this.ebEnt.dbDyn
-							.ExecuteSql1n("select sum(nmExpenditureToDate) from Schedule"
+					String stTemp = this.ebEnt.dbDyn
+							.ExecuteSql1("select sum(nmExpenditureToDate) from Schedule"
+									+ " where nmProjectId="
+									+ rs.getInt("RecId")
+									+ " and nmBaseline="
+									+ iIniticalBaseline
+									+ " and SchEfforttoDate>0 and SchFlags&1000=0 and lowlvl=1");
+
+					double CPIAV = (stTemp != null && "".equals(stTemp.trim())) ? Double
+							.parseDouble(stTemp) : 0;
+					stTemp = this.ebEnt.dbDyn
+							.ExecuteSql1("select sum(SchCost) from Schedule"
+									+ " where nmProjectId="
+									+ rs.getInt("RecId")
+									+ " and nmBaseline="
+									+ iIniticalBaseline
+									+ " and SchEfforttoDate>0 and SchFlags&1000=0 and lowlvl=1");
+					double CPIPV = (stTemp != null && "".equals(stTemp.trim())) ? Double
+							.parseDouble(stTemp) : 0;
+					if (CPIAV != 0) {
+						CPI = 1.0 * Math.round(CPIPV * 100 / CPIAV) / 100;
+					}
+
+					stTemp = this.ebEnt.dbDyn
+							.ExecuteSql1("select sum(nmExpenditureToDate) from Schedule"
 									+ " where nmProjectId="
 									+ rs.getInt("RecId")
 									+ " and nmBaseline="
 									+ iIniticalBaseline
 									+ " and SchEfforttoDate>0 and lowlvl=1");
-					double AC = this.ebEnt.dbDyn
-							.ExecuteSql1n("select sum(SchCost) from Schedule"
+					double SPIAV = (stTemp != null && "".equals(stTemp.trim())) ? Double
+							.parseDouble(stTemp) : 0;
+					stTemp = this.ebEnt.dbDyn
+							.ExecuteSql1("select sum(SchCost) from Schedule"
 									+ " where nmProjectId="
 									+ rs.getInt("RecId") + " and nmBaseline="
 									+ iIniticalBaseline
 									+ " and SchEfforttoDate>0 and lowlvl=1");
-					if (AC != 0) {
-						CPI = 1.0 * Math.round(EV * 100 / AC) / 100;
+					double SPIPV = (stTemp != null && "".equals(stTemp.trim())) ? Double
+							.parseDouble(stTemp) : 0;
+
+					if (SPIAV != 0) {
+						SPI = 1.0 * Math.round(SPIPV * 100 / SPIAV) / 100;
 					}
 
-					double PV = this.ebEnt.dbDyn
-							.ExecuteSql1n("select sum(SchCost) from Schedule"
-									+ " where nmProjectId="
-									+ rs.getInt("RecId") + " and nmBaseline="
-									+ iIniticalBaseline + " and lowlvl=1");
-					if (PV != 0) {
-						SPI = 1.0 * Math.round(EV * 100 / PV) / 100;
-					}
-					
-					System.out.println("Project ID " + rs.getInt("RecId") + " EV: " + EV + " AC: "+ AC +" PV: "+ PV + " ====> CPI:" + CPI +" SPI: " + SPI);
+					System.out.println("Project ID " + rs.getInt("RecId")
+							+ " Baseline: " + iIniticalBaseline + " CPIPV: "
+							+ CPIPV + " CPIAV: " + CPIAV + " SPIPV: " + SPIPV
+							+ " SPIAV: " + SPIAV + " ====> CPI:" + CPI
+							+ " SPI: " + SPI);
 
 					stReturn += "<td class='l1td spi-content'>"
 							+ "<table><tr class=spibg><td colspan=4><div class=spiline data-val='"
@@ -2739,8 +2788,8 @@ public class EpsUserData {
 		String stPart = this.ebEnt.ebUd.request.getParameter("part");
 		if (stPart == null || stPart.isEmpty())
 			stPart = "0";
-		stReturn += "</div></form>"
-				+ "<script>$(document).ready(winReady("+stPart+"));</script>";
+		stReturn += "</div></form>" + "<script>$(document).ready(winReady("
+				+ stPart + "));</script>";
 		return stReturn;
 	}
 
@@ -4236,67 +4285,15 @@ public class EpsUserData {
 			if ((nmTableFlags & 0x20) != 0) {
 				stReturn += "<tr><td class=l1td colspan=" + iFieldMax
 						+ " align=center style='background: skyblue'>";
-				// if (iFrom >= this.rsMyDiv.getInt("MaxRecords")) {
-				// stReturn +=
-				// "&nbsp;&nbsp;&nbsp;<input type=button onClick=\"parent.location='./?stAction=admin&t="
-				// + rsTable.getInt("nmTableId")
-				// + "&stFrom="
-				// + 0
-				// + "&stSql="
-				// + URLEncoder.encode(stSql, "UTF-8") + "'\"" +
-				// " value='First'>";
-				// stReturn +=
-				// "&nbsp;&nbsp;&nbsp;<input type=button onClick=\"parent.location='./?stAction=admin&t="
-				// + rsTable.getInt("nmTableId")
-				// + "&stFrom="
-				// + iToPrevious
-				// + "&stSql="
-				// + URLEncoder.encode(stSql, "UTF-8")
-				// + "'\""
-				// + " value='Previous " + this.rsMyDiv.getInt("MaxRecords") +
-				// "'>";
-				// }
-				// http://localhost:8084/eps/?stAction=admin&t=36
-				//
 				stReturn += "<input type=button onClick=\"parent.location='"
 						+ stLink + "&do=insert'\" value='Insert New'>";
-				// if (iMax >= this.rsMyDiv.getInt("MaxRecords")) {
-				// stReturn +=
-				// "&nbsp;&nbsp;&nbsp;<input type=button onClick=\"parent.location='./?stAction=admin&t="
-				// + rsTable.getInt("nmTableId")
-				// + "&stFrom="
-				// + iTo
-				// + "&stSql="
-				// + URLEncoder.encode(stSql, "UTF-8")
-				// + "'\""
-				// + " value='Next "
-				// + this.rsMyDiv.getInt("MaxRecords") + "'>";
-				// int iLast = iCount - (iCount %
-				// this.rsMyDiv.getInt("MaxRecords"));
-				// stReturn +=
-				// "&nbsp;&nbsp;&nbsp;<input type=button onClick=\"parent.location='./?stAction=admin&t="
-				// + rsTable.getInt("nmTableId")
-				// + "&stFrom="
-				// + iLast
-				// + "&stSql="
-				// + URLEncoder.encode(stSql, "UTF-8") + "'\"" +
-				// " value='Last'>";
-				// }
-				// + "<a href='./?stAction=admin&t=" +
-				// rsTable.getInt("nmTableId")
-				// + "&stFrom=" + iTo + "&stSql=" + URLEncoder.encode(stSql,
-				// "UTF-8") +
-				// "'>Next " + this.rsMyDiv.getInt("MaxRecords") + "</a>";
 
 				stReturn += "</td></tr>";
 			}
 			stReturn += "</table>";
 			if ((nmTableFlags & 0x20) != 0) {
-				// stReturn += "<tr><td class=l1td colspan=" + iFieldMax
-				// + " align=center>";
 				stReturn += makeToolbar(false, iCount, iFrom, iBlock,
 						"./?stAction=admin&t=" + rsTable.getInt("nmTableId"));
-				// stReturn += "</td></tr>";
 			}
 			if (rsTable.getInt("nmTableId") == 17) // Calendar
 			{
@@ -6112,10 +6109,11 @@ public class EpsUserData {
 			// compute project ranking -- activity #3,#4, #20, #21
 			EpsReport epsReport = new EpsReport();
 			epsReport.doProjectRanking(this);
-			/*makeMessage("All", getAllUsers(getPriviledge("ppm")) + ","
-					+ getAllUsers(getPriviledge("ex")), "Projects",
-					"The ranking of the active projects has been updated",
-					dateEnd);*/
+			/*
+			 * makeMessage("All", getAllUsers(getPriviledge("ppm")) + "," +
+			 * getAllUsers(getPriviledge("ex")), "Projects",
+			 * "The ranking of the active projects has been updated", dateEnd);
+			 */
 
 			// Missing Divisions
 			// verify atleast one division exists -- activity #8

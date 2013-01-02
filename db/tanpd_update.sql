@@ -152,3 +152,59 @@ if (ns4)
 </script>' WHERE `x25refcontent`.`nmContentId` = 1;
 
 UPDATE `ebeps01`.`x25refcontent` SET `stContent`='<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\r\n\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n<html>\r\n    <head>\r\n        <title>EPPORA</title>\r\n        <meta content=\"by MyInfo.com Robert Eder\" name=\"GENERATOR\" />\r\n<style>\r\n#content,#footer,#header .pagetitle,#header-content,#header .hbar, #header-wrap {\r\nwidth: ~PageWidthPx~px;\r\n}\r\n</style>\r\n\r\n<link rel=\"stylesheet\" href=\"./common/calendar.css\" />\r\n<link rel=\"stylesheet\" href=\"./common/eppora.css\" />\r\n<script language=\"JavaScript\" src=\"./common/jquery-1.7.1.min.js\"></script>\r\n<script language=\"JavaScript\" src=\"./common/jquery-ui-1.8.18.custom.min.js\"></script>\r\n<SCRIPT LANGUAGE=\"JavaScript\" SRC=\"./common/ebmain.js\"></SCRIPT>\r\n<script language=\"JavaScript\" src=\"./common/calendar_us.js\"></script>\r\n<script language=\"JavaScript\" src=\"./common/jQueryRotate.2.2.js\"></script>\r\n<script language=\"JavaScript\" src=\"./common/eppora.js\"></script>\r\n</head>\r\n<body id=\"ebbody\" onLoad=\"EpsLoad();\" class=\"~BodyStyleClass~\">\r\n<layer name=\"nsviewer\" bgcolor=\"#cccccc\" width=0 height=0 style=\"border-width:thin;z-index:1\"></layer>\r\n<script language=\"JavaScript1.2\">\r\nif (iens6)\r\n{\r\n document.write(\"<div id=\'viewer\' name=\'viewer\' style=\'background-color:#cccccc;marginleft:0;visibility:hidden;position:absolute;width:2;height:2;zindex:1;overflow:hidden\'></div>\");\r\n}\r\nif (ns4)\r\n{\r\n hideobj = eval(\"document.nsviewer\");\r\n hideobj.visibility=\"hidden\";\r\n}\r\n</script>' WHERE `nmContentId`='1';
+
+
+ALTER TABLE  `schedule` ADD  `SchStatus` ENUM(  'Not Started',  'In Progress',  'Approved',  'Suspended' ) NOT NULL DEFAULT  'Not Started' AFTER  `SchDone`;
+INSERT INTO `dbeps01`.`teb_fields` (`nmForeignId`, `stDbFieldName`, `nmDataType`, `nmFlags`, `nmOrder2`, `nmGrouping`, `nmGroupingOrder`, `stDefaultValue`, `nmTabId`, `stTabName`, `stLabel`, `nmOrder`, `nmHeaderOrder`, `nmMinBytes`, `nmMaxBytes`, `nmRows`, `nmCols`, `nmSecurityFlags`, `stMask`, `stValidation`, `stValidParam`, `stLabelShort`) VALUES (NULL, 'SchStatus', '9', '3', '0', '21', '21', 'Not Started', '21', '', 'Status', '0', '0', '2', '255', '0', '64', '0', '', '', '', '');
+INSERT INTO `dbeps01`.`teb_epsfields` (`nmForeignId`, `nmOrderDisplay`, `stValidationFlags`, `stHandler`, `stChoiceValues`, `stSpecial`, `stTemp`, `nmPriv`, `stNull`, `stExtra`) VALUES (ID, '50', '', '', '', NULL, NULL, '224', '', '');
+INSERT INTO `dbeps01`.`teb_choices` (`RecId`, `UniqIdChoice`, `nmParentId`, `UniqIdField`, `stChoiceValue`, `nmOrder`, `stReference`, `stWPText`, `nmFieldId`, `nmPrivUserReadFlags`, `nmPrivRecordFlags`, `stChoiceCustomer`, `stChoiceValueShort`, `stChoiceValueAllow`, `stChoiceDependancy`) VALUES (NULL, 'Not Started', '0', NULL, 'Not Started', '10', '', '', ID, '0', '0', '', '', '', ''), (NULL, 'In Progress', '0', NULL, 'In Progress', '20', '', '', ID, '0', '0', '', '', '', ''), (NULL, 'Approved', '0', NULL, 'Approved', '30', '', '', ID, '0', '0', '', '', '', ''), (NULL, 'Suspended', '0', NULL, 'Suspended', '40', '', '', ID, '0', '0', '', '', '', '');
+
+ALTER TABLE  `schedule` ADD  `SchRemainingHours` DOUBLE NOT NULL DEFAULT  '0' AFTER  `SchStatus`;
+INSERT INTO `dbeps01`.`teb_fields` (`nmForeignId`, `stDbFieldName`, `nmDataType`, `nmFlags`, `nmOrder2`, `nmGrouping`, `nmGroupingOrder`, `stDefaultValue`, `nmTabId`, `stTabName`, `stLabel`, `nmOrder`, `nmHeaderOrder`, `nmMinBytes`, `nmMaxBytes`, `nmRows`, `nmCols`, `nmSecurityFlags`, `stMask`, `stValidation`, `stValidParam`, `stLabelShort`) VALUES (NULL, 'SchRemainingHours', '31', '1', '0', '21', '21', '0', '21', '', 'Remaining Hours', '0', '0', '0', '5', '0', '5', '0', '', '', '', '');
+INSERT INTO `dbeps01`.`teb_epsfields` (`nmForeignId`, `nmOrderDisplay`, `stValidationFlags`, `stHandler`, `stChoiceValues`, `stSpecial`, `stTemp`, `nmPriv`, `stNull`, `stExtra`) VALUES (ID, '120', '', '', '', NULL, NULL, '224', '', '');
+
+
+ CREATE  TABLE  `dbeps01`.`teb_workflow2` (  `nmProjectId` int( 11  )  NOT  NULL ,
+ `nmBaseline` int( 11  )  NOT  NULL ,
+ `RecId` int( 11  )  NOT  NULL ,
+ `SchHolidays` int( 11  )  NOT  NULL DEFAULT  '0',
+ `nmD53Flags` int( 11  )  NOT  NULL DEFAULT  '0',
+ `nmSchAanalFlags` int( 11  )  NOT  NULL DEFAULT  '0',
+ `nmExpenditureToDate` double NOT  NULL DEFAULT  '0',
+ `dtSchLastUpdate` datetime  DEFAULT NULL ,
+ `SchTitle` varchar( 255  )  NOT  NULL DEFAULT  '',
+ `SchParentRecId` int( 11  )  NOT  NULL DEFAULT  '0',
+ `SchLevel` int( 11  )  NOT  NULL DEFAULT  '0',
+ `SchPctDone` double NOT  NULL DEFAULT  '0',
+ `SchFixedFinishDate` datetime  DEFAULT NULL ,
+ `SchFixedStartDate` datetime  DEFAULT NULL ,
+ `SchComments` longtext,
+ `SchCost` double NOT  NULL DEFAULT  '0',
+ `SchDependencies` varchar( 64  )  NOT  NULL DEFAULT  '',
+ `SchDescription` longtext,
+ `SchEfforttoDate` double NOT  NULL DEFAULT  '0',
+ `SchEstimatedEffort` double NOT  NULL DEFAULT  '0',
+ `SchFinishDate` datetime  DEFAULT NULL ,
+ `SchFlags` varchar( 8  )  NOT  NULL DEFAULT  '0',
+ `SchWeekendDays` int( 11  )  NOT  NULL DEFAULT  '0',
+ `SchPriority` int( 11  )  NOT  NULL DEFAULT  '0',
+ `SchRemainingCost` double NOT  NULL DEFAULT  '0',
+ `SchLaborCategories` varchar( 255  )  NOT  NULL DEFAULT  '',
+ `SchSlack` double NOT  NULL DEFAULT  '0',
+ `SchStartDate` datetime  DEFAULT NULL ,
+ `SchSuccessors` varchar( 64  )  NOT  NULL DEFAULT  '',
+ `SchId` int( 11  )  NOT  NULL DEFAULT  '0',
+ `SchInventory` varchar( 64  )  NOT  NULL DEFAULT  '',
+ `SchOtherResources` varchar( 64  )  NOT  NULL DEFAULT  '',
+ `nmEffort40Flag` int( 11  )  DEFAULT NULL ,
+ `SchDone` char( 1  )  DEFAULT NULL ,
+ `SchStatus` enum(  'Not Started',  'In Progress',  'Approved',  'Suspended'  )  NOT  NULL DEFAULT  'Not Started',
+ `SchRemainingHours` double NOT  NULL DEFAULT  '0',
+ `SchMessage` char( 1  )  DEFAULT NULL ,
+ `lowlvl` int( 11  )  DEFAULT NULL ,
+ `nmUserId` INT ( 11 ) NOT NULL,
+ `iHandleFlags` INT( 11 ) NOT NULL DEFAULT  '0',
+ PRIMARY  KEY (  `nmProjectId` ,  `nmBaseline` ,  `RecId`  ) ,
+ KEY  `baseid` (  `nmProjectId` ,  `nmBaseline` ,  `SchId`  ) ,
+ KEY  `recid2` (  `RecId`  ) ,
+ KEY  `schid` (  `SchId`  )  ) ENGINE  = InnoDB  DEFAULT CHARSET  = latin1;

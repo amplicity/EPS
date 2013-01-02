@@ -4263,6 +4263,8 @@ class EpsXlsProject // extends EpsUserData
 								if (aFields.length < 8)
 									stError += "<br>REQ ERROR on Line: "
 											+ iRecId;
+								stSql = "INSERT INTO Requirements "
+										+ "(RecId,nmProjectId,nmBaseline,ReqId,ReqTitle,ReqLevel,ReqDescription)VALUES";
 								for (int iBL = 1; iBL <= nmBaseline; iBL++) {
 									if (aFields.length >= 7
 											&& aFields[5].length() > 0
@@ -4314,8 +4316,9 @@ class EpsXlsProject // extends EpsUserData
 											}
 										}
 									}
-									stSql = "INSERT INTO Requirements "
-											+ "(RecId,nmProjectId,nmBaseline,ReqId,ReqTitle,ReqLevel,ReqDescription)VALUES("
+									if (iBL > 1)
+										stSql += ",";
+									stSql += "("
 											+ aFields[1]
 											+ ","
 											+ aFields[0]
@@ -4344,6 +4347,8 @@ class EpsXlsProject // extends EpsUserData
 								iLastId = iCurrId;
 
 								iRecId++;
+								stSql = "INSERT INTO Schedule (RecId,nmProjectId,nmBaseline,SchId,SchDescription,SchTitle,SchLevel,"
+										+ "SchEstimatedEffort,SchDependencies,SchPriority,SchLaborCategories)VALUES";
 								for (int iBL = 1; iBL <= nmBaseline; iBL++) {
 									stTemp = aFields[8].trim();
 									if (stTemp.length() > 0) {
@@ -4478,8 +4483,9 @@ class EpsXlsProject // extends EpsUserData
 														+ aV[iV].trim();
 										}
 									}
-									stSql = "INSERT INTO Schedule (RecId,nmProjectId,nmBaseline,SchId,SchDescription,SchTitle,SchLevel,"
-											+ "SchEstimatedEffort,SchDependencies,SchPriority,SchLaborCategories)VALUES("
+									if (iBL > 1)
+										stSql += ",";
+									stSql += "("
 											+ aFields[1]
 											+ ","
 											+ aFields[0]
@@ -4526,9 +4532,12 @@ class EpsXlsProject // extends EpsUserData
 								iLastId = iCurrId;
 
 								iRecId++;
+								stSql = "INSERT INTO test (RecId, nmProjectId, nmBaseLine, ReqMap, TstType, TstMethod,"
+										+ " TstId, TstTitle, TstDescription) VALUES";
 								for (int iBL = 1; iBL <= nmBaseline; iBL++) {
-									stSql = "INSERT INTO test (RecId, nmProjectId, nmBaseLine, ReqMap, TstType, TstMethod,"
-											+ " TstId, TstTitle, TstDescription) VALUES ("
+									if (iBL > 0)
+										stSql += ",";
+									stSql += "("
 											+ iRecId
 											+ ","
 											+ aFields[0]
