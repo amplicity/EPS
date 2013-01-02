@@ -3900,8 +3900,21 @@ class EpsXlsProject // extends EpsUserData
 										+ " where nmDivision=" + aFields[0];
 								break;
 							case 2:
-								stSql = "insert into LaborCategory (LaborCategory) values(\""
-										+ aFields[0] + "\") ";
+								this.ebEnt.dbDyn
+										.ExecuteUpdate("insert into LaborCategory (LaborCategory) values(\""
+												+ aFields[0] + "\") ");
+								ResultSet fixedUsers = this.ebEnt.dbDyn
+										.ExecuteSql("select * from users where nmUserId <=10");
+								while (fixedUsers.next()) {
+									this.ebEnt.dbDyn
+											.ExecuteUpdate("insert into teb_reflaborcategory(nmLaborCategoryId, nmRefType, nmRefId) values "
+													+ "((select nmLcId from LaborCategory where LaborCategory=\""
+													+ aFields[0]
+													+ "\"), 42, "
+													+ fixedUsers
+															.getString("nmUserId")
+													+ "  )");
+								}
 								break;
 							case 10:
 								stSql = "replace into Inventory "
