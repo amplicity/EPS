@@ -4758,22 +4758,26 @@ class EpsXlsProject // extends EpsUserData
 				for (int i = 1; i <= iSch; i++) {
 					rs.absolute(i);
 					if (iLastLevel == rs.getInt("SchLevel")) {
+						int iPrjStatus = this.ebEnt.dbDyn
+								.ExecuteSql1n("SELECT ProjectStatus FROM Projects WHERE RecId="
+										+ this.stPk);
 						// same level as before, therefore we are low level
-						linkHit = this.ebEnt.dbDyn
-								.ExecuteSql1n("SELECT COUNT(*) as c FROM teb_link WHERE nmProjectId="
-										+ this.stPk
-										+ " and nmBaseline="
-										+ this.nmBaseline
-										+ " and nmLinkFlags=1 and nmToId="
-										+ rs.getInt("RecId"));
-						if (linkHit <= 0) {
-							this.epsUd.makeMessage(
-									prjname,
-									ppm + "," + pm + "," + ba + "," + sp,
-									"Schedule Mapping",
-									"Please Assign a Requirement to Task("
-											+ rs.getString("SchTitle") + ")",
-									dateEnd);
+						if (iPrjStatus > 0) {
+							linkHit = this.ebEnt.dbDyn
+									.ExecuteSql1n("SELECT COUNT(*) as c FROM teb_link WHERE nmProjectId="
+											+ this.stPk
+											+ " and nmBaseline="
+											+ this.nmBaseline
+											+ " and nmLinkFlags=1 and nmToId="
+											+ rs.getInt("RecId"));
+							if (linkHit <= 0) {
+								this.epsUd.makeMessage(prjname, ppm + "," + pm
+										+ "," + ba + "," + sp,
+										"Schedule Mapping",
+										"Please Assign a Requirement to Task("
+												+ rs.getString("SchTitle")
+												+ ")", dateEnd);
+							}
 						}
 					}
 					iLastLevel = rs.getInt("SchLevel");
@@ -4862,31 +4866,38 @@ class EpsXlsProject // extends EpsUserData
 							.ExecuteUpdate("delete from teb_link where nmLinkFlags=5");
 				}
 			}
-			ResultSet rs1 = this.ebEnt.dbDyn
-					.ExecuteSql("select"
-							+ " count(*) cnt,nmToId,format(sum(nmPercent),4) nmPercent,sum(nmAmortize) nmAmortize,sum(nmRemainder) nmRemainder"
-							+ " from teb_link where nmProjectId="
-							+ this.stPk
-							+ " and nmBaseline="
-							+ this.nmBaseline
-							+ " and nmLinkFlags=1 group by nmToId having format(sum(nmPercent),4) = 100");
-			rs1.last();
-			iMax = rs1.getRow();
 
-			sbReturn.append(stHead + "<td>Requirements to Schedules</td>");
-			if (iMax > 0)
-				sbReturn.append("<td>Schedules Mapped 100% </td><td align=right>"
-						+ iMax + "</td><td style='color:green;'>ok</td>");
-			else {
-				this.iAnalyzeStatus |= 0x10; // No schedule mapped 100%
-				sbReturn.append("<td style='color:red;'>Requirement Mapping</td><td align=right>"
-						+ iMax + "</td><td style='color:red;'>fail</td>");
-				this.epsUd.makeMessage(prjname, ppm + "," + pm + "," + ba + ","
-						+ sp, "Requirement Mapping",
-						"Please Assign Tasks to Requirements", dateEnd);
+			ResultSet rs1;
+			int iPrjStatus = this.ebEnt.dbDyn
+					.ExecuteSql1n("SELECT ProjectStatus FROM Projects WHERE RecId="
+							+ this.stPk);
+			if (iPrjStatus > 0) {
+				rs1 = this.ebEnt.dbDyn
+						.ExecuteSql("select"
+								+ " count(*) cnt,nmToId,format(sum(nmPercent),4) nmPercent,sum(nmAmortize) nmAmortize,sum(nmRemainder) nmRemainder"
+								+ " from teb_link where nmProjectId="
+								+ this.stPk
+								+ " and nmBaseline="
+								+ this.nmBaseline
+								+ " and nmLinkFlags=1 group by nmToId having format(sum(nmPercent),4) = 100");
+				rs1.last();
+				iMax = rs1.getRow();
+
+				sbReturn.append(stHead + "<td>Requirements to Schedules</td>");
+				if (iMax > 0)
+					sbReturn.append("<td>Schedules Mapped 100% </td><td align=right>"
+							+ iMax + "</td><td style='color:green;'>ok</td>");
+				else {
+					this.iAnalyzeStatus |= 0x10; // No schedule mapped 100%
+					sbReturn.append("<td style='color:red;'>Requirement Mapping</td><td align=right>"
+							+ iMax + "</td><td style='color:red;'>fail</td>");
+					this.epsUd.makeMessage(prjname, ppm + "," + pm + "," + ba
+							+ "," + sp, "Requirement Mapping",
+							"Please Assign Tasks to Requirements", dateEnd);
+				}
+				sbReturn.append(this.getElapsed());
+				rs1.close();
 			}
-			sbReturn.append(this.getElapsed());
-			rs1.close();
 
 			rs1 = this.ebEnt.dbDyn
 					.ExecuteSql("select"
