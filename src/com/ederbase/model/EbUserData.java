@@ -216,12 +216,6 @@ public class EbUserData {
 					// int logged =
 					// this.ebEnt.dbEnterprise.ExecuteSql1n("select RecId from X25User where and stEMail='"
 					// + this.ebEnt.ebUd.aLogin[2] + "'");
-					// List<Integer> ids = (List<Integer>)
-					// this.ebEnt.ebUd.request.getSession().getServletContext().getAttribute("LOG_IN_USERS");
-					// if (ids.contains(logged)) {
-					// iReturn = -5;
-					// } else
-					// {
 					iReturn = this.ebEnt.dbEnterprise
 					    .ExecuteSql1n("select RecId from X25User where stEMail='"
 					        + this.aLogin[2] + "' and ( stPassword=password('"
