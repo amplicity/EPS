@@ -1937,7 +1937,7 @@ public class EpsUserData {
 			rs = this.ebEnt.dbEnterprise
 					.ExecuteSql("select t.* from X25RefTask rt, X25Task t"
 							+ " where t.RecId=rt.nmTaskId and rt.nmRefType=42 and (t.nmTaskFlag=1 OR (t.nmTaskFlag=2  and dtStart >= DATE_ADD(curdate(),INTERVAL -10 DAY)))"
-							+ " and rt.nmRefId=" + this.ebEnt.ebUd.getLoginId() + " LIMIT " + iFrom + "," + iDisplay);
+							+ " and rt.nmRefId=" + this.ebEnt.ebUd.getLoginId() + " ORDER BY t.dtStart DESC" + " LIMIT " + iFrom + "," + iDisplay);
 			// + " order by dtAssignStart desc limit 30");
 			// + " order by dtStart desc limit 100");
 			rs.last();

@@ -198,7 +198,7 @@ INSERT INTO `teb_epsfields` (`nmForeignId`, `nmOrderDisplay`, `stValidationFlags
  `SchOtherResources` varchar( 64  )  NOT  NULL DEFAULT  '',
  `nmEffort40Flag` int( 11  )  DEFAULT NULL ,
  `SchDone` char( 1  )  DEFAULT NULL ,
- `SchStatus` enum(  'Not Started',  'In Progress', 'Done'  'Approved',  'Suspended'  )  NOT  NULL DEFAULT  'Not Started',
+ `SchStatus` enum(  'Not Started',  'In Progress', 'Done',  'Approved',  'Suspended'  )  NOT  NULL DEFAULT  'Not Started',
  `SchRemainingHours` double NOT  NULL DEFAULT  '0',
  `SchMessage` char( 1  )  DEFAULT NULL ,
  `lowlvl` int( 11  )  DEFAULT NULL ,
