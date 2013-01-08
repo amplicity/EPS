@@ -1860,24 +1860,23 @@ public class EpsUserData {
 					stPrjIds += ",";
 				stPrjIds += rsP.getString("RecId");
 			}
-			iTotalRecords = this.ebEnt.dbDyn
-					.ExecuteSql1n("select count(*)," +
-							"(select count(*) from teb_workflow2 wf where wf.nmBaseline=s.nmBaseline and wf.nmProjectId=s.nmProjectId and wf.RecId=s.RecId and wf.iHandleFlags>0) AS cnt "
-							+ " from Projects p, Schedule s"
-							+ " LEFT JOIN teb_reflaborcategory rlc ON rlc.nmLaborCategoryId = SUBSTRING_INDEX( s.SchLaborCategories, '~', 1 )"
-							+ " LEFT JOIN users u ON rlc.nmRefId=u.nmUserId"
-							+ " where p.CurrentBaseline=s.nmBaseline and p.RecId=s.nmProjectId and p.ProjectStatus=1 and s.lowlvl=1"
-							+ " 	and u.nmUserId=" + this.ebEnt.ebUd.getLoginId() + " and p.RecId IN (" + stPrjIds + ") having cnt=0"
-							+ " order by p.ProjectName,s.RecId");
-			rs = this.ebEnt.dbDyn
-					.ExecuteSql("select p.ProjectName, p.RecId AS ProjectId, s.*," +
-							"  (select count(*) from teb_workflow2 wf where wf.nmBaseline=s.nmBaseline and wf.nmProjectId=s.nmProjectId and wf.RecId=s.RecId and wf.iHandleFlags>0) AS cnt "
-							+ " from Projects p, Schedule s"
-							+ " LEFT JOIN teb_reflaborcategory rlc ON rlc.nmLaborCategoryId = SUBSTRING_INDEX( s.SchLaborCategories, '~', 1 )"
-							+ " LEFT JOIN users u ON rlc.nmRefId=u.nmUserId"
-							+ " where p.CurrentBaseline=s.nmBaseline and p.RecId=s.nmProjectId and p.ProjectStatus=1 and s.lowlvl=1"
-							+ " 	and u.nmUserId=" + this.ebEnt.ebUd.getLoginId() + " and p.RecId IN (" + stPrjIds + ") having cnt=0"
-							+ " order by p.ProjectName,s.RecId" + " LIMIT " + iFrom + "," + iDisplay);
+			iTotalRecords = this.ebEnt.dbDyn.ExecuteSql1n("select count(*)," + "(select count(*) from teb_workflow2 wf"
+					+ " where wf.nmBaseline=s.nmBaseline and wf.nmProjectId=s.nmProjectId and wf.RecId=s.RecId"
+					+ " and (wf.iHandleFlags=0 OR (wf.SchStatus!='Not Started' AND wf.SchStatus!='In Progress'))) AS cnt " + " from Projects p, Schedule s"
+					+ " LEFT JOIN teb_reflaborcategory rlc ON rlc.nmLaborCategoryId = SUBSTRING_INDEX( s.SchLaborCategories, '~', 1 )"
+					+ " LEFT JOIN users u ON rlc.nmRefId=u.nmUserId"
+					+ " where p.CurrentBaseline=s.nmBaseline and p.RecId=s.nmProjectId and p.ProjectStatus=1 and s.lowlvl=1"
+					+ " 	and u.nmUserId=" + this.ebEnt.ebUd.getLoginId() + " and p.RecId IN (" + stPrjIds + ") having cnt=0"
+					+ " order by p.ProjectName,s.RecId");
+			rs = this.ebEnt.dbDyn.ExecuteSql("select p.ProjectName, p.RecId AS ProjectId, s.*,"
+					+ "  (select count(*) from teb_workflow2 wf"
+					+ " where wf.nmBaseline=s.nmBaseline and wf.nmProjectId=s.nmProjectId and wf.RecId=s.RecId"
+					+ " and (wf.iHandleFlags=0 OR (wf.SchStatus!='Not Started' AND wf.SchStatus!='In Progress'))) AS cnt " + " from Projects p, Schedule s"
+					+ " LEFT JOIN teb_reflaborcategory rlc ON rlc.nmLaborCategoryId = SUBSTRING_INDEX( s.SchLaborCategories, '~', 1 )"
+					+ " LEFT JOIN users u ON rlc.nmRefId=u.nmUserId"
+					+ " where p.CurrentBaseline=s.nmBaseline and p.RecId=s.nmProjectId and p.ProjectStatus=1 and s.lowlvl=1"
+					+ " 	and u.nmUserId=" + this.ebEnt.ebUd.getLoginId() + " and p.RecId IN (" + stPrjIds + ") having cnt=0"
+					+ " order by p.ProjectName,s.RecId" + " LIMIT " + iFrom + "," + iDisplay);
 			while (rs.next()) {
 				iCount++;
 				String recId = rs.getString("RecId");
@@ -1900,18 +1899,17 @@ public class EpsUserData {
 				stReturn += "<td class='l1td td2'>" + recId + "</td>";
 				stReturn += "<td class='l1td td3'>" + "<span class=hiddenfield><input type=text name='wfExpended-" + stPrjId + "_"
 						+ stBaseLine + "_" + recId + "' style='text-align:right;' value='" + rs.getString("SchEfforttoDate")
-						+ "' /></span><span class=showfield data-value='" + rs.getString("SchEfforttoDate") + "'>" + rs.getString("SchEfforttoDate")
-						+ "</span></td>";
+						+ "' /></span><span class=showfield data-value='" + rs.getString("SchEfforttoDate") + "'>"
+						+ rs.getString("SchEfforttoDate") + "</span></td>";
 				stReturn += "<td class='l1td td4'>" + "<span class=hiddenfield><input type=text name='wfEstimated-" + stPrjId + "_"
 						+ stBaseLine + "_" + recId + "' style='text-align:right;' value='" + rs.getString("SchEstimatedEffort")
-						+ "' /></span><span data-value='" + rs.getString("SchEstimatedEffort") + "'>"
-						+ rs.getString("SchEstimatedEffort") + "</span></td>";
+						+ "' /></span><span data-value='" + rs.getString("SchEstimatedEffort") + "'>" + rs.getString("SchEstimatedEffort")
+						+ "</span></td>";
 				String stStatus = rs.getString("SchStatus");
 				stReturn += "<td class='l1td td5'>" + "<span class=hiddenfield><select name='wfStatus-" + stPrjId + "_" + stBaseLine + "_"
 						+ recId + "'>" + this.ebEnt.ebUd.addOption("Not Started", "Not Started", stStatus)
 						+ this.ebEnt.ebUd.addOption("In Progress", "In Progress", stStatus)
-						+ this.ebEnt.ebUd.addOption("Done", "Done", stStatus)
-						+ this.ebEnt.ebUd.addOption("Suspended", "Suspended", stStatus) + "</select></span>" + "</select></span>"
+						+ this.ebEnt.ebUd.addOption("Done", "Done", stStatus) + "</select></span>" + "</select></span>"
 						+ "<span class=showfield data-value='" + stStatus + "'>" + stStatus + "</span>" + "</td>";
 				stReturn += "<td class='l1td td6'>" + rs.getString("SchDescription") + "</td>";
 				stReturn += "</tr>";
@@ -1937,7 +1935,8 @@ public class EpsUserData {
 			rs = this.ebEnt.dbEnterprise
 					.ExecuteSql("select t.* from X25RefTask rt, X25Task t"
 							+ " where t.RecId=rt.nmTaskId and rt.nmRefType=42 and (t.nmTaskFlag=1 OR (t.nmTaskFlag=2  and dtStart >= DATE_ADD(curdate(),INTERVAL -10 DAY)))"
-							+ " and rt.nmRefId=" + this.ebEnt.ebUd.getLoginId() + " ORDER BY t.dtStart DESC" + " LIMIT " + iFrom + "," + iDisplay);
+							+ " and rt.nmRefId=" + this.ebEnt.ebUd.getLoginId() + " ORDER BY t.dtStart DESC" + " LIMIT " + iFrom + ","
+							+ iDisplay);
 			// + " order by dtAssignStart desc limit 30");
 			// + " order by dtStart desc limit 100");
 			rs.last();
@@ -2011,7 +2010,7 @@ public class EpsUserData {
 					+ iDisplay
 					+ "'>Work Flow of Project Team Members</a></div>"
 					+ "<div id='wfptm-content'><table class=l1tablenarrow>"
-					+ "<tr><th class='l1th th0'>Action</th><th class='l1th th1'>Project Name</th><th class='l1th th2'>Task ID</th><th class='l1th th3'>Project Team Member</th><th class='l1th th4'>Estimated Hours</th><th class='l1th th5'>Expended Hours</th><th class='l1th th6'>Status</th><th class='l1th th7'>Description</th></tr>";
+					+ "<tr><th class='l1th th0'>Action</th><th class='l1th th1'>Project Name</th><th class='l1th th2'>Task ID</th><th class='l1th th3'>Project Team Member</th><th class='l1th th4'>Expended Hours</th><th class='l1th th5'>Estimated Hours</th><th class='l1th th6'>Status</th><th class='l1th th7'>Description</th></tr>";
 			for (int iR = 1; iR <= iMax; iR++) {
 				rs.absolute(iR);
 				iCount++;
@@ -2042,14 +2041,14 @@ public class EpsUserData {
 				stReturn += "<td class='l1td td1'>" + rs.getString("ProjectName") + "</td>";
 				stReturn += "<td class='l1td td2'>" + rs.getString("RecId") + "</td>";
 				stReturn += "<td class='l1td td3'>" + rs.getString("UserName") + "</td>";
-				stReturn += "<td class='l1td td4'>" + "<span class=hiddenfield><input type=text name='wfPTMEstimated-" + stPrjId + "_"
-						+ stBaseLine + "_" + recId + "' style='text-align:right;' value='" + rs.getString("SchEstimatedEffort")
-						+ "' /></span><span class=showfield data-value='" + rs.getString("SchEstimatedEffort") + "'>"
-						+ rs.getString("SchEstimatedEffort") + "</span></td>";
 				stReturn += "<td class='l1td td5'>" + "<span class=hiddenfield><input type=text name='wfPTMExpended-" + stPrjId + "_"
 						+ stBaseLine + "_" + recId + "' style='text-align:right;' value='" + rs.getString("SchEfforttoDate")
 						+ "' /></span><span class=showfield data-value='" + rs.getString("SchEfforttoDate") + "'>"
 						+ rs.getString("SchEfforttoDate") + "</span></td>";
+				stReturn += "<td class='l1td td4'>" + "<span class=hiddenfield><input type=text name='wfPTMEstimated-" + stPrjId + "_"
+						+ stBaseLine + "_" + recId + "' style='text-align:right;' value='" + rs.getString("SchEstimatedEffort")
+						+ "' /></span><span class=showfield data-value='" + rs.getString("SchEstimatedEffort") + "'>"
+						+ rs.getString("SchEstimatedEffort") + "</span></td>";
 
 				String stStatus = rs.getString("SchStatus");
 				stReturn += "<td class='l1td td6'>" + "<span class=hiddenfield><select name='wfPTMStatus-" + stPrjId + "_" + stBaseLine
@@ -2123,29 +2122,46 @@ public class EpsUserData {
 
 					String stTemp = this.ebEnt.dbDyn.ExecuteSql1("select sum(nmExpenditureToDate) from Schedule" + " where nmProjectId="
 							+ rs.getInt("RecId") + " and nmBaseline=" + iIniticalBaseline
-							+ " and SchEfforttoDate>0 and SchFlags&1000=0 and lowlvl=1");
+							+ " and SchEfforttoDate>0 and SchStatus!='Not Started' and SchStatus!='In Progress' and lowlvl=1");
 
-					double CPIAV = (stTemp != null && "".equals(stTemp.trim())) ? Double.parseDouble(stTemp) : 0;
+					double CPIExpended = (stTemp != null && "".equals(stTemp.trim())) ? Double.parseDouble(stTemp) : 0;
 					stTemp = this.ebEnt.dbDyn.ExecuteSql1("select sum(SchCost) from Schedule" + " where nmProjectId=" + rs.getInt("RecId")
-							+ " and nmBaseline=" + iIniticalBaseline + " and SchEfforttoDate>0 and SchFlags&1000=0 and lowlvl=1");
-					double CPIPV = (stTemp != null && "".equals(stTemp.trim())) ? Double.parseDouble(stTemp) : 0;
-					if (CPIAV != 0) {
-						CPI = 1.0 * Math.round(CPIPV * 100 / CPIAV) / 100;
+							+ " and nmBaseline=" + iIniticalBaseline + " and SchEfforttoDate>0 and SchStatus!='Not Started' and SchStatus!='In Progress' and lowlvl=1");
+					double CPIEstimated = (stTemp != null && "".equals(stTemp.trim())) ? Double.parseDouble(stTemp) : 0;
+					if (CPIExpended != 0) {
+						CPI = 1.0 * Math.round(CPIEstimated * 100 / CPIExpended) / 100;
+					}
+					
+					
+//					stTemp = this.ebEnt.dbDyn.ExecuteSql1("select sum(nmExpenditureToDate + SchRemainingHours) from Schedule" + " where nmProjectId="
+//							+ rs.getInt("RecId") + " and nmBaseline=" + iIniticalBaseline + " and SchEfforttoDate>0 and SchStatus!='Not Started' and lowlvl=1");
+//					double SPIExpended = (stTemp != null && "".equals(stTemp.trim())) ? Double.parseDouble(stTemp) : 0;
+					
+					ResultSet rsSchedule = this.ebEnt.dbDyn.ExecuteSql("select * from Schedule where nmProjectId=" + rs.getInt("RecId")
+							+ " and nmBaseline=" + iIniticalBaseline + " and SchEfforttoDate>0 and SchStatus!='Not Started' and lowlvl=1");
+					double SPIExpended = 0;
+					while (rsSchedule.next()) {
+						String stValue = rs.getString("SchLaborCategories");
+						if (stValue != null && stValue.length() > 0) {
+							String[] aRecords = stValue.split("\\|", -1);
+							String[] aFields = aRecords[0].split("~", -1);
+							double dAvg = this.ebEnt.dbDyn.ExecuteSql1n("select sum(HourlyRate)/count(*) from LaborCategory l,"
+									+ " Users u, teb_reflaborcategory rlc where  l.nmLcId=" + aFields[0]
+									+ " and u.nmUserId=rlc.nmRefId and rlc.nmRefType=42 and rlc.nmLaborCategoryId=l.nmLcId");
+							double dHours = Double.parseDouble(aFields[2]);
+							SPIExpended += rsSchedule.getDouble("nmExpenditureToDate") + dAvg * dHours;
+						}
+					}
+					stTemp = this.ebEnt.dbDyn.ExecuteSql1("select sum(SchCost) from Schedule" + " where nmProjectId=" + rs.getInt("RecId")
+							+ " and nmBaseline=" + iIniticalBaseline + " and SchEfforttoDate>0 and SchStatus!='Not Started' and lowlvl=1");
+					double SPIEstimated = (stTemp != null && "".equals(stTemp.trim())) ? Double.parseDouble(stTemp) : 0;
+
+					if (SPIExpended != 0) {
+						SPI = 1.0 * Math.round(SPIEstimated * 100 / SPIExpended) / 100;
 					}
 
-					stTemp = this.ebEnt.dbDyn.ExecuteSql1("select sum(nmExpenditureToDate) from Schedule" + " where nmProjectId="
-							+ rs.getInt("RecId") + " and nmBaseline=" + iIniticalBaseline + " and SchEfforttoDate>0 and lowlvl=1");
-					double SPIAV = (stTemp != null && "".equals(stTemp.trim())) ? Double.parseDouble(stTemp) : 0;
-					stTemp = this.ebEnt.dbDyn.ExecuteSql1("select sum(SchCost) from Schedule" + " where nmProjectId=" + rs.getInt("RecId")
-							+ " and nmBaseline=" + iIniticalBaseline + " and SchEfforttoDate>0 and lowlvl=1");
-					double SPIPV = (stTemp != null && "".equals(stTemp.trim())) ? Double.parseDouble(stTemp) : 0;
-
-					if (SPIAV != 0) {
-						SPI = 1.0 * Math.round(SPIPV * 100 / SPIAV) / 100;
-					}
-
-					System.out.println("Project ID " + rs.getInt("RecId") + " Baseline: " + iIniticalBaseline + " CPIPV: " + CPIPV
-							+ " CPIAV: " + CPIAV + " SPIPV: " + SPIPV + " SPIAV: " + SPIAV + " ====> CPI:" + CPI + " SPI: " + SPI);
+					System.out.println("Project ID " + rs.getInt("RecId") + " Baseline: " + iIniticalBaseline + " CPIPV: " + CPIEstimated
+							+ " CPIAV: " + CPIExpended + " SPIPV: " + SPIEstimated + " SPIAV: " + SPIExpended + " ====> CPI:" + CPI + " SPI: " + SPI);
 
 					stReturn += "<td class='l1td spi-content'>" + "<table><tr class=spibg><td colspan=4><div class=spiline data-val='"
 							+ SPI + "'/></td></tr>" + "<tr class=spinumber><td>0</td><td>1</td><td>2</td><td>3</td></tr></table>" + "</td>";
