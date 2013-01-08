@@ -1851,7 +1851,7 @@ public class EpsUserData {
 					+ stProjects
 					+ "</select></span></div>"
 					+ "<div id='wf-content'><table class=l1tablenarrow>"
-					+ "<tr><th class='l1th th0'>Action</th><th class='l1th th1'>Project Name</th><th class='l1th th2'>Task ID</th><th class='l1th th3'>Estimated Hours</th><th class='l1th th4'>Expended Hours</th><th class='l1th th5'>Status</th><th class='l1th th6'>Description</th></tr>";
+					+ "<tr><th class='l1th th0'>Action</th><th class='l1th th1'>Project Name</th><th class='l1th th2'>Task ID</th><th class='l1th th3'>Expended Hours</th><th class='l1th th4'>Estimated Hours</th><th class='l1th th5'>Status</th><th class='l1th th6'>Description</th></tr>";
 			String stPrjIds = "";
 			iMax = rsP.getRow();
 			for (int i = 1; i <= iMax; i++) {
@@ -1898,14 +1898,14 @@ public class EpsUserData {
 						+ recId + "&listp=" + stPrjId + "&listb=" + stBaseLine + "\")' /></a>" + "</span></td>";
 				stReturn += "<td class='l1td td1'>" + rs.getString("ProjectName") + "</td>";
 				stReturn += "<td class='l1td td2'>" + recId + "</td>";
-				stReturn += "<td class='l1td td3'>" + "<span class=hiddenfield><input type=text name='wfEstimated-" + stPrjId + "_"
-						+ stBaseLine + "_" + recId + "' style='text-align:right;' value='" + rs.getString("SchEstimatedEffort")
-						+ "' /></span><span class=showfield data-value='" + rs.getString("SchEstimatedEffort") + "'>"
-						+ rs.getString("SchEstimatedEffort") + "</span></td>";
-				stReturn += "<td class='l1td td4'>" + "<span class=hiddenfield><input type=text name='wfExpended-" + stPrjId + "_"
+				stReturn += "<td class='l1td td3'>" + "<span class=hiddenfield><input type=text name='wfExpended-" + stPrjId + "_"
 						+ stBaseLine + "_" + recId + "' style='text-align:right;' value='" + rs.getString("SchEfforttoDate")
-						+ "' /></span><span data-value='" + rs.getString("SchEfforttoDate") + "'>" + rs.getString("SchEfforttoDate")
+						+ "' /></span><span class=showfield data-value='" + rs.getString("SchEfforttoDate") + "'>" + rs.getString("SchEfforttoDate")
 						+ "</span></td>";
+				stReturn += "<td class='l1td td4'>" + "<span class=hiddenfield><input type=text name='wfEstimated-" + stPrjId + "_"
+						+ stBaseLine + "_" + recId + "' style='text-align:right;' value='" + rs.getString("SchEstimatedEffort")
+						+ "' /></span><span data-value='" + rs.getString("SchEstimatedEffort") + "'>"
+						+ rs.getString("SchEstimatedEffort") + "</span></td>";
 				String stStatus = rs.getString("SchStatus");
 				stReturn += "<td class='l1td td5'>" + "<span class=hiddenfield><select name='wfStatus-" + stPrjId + "_" + stBaseLine + "_"
 						+ recId + "'>" + this.ebEnt.ebUd.addOption("Not Started", "Not Started", stStatus)
