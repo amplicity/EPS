@@ -67,9 +67,8 @@ class EpsXlsProject // extends EpsUserData
 		try {
 			stPk = this.ebEnt.ebUd.request.getParameter("pk");
 			stGoBack = "?stAction=projects&t=12";
-			String stLink = "?stAction=projects&t="
-					+ this.ebEnt.ebUd.request.getParameter("t") + "&do=xls&pk="
-					+ stPk + "&parent=" + stTemp + "&child=" + stChild;
+			String stLink = "?stAction=projects&t=" + this.ebEnt.ebUd.request.getParameter("t") + "&do=xls&pk=" + stPk + "&parent="
+					+ stTemp + "&child=" + stChild;
 			int iFrom = 0;
 			int iBlock = this.epsUd.rsMyDiv.getInt("ReqSchRows");
 			String stBlock = this.ebEnt.ebUd.request.getParameter("display");
@@ -80,8 +79,7 @@ class EpsXlsProject // extends EpsUserData
 
 				}
 			}
-			this.rsProject = this.ebEnt.dbDyn
-					.ExecuteSql("select * from Projects where RecId=" + stPk);
+			this.rsProject = this.ebEnt.dbDyn.ExecuteSql("select * from Projects where RecId=" + stPk);
 			this.rsProject.absolute(1);
 			nmBaseline = this.rsProject.getInt("CurrentBaseline");
 			stTemp = this.ebEnt.ebUd.request.getParameter("from");
@@ -97,205 +95,97 @@ class EpsXlsProject // extends EpsUserData
 				if (!stSave.equals("Cancel")) {
 					saveInline(stChild, stPk);
 				}
-				this.ebEnt.ebUd.setRedirect(stLink + "#row"
-						+ this.ebEnt.ebUd.request.getParameter("edit"));
+				this.ebEnt.ebUd.setRedirect(stLink + "#row" + this.ebEnt.ebUd.request.getParameter("edit"));
 				return ""; // redirect, to remove EDIT tag
 							// ----------------------------->
 			}
 			String stAction = this.ebEnt.ebUd.request.getParameter("a");
 			String stR = this.ebEnt.ebUd.request.getParameter("r");
-			if (stAction != null && stAction.length() > 0 && stR != null
-					&& stR.length() > 0) { // PROCESS ACTIONS
+			if (stAction != null && stAction.length() > 0 && stR != null && stR.length() > 0) { // PROCESS
+																								// ACTIONS
 				int iRecIdDo = Integer.parseInt(stR);
-				ResultSet rs1 = this.ebEnt.dbDyn
-						.ExecuteSql("select * from Requirements where RecId="
-								+ iRecIdDo + " and nmProjectId=" + stPk
-								+ " and nmBaseline=" + this.nmBaseline);
+				ResultSet rs1 = this.ebEnt.dbDyn.ExecuteSql("select * from Requirements where RecId=" + iRecIdDo + " and nmProjectId="
+						+ stPk + " and nmBaseline=" + this.nmBaseline);
 				rs1.absolute(1);
 				if (stAction.equals("collapse")) {
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Requirements set ReqFlags = ( ReqFlags | 2) where RecId= "
-									+ iRecIdDo
-									+ " and nmProjectId="
-									+ stPk
-									+ " and nmBaseline=" + this.nmBaseline);
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Requirements set ReqFlags = ( ReqFlags | 1) where nmProjectId="
-									+ stPk
-									+ " and nmBaseline="
-									+ this.nmBaseline
-									+ " "
-									+ "and ReqId > "
-									+ rs1.getString("ReqId")
-									+ " and ReqId < "
-									+ getEnd(stChild, stPk, rs1));
+					this.ebEnt.dbDyn.ExecuteUpdate("update Requirements set ReqFlags = ( ReqFlags | 2) where RecId= " + iRecIdDo
+							+ " and nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline);
+					this.ebEnt.dbDyn.ExecuteUpdate("update Requirements set ReqFlags = ( ReqFlags | 1) where nmProjectId=" + stPk
+							+ " and nmBaseline=" + this.nmBaseline + " " + "and ReqId > " + rs1.getString("ReqId") + " and ReqId < "
+							+ getEnd(stChild, stPk, rs1));
 				} else if (stAction.equals("expand")) {
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Requirements set ReqFlags = (ReqFlags & ~0x3) where RecId= "
-									+ iRecIdDo
-									+ " and nmProjectId="
-									+ stPk
-									+ " and nmBaseline=" + this.nmBaseline);
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Requirements set ReqFlags = (ReqFlags & ~0x3) where nmProjectId="
-									+ stPk
-									+ " and nmBaseline="
-									+ this.nmBaseline
-									+ " "
-									+ "and ReqId > "
-									+ rs1.getString("ReqId")
-									+ " and ReqId < "
-									+ getEnd(stChild, stPk, rs1));
+					this.ebEnt.dbDyn.ExecuteUpdate("update Requirements set ReqFlags = (ReqFlags & ~0x3) where RecId= " + iRecIdDo
+							+ " and nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline);
+					this.ebEnt.dbDyn.ExecuteUpdate("update Requirements set ReqFlags = (ReqFlags & ~0x3) where nmProjectId=" + stPk
+							+ " and nmBaseline=" + this.nmBaseline + " " + "and ReqId > " + rs1.getString("ReqId") + " and ReqId < "
+							+ getEnd(stChild, stPk, rs1));
 				} else if (stAction.equals("insert")) {
-					int iRecMax = this.ebEnt.dbDyn
-							.ExecuteSql1n("select max(RecId) from Requirements");
+					int iRecMax = this.ebEnt.dbDyn.ExecuteSql1n("select max(RecId) from Requirements");
 					iRecMax++;
-					String stWhat = this.ebEnt.ebUd.request
-							.getParameter("what");
+					String stWhat = this.ebEnt.ebUd.request.getParameter("what");
 					try {
 						iEditId = rs1.getInt("ReqId");
 						if (stWhat.equals("below")) {
 							iEditId++;
-							this.ebEnt.dbDyn
-									.ExecuteUpdate("update Requirements set ReqId=(ReqId+1) where ReqId > "
-											+ rs1.getString("ReqId")
-											+ " and  nmProjectId="
-											+ stPk
-											+ " and nmBaseline="
-											+ this.nmBaseline + " ");
+							this.ebEnt.dbDyn.ExecuteUpdate("update Requirements set ReqId=(ReqId+1) where ReqId > "
+									+ rs1.getString("ReqId") + " and  nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline + " ");
 						} else {
 							// Above
-							this.ebEnt.dbDyn
-									.ExecuteUpdate("update Requirements set ReqId=(ReqId+1) where ReqId >= "
-											+ rs1.getString("ReqId")
-											+ " and  nmProjectId="
-											+ stPk
-											+ " and nmBaseline="
-											+ this.nmBaseline + " ");
+							this.ebEnt.dbDyn.ExecuteUpdate("update Requirements set ReqId=(ReqId+1) where ReqId >= "
+									+ rs1.getString("ReqId") + " and  nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline + " ");
 						}
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("insert into Requirements (RecId,nmProjectId,ReqId,nmBaseline,ReqLevel) "
-										+ "values("
-										+ iRecMax
-										+ ","
-										+ stPk
-										+ ","
-										+ iEditId
-										+ ","
-										+ nmBaseline
-										+ "," + rs1.getInt("ReqLevel") + ")");
+						this.ebEnt.dbDyn.ExecuteUpdate("insert into Requirements (RecId,nmProjectId,ReqId,nmBaseline,ReqLevel) "
+								+ "values(" + iRecMax + "," + stPk + "," + iEditId + "," + nmBaseline + "," + rs1.getInt("ReqLevel") + ")");
 					} catch (Exception e) {
 						iEditId = 1;
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("insert into Requirements (RecId,nmProjectId,ReqId,nmBaseline,ReqLevel) "
-										+ "values("
-										+ iRecMax
-										+ ","
-										+ stPk
-										+ ","
-										+ iEditId
-										+ ","
-										+ nmBaseline
-										+ ",0)");
+						this.ebEnt.dbDyn.ExecuteUpdate("insert into Requirements (RecId,nmProjectId,ReqId,nmBaseline,ReqLevel) "
+								+ "values(" + iRecMax + "," + stPk + "," + iEditId + "," + nmBaseline + ",0)");
 					}
-					this.epsUd.makeTask(6, this.epsUd.epsEf.getRequirementName(
-							"" + iRecIdDo, stPk, nmBaseline)); // Inserted
-																// Requirement
-					this.ebEnt.ebUd.setRedirect(stLink + "&edit=" + iRecMax
-							+ "&new=y#row" + iEditId);
+					this.epsUd.makeTask(6, this.epsUd.epsEf.getRequirementName("" + iRecIdDo, stPk, nmBaseline)); // Inserted
+																													// Requirement
+					this.ebEnt.ebUd.setRedirect(stLink + "&edit=" + iRecMax + "&new=y#row" + iEditId);
 					return ""; // ----------------------------->
 				} else if (stAction.equals("delete")) {
-					this.epsUd.makeTask(4, this.epsUd.epsEf.getRequirementName(
-							"" + iRecIdDo, stPk, nmBaseline)); // 4 1 Deleted
-																// Requirement
-																// Enabled
-																// Yes
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("delete from Requirements where RecId="
-									+ iRecIdDo
-									+ " and  nmProjectId="
-									+ stPk
-									+ " and nmBaseline=" + this.nmBaseline);
-					String stWhat = this.ebEnt.ebUd.request
-							.getParameter("what");
+					this.epsUd.makeTask(4, this.epsUd.epsEf.getRequirementName("" + iRecIdDo, stPk, nmBaseline)); // 4
+																													// 1
+																													// Deleted
+																													// Requirement
+																													// Enabled
+																													// Yes
+					this.ebEnt.dbDyn.ExecuteUpdate("delete from Requirements where RecId=" + iRecIdDo + " and  nmProjectId=" + stPk
+							+ " and nmBaseline=" + this.nmBaseline);
+					String stWhat = this.ebEnt.ebUd.request.getParameter("what");
 					int iDel = 1;
 					if (stWhat.equals("children")) {
 						int iReqIdEnd = getEnd(stChild, stPk, rs1);
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("delete from Requirements where nmProjectId="
-										+ stPk
-										+ " and nmBaseline="
-										+ this.nmBaseline
-										+ " "
-										+ "and ReqId > "
-										+ rs1.getString("ReqId")
-										+ " and ReqId < " + iReqIdEnd);
+						this.ebEnt.dbDyn.ExecuteUpdate("delete from Requirements where nmProjectId=" + stPk + " and nmBaseline="
+								+ this.nmBaseline + " " + "and ReqId > " + rs1.getString("ReqId") + " and ReqId < " + iReqIdEnd);
 						iDel += (iReqIdEnd - rs1.getInt("ReqId") - 1);
 					} else {
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("update Requirements set ReqLevel=(ReqLevel-1) where nmProjectId="
-										+ stPk
-										+ " and nmBaseline="
-										+ this.nmBaseline
-										+ " "
-										+ "and ReqId > "
-										+ rs1.getString("ReqId")
-										+ " and ReqId < "
-										+ getEnd(stChild, stPk, rs1));
+						this.ebEnt.dbDyn.ExecuteUpdate("update Requirements set ReqLevel=(ReqLevel-1) where nmProjectId=" + stPk
+								+ " and nmBaseline=" + this.nmBaseline + " " + "and ReqId > " + rs1.getString("ReqId") + " and ReqId < "
+								+ getEnd(stChild, stPk, rs1));
 					}
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Requirements set ReqId=(ReqId-"
-									+ iDel
-									+ ") where ReqId > "
-									+ rs1.getString("ReqId")
-									+ " and  nmProjectId="
-									+ stPk
-									+ " and nmBaseline="
-									+ this.nmBaseline
-									+ " "
-									+ "and ReqId > "
-									+ rs1.getString("ReqId"));
+					this.ebEnt.dbDyn.ExecuteUpdate("update Requirements set ReqId=(ReqId-" + iDel + ") where ReqId > "
+							+ rs1.getString("ReqId") + " and  nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline + " "
+							+ "and ReqId > " + rs1.getString("ReqId"));
 				} else if (stAction.equals("demote")) {
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Requirements set ReqLevel=(ReqLevel-1) where RecId="
-									+ iRecIdDo
-									+ " and nmProjectId="
-									+ stPk
-									+ " and nmBaseline=" + this.nmBaseline);
-					String stWhat = this.ebEnt.ebUd.request
-							.getParameter("what");
+					this.ebEnt.dbDyn.ExecuteUpdate("update Requirements set ReqLevel=(ReqLevel-1) where RecId=" + iRecIdDo
+							+ " and nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline);
+					String stWhat = this.ebEnt.ebUd.request.getParameter("what");
 					if (stWhat.equals("children")) {
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("update Requirements set ReqLevel=(ReqLevel-1) where nmProjectId="
-										+ stPk
-										+ " and nmBaseline="
-										+ this.nmBaseline
-										+ " "
-										+ "and ReqId > "
-										+ rs1.getString("ReqId")
-										+ " and ReqId < "
-										+ getEnd(stChild, stPk, rs1));
+						this.ebEnt.dbDyn.ExecuteUpdate("update Requirements set ReqLevel=(ReqLevel-1) where nmProjectId=" + stPk
+								+ " and nmBaseline=" + this.nmBaseline + " " + "and ReqId > " + rs1.getString("ReqId") + " and ReqId < "
+								+ getEnd(stChild, stPk, rs1));
 					}
 				} else if (stAction.equals("promote")) {
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Requirements set ReqLevel=(ReqLevel+1) where RecId="
-									+ iRecIdDo
-									+ " and nmProjectId="
-									+ stPk
-									+ " and nmBaseline=" + this.nmBaseline);
-					String stWhat = this.ebEnt.ebUd.request
-							.getParameter("what");
+					this.ebEnt.dbDyn.ExecuteUpdate("update Requirements set ReqLevel=(ReqLevel+1) where RecId=" + iRecIdDo
+							+ " and nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline);
+					String stWhat = this.ebEnt.ebUd.request.getParameter("what");
 					if (stWhat.equals("children")) {
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("update Requirements set ReqLevel=(ReqLevel+1) where nmProjectId="
-										+ stPk
-										+ " and nmBaseline="
-										+ this.nmBaseline
-										+ " "
-										+ "and ReqId > "
-										+ rs1.getString("ReqId")
-										+ " and ReqId < "
-										+ getEnd(stChild, stPk, rs1));
+						this.ebEnt.dbDyn.ExecuteUpdate("update Requirements set ReqLevel=(ReqLevel+1) where nmProjectId=" + stPk
+								+ " and nmBaseline=" + this.nmBaseline + " " + "and ReqId > " + rs1.getString("ReqId") + " and ReqId < "
+								+ getEnd(stChild, stPk, rs1));
 					}
 				} else if (stAction.equals("customize")) {
 					stTemp = this.ebEnt.ebUd.request.getParameter("savedata");
@@ -305,20 +195,12 @@ class EpsXlsProject // extends EpsUserData
 				} else if (stAction.equals("custom")) {
 					String stB = this.ebEnt.ebUd.request.getParameter("b");
 					if (stB != null) {
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("update Requirements set ReqFlags = (ReqFlags & ~0x3) where nmProjectId="
-										+ stPk
-										+ " and nmBaseline="
-										+ this.nmBaseline + "");
+						this.ebEnt.dbDyn.ExecuteUpdate("update Requirements set ReqFlags = (ReqFlags & ~0x3) where nmProjectId=" + stPk
+								+ " and nmBaseline=" + this.nmBaseline + "");
 						try {
 							int iLevel = Integer.parseInt(stB);
-							this.ebEnt.dbDyn
-									.ExecuteUpdate("update Requirements set ReqFlags = ( ReqFlags | 1) "
-											+ "where nmProjectId="
-											+ stPk
-											+ " and nmBaseline="
-											+ this.nmBaseline
-											+ " and ReqLevel > " + iLevel);
+							this.ebEnt.dbDyn.ExecuteUpdate("update Requirements set ReqFlags = ( ReqFlags | 1) " + "where nmProjectId="
+									+ stPk + " and nmBaseline=" + this.nmBaseline + " and ReqLevel > " + iLevel);
 						} catch (Exception e) {
 						}
 						setFlags(stChild);
@@ -334,14 +216,10 @@ class EpsXlsProject // extends EpsUserData
 				}
 			}
 			String stHeader = xlsHeaders(stChild);
-			String s1 = "</form><form method=post name='form" + stChild
-					+ "' id='form" + stChild
-					+ "' onsubmit='return myValidation(this)'>"
-					+ "<input type=hidden name=from value='" + iFrom
-					+ "'><table class=l1table><tr><td class=l1td colspan="
-					+ iMaxFields + " align=center><h2>"
-					+ this.rsProject.getString("ProjectName")
-					+ "</h2></td></tr>";
+			String s1 = "</form><form method=post name='form" + stChild + "' id='form" + stChild
+					+ "' onsubmit='return myValidation(this)'>" + "<input type=hidden name=from value='" + iFrom
+					+ "'><table class=l1table><tr><td class=l1td colspan=" + iMaxFields + " align=center><h2>"
+					+ this.rsProject.getString("ProjectName") + "</h2></td></tr>";
 			sbReturn.append(s1);
 			String stEdit = this.ebEnt.ebUd.request.getParameter("edit");
 			if (stEdit != null && stEdit.length() > 0)
@@ -349,18 +227,10 @@ class EpsXlsProject // extends EpsUserData
 			else
 				iEditId = -2;
 
-			int iMaxRecords = this.ebEnt.dbDyn
-					.ExecuteSql1n("select count(*) from Requirements where nmProjectId="
-							+ stPk
-							+ " and nmBaseline="
-							+ this.nmBaseline
-							+ " and (ReqFlags & 0x1) = 0");
-			stSql = "select * from Requirements where nmProjectId="
-					+ stPk
-					+ " and nmBaseline="
-					+ this.nmBaseline
-					+ " and (ReqFlags & 0x1) =0 order by ReqId,RecId desc limit "
-					+ iFrom + "," + iBlock;
+			int iMaxRecords = this.ebEnt.dbDyn.ExecuteSql1n("select count(*) from Requirements where nmProjectId=" + stPk
+					+ " and nmBaseline=" + this.nmBaseline + " and (ReqFlags & 0x1) = 0");
+			stSql = "select * from Requirements where nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline
+					+ " and (ReqFlags & 0x1) =0 order by ReqId,RecId desc limit " + iFrom + "," + iBlock;
 			ResultSet rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
 			rs.last();
 			int iMax = rs.getRow();
@@ -370,28 +240,17 @@ class EpsXlsProject // extends EpsUserData
 			{
 				iFrom = 0; // reset to 0
 				rs.close();
-				stSql = "select * from Requirements where nmProjectId="
-						+ stPk
-						+ " and nmBaseline="
-						+ this.nmBaseline
-						+ " and (ReqFlags & 0x1) != 1 order by ReqId,RecId desc limit "
-						+ iFrom + "," + iBlock;
+				stSql = "select * from Requirements where nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline
+						+ " and (ReqFlags & 0x1) != 1 order by ReqId,RecId desc limit " + iFrom + "," + iBlock;
 				rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
 				rs.last();
 				iMax = rs.getRow();
 				if (iMax <= 0) { // Clear all collapsed flags -- do EXPAND ALL
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Requirements set ReqFlags=(ReqFlags & ~0x3) where nmProjectId="
-									+ stPk
-									+ " and nmBaseline="
-									+ this.nmBaseline + "");
+					this.ebEnt.dbDyn.ExecuteUpdate("update Requirements set ReqFlags=(ReqFlags & ~0x3) where nmProjectId=" + stPk
+							+ " and nmBaseline=" + this.nmBaseline + "");
 					rs.close();
-					stSql = "select * from Requirements where nmProjectId="
-							+ stPk
-							+ " and nmBaseline="
-							+ this.nmBaseline
-							+ " and (ReqFlags & 0x1) != 1 order by ReqId,RecId desc limit "
-							+ iFrom + "," + iBlock;
+					stSql = "select * from Requirements where nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline
+							+ " and (ReqFlags & 0x1) != 1 order by ReqId,RecId desc limit " + iFrom + "," + iBlock;
 					rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
 					rs.last();
 					iMax = rs.getRow();
@@ -432,11 +291,10 @@ class EpsXlsProject // extends EpsUserData
 						stDescription = "";
 					else
 						stDescription = stDescription.trim();
-					if (iEditId <= 0
-							&& (this.ebEnt.ebUd.getLoginPersonFlags() & 0xA0) != 0) // Only
-																					// BA
-																					// and
-																					// PPM
+					if (iEditId <= 0 && (this.ebEnt.ebUd.getLoginPersonFlags() & 0xA0) != 0) // Only
+																								// BA
+																								// and
+																								// PPM
 					{
 						// onmouseover="
 						// + "\"setActions(1," + rs.getInt("RecId") + "," +
@@ -445,12 +303,9 @@ class EpsXlsProject // extends EpsUserData
 						// iNextLevel + "," + iPrevLevel + "," + iNextShow +
 						// ",'" + stLink +
 						// "' )\""
-						s1 = "<tr  " + " onClick=" + "\"setActionsClick(1,"
-								+ rs.getInt("RecId") + "," + rs.getInt("ReqId")
-								+ "," + rs.getInt("ReqFlags") + ","
-								+ rs.getInt("ReqLevel") + "," + iNextLevel
-								+ "," + iPrevLevel + "," + iNextShow + ",'"
-								+ stLink + "'," + iMaxFields + " )\"" + " >";
+						s1 = "<tr  " + " onClick=" + "\"setActionsClick(1," + rs.getInt("RecId") + "," + rs.getInt("ReqId") + ","
+								+ rs.getInt("ReqFlags") + "," + rs.getInt("ReqLevel") + "," + iNextLevel + "," + iPrevLevel + ","
+								+ iNextShow + ",'" + stLink + "'," + iMaxFields + " )\"" + " >";
 						sbReturn.append(s1);
 					} else {
 						sbReturn.append("<tr>");
@@ -465,8 +320,7 @@ class EpsXlsProject // extends EpsUserData
 						sbReturn.append(iF);
 						sbReturn.append(" ");
 						sbReturn.append(getStyle(0));
-						if (rsFields.getInt("nmDataType") == 3
-								|| rsFields.getInt("nmDataType") == 4)
+						if (rsFields.getInt("nmDataType") == 3 || rsFields.getInt("nmDataType") == 4)
 							sbReturn.append(" align='left' "); // align text
 																// left
 						sbReturn.append(">");
@@ -476,34 +330,25 @@ class EpsXlsProject // extends EpsUserData
 							sbReturn.append(rs.getString("ReqId"));
 							sbReturn.append("'></a>");
 						}
-						String stValue = rs.getString(rsFields
-								.getString("stDbFieldName"));
+						String stValue = rs.getString(rsFields.getString("stDbFieldName"));
 						if (stValue == null)
 							stValue = "";
-						if (this.rsFields.getInt("nmDataType") == 5
-								&& stValue.length() > 0)
-							sbReturn.append(this.epsUd.rsMyDiv
-									.getString("stMoneySymbol") + " ");
+						if (this.rsFields.getInt("nmDataType") == 5 && stValue.length() > 0)
+							sbReturn.append(this.epsUd.rsMyDiv.getString("stMoneySymbol") + " ");
 
-						if (iEditId == rs.getInt("RecId")
-								&& (rsFields.getInt("nmFlags") & 0x1) != 0) {
-							if (rsFields.getString("stDbFieldName").equals(
-									"ReqLevel")) {
+						if (iEditId == rs.getInt("RecId") && (rsFields.getInt("nmFlags") & 0x1) != 0) {
+							if (rsFields.getString("stDbFieldName").equals("ReqLevel")) {
 								sbReturn.append(editXlsField(stValue));
 							} else {
 								sbReturn.append(editXlsField(stValue));
 							}
 						} else {
-							if (rsFields.getString("stDbFieldName").equals(
-									"ReqTitle"))
+							if (rsFields.getString("stDbFieldName").equals("ReqTitle"))
 								for (int i = 0; i < rs.getInt("ReqLevel"); i++)
 									sbReturn.append("&nbsp;&nbsp;");
-							else if (rsFields.getString("stDbFieldName")
-									.equals("ReqCost")) {
-								DecimalFormat df = new DecimalFormat(
-										"#,###,###,##0.00");
-								stValue = df
-										.format(Double.parseDouble(stValue));
+							else if (rsFields.getString("stDbFieldName").equals("ReqCost")) {
+								DecimalFormat df = new DecimalFormat("#,###,###,##0.00");
+								stValue = df.format(Double.parseDouble(stValue));
 							}
 							sbReturn.append(stValue.replace("\n", "<BR>"));
 						}
@@ -511,17 +356,14 @@ class EpsXlsProject // extends EpsUserData
 					sbReturn.append("</tr>");
 					iPrevLevel = rs.getInt("ReqLevel");
 				}
-				sbReturn.append(doNext(stChild, iMaxFields, iMaxRecords, iFrom,
-						iBlock, stGoBack, stPk));
+				sbReturn.append(doNext(stChild, iMaxFields, iMaxRecords, iFrom, iBlock, stGoBack, stPk));
 			} else {
-				sbReturn.append(doNext(stChild, iMaxFields, 0, 0, iBlock,
-						stGoBack, stPk));
+				sbReturn.append(doNext(stChild, iMaxFields, 0, 0, iBlock, stGoBack, stPk));
 			}
 			sbReturn.append("</table></form><br/>");
 			if (iMax > 0) {
-				sbReturn.append(epsUd.makeToolbar(false, iMaxRecords, iFrom,
-						iBlock, "./?stAction=projects&t=12&do=xls&pk=" + stPk
-								+ "&parent=12&child=" + stChild + ""));
+				sbReturn.append(epsUd.makeToolbar(false, iMaxRecords, iFrom, iBlock, "./?stAction=projects&t=12&do=xls&pk=" + stPk
+						+ "&parent=12&child=" + stChild + ""));
 			}
 		} catch (Exception e) {
 			this.stError += "<br>ERROR xlsRequirementsEdit: " + e;
@@ -537,9 +379,8 @@ class EpsXlsProject // extends EpsUserData
 		try {
 			stPk = this.ebEnt.ebUd.request.getParameter("pk");
 			stGoBack = "?stAction=projects&t=12";
-			String stLink = "?stAction=projects&t="
-					+ this.ebEnt.ebUd.request.getParameter("t") + "&do=xls&pk="
-					+ stPk + "&parent=" + stTemp + "&child=" + stChild;
+			String stLink = "?stAction=projects&t=" + this.ebEnt.ebUd.request.getParameter("t") + "&do=xls&pk=" + stPk + "&parent="
+					+ stTemp + "&child=" + stChild;
 			int iFrom = 0;
 			int iBlock = this.epsUd.rsMyDiv.getInt("ReqSchRows");
 			String stBlock = this.ebEnt.ebUd.request.getParameter("display");
@@ -550,8 +391,7 @@ class EpsXlsProject // extends EpsUserData
 
 				}
 			}
-			this.rsProject = this.ebEnt.dbDyn
-					.ExecuteSql("select * from Projects where RecId=" + stPk);
+			this.rsProject = this.ebEnt.dbDyn.ExecuteSql("select * from Projects where RecId=" + stPk);
 			this.rsProject.absolute(1);
 			nmBaseline = this.rsProject.getInt("CurrentBaseline");
 			stTemp = this.ebEnt.ebUd.request.getParameter("from");
@@ -567,183 +407,91 @@ class EpsXlsProject // extends EpsUserData
 				if (!stSave.equals("Cancel")) {
 					saveInline(stChild, stPk);
 				}
-				this.ebEnt.ebUd.setRedirect(stLink + "#row"
-						+ this.ebEnt.ebUd.request.getParameter("edit"));
+				this.ebEnt.ebUd.setRedirect(stLink + "#row" + this.ebEnt.ebUd.request.getParameter("edit"));
 				return ""; // redirect, to remove EDIT tag
 							// ----------------------------->
 			}
 			String stAction = this.ebEnt.ebUd.request.getParameter("a");
 			String stR = this.ebEnt.ebUd.request.getParameter("r");
-			if (stAction != null && stAction.length() > 0 && stR != null
-					&& stR.length() > 0) { // PROCESS ACTIONS
+			if (stAction != null && stAction.length() > 0 && stR != null && stR.length() > 0) { // PROCESS
+																								// ACTIONS
 				int iRecIdDo = Integer.parseInt(stR);
-				ResultSet rs1 = this.ebEnt.dbDyn
-						.ExecuteSql("select * from Test where RecId="
-								+ iRecIdDo + " and  nmProjectId=" + stPk
-								+ " and nmBaseline=" + this.nmBaseline);
+				ResultSet rs1 = this.ebEnt.dbDyn.ExecuteSql("select * from Test where RecId=" + iRecIdDo + " and  nmProjectId=" + stPk
+						+ " and nmBaseline=" + this.nmBaseline);
 				rs1.absolute(1);
 				if (stAction.equals("collapse")) {
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Test set TstFlags=2 where RecId= "
-									+ iRecIdDo
-									+ " and nmBaseline="
-									+ this.nmBaseline);
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Test set TstFlags=1 where nmProjectId="
-									+ stPk
-									+ " and nmBaseline="
-									+ this.nmBaseline
-									+ " "
-									+ "and TstId > "
-									+ rs1.getString("TstId")
-									+ " and TstId < "
-									+ getEnd(stChild, stPk, rs1));
+					this.ebEnt.dbDyn.ExecuteUpdate("update Test set TstFlags=2 where RecId= " + iRecIdDo + " and nmBaseline="
+							+ this.nmBaseline);
+					this.ebEnt.dbDyn.ExecuteUpdate("update Test set TstFlags=1 where nmProjectId=" + stPk + " and nmBaseline="
+							+ this.nmBaseline + " " + "and TstId > " + rs1.getString("TstId") + " and TstId < "
+							+ getEnd(stChild, stPk, rs1));
 				} else if (stAction.equals("expand")) {
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Test set TstFlags=0 where RecId= "
-									+ iRecIdDo
-									+ " and nmBaseline="
-									+ this.nmBaseline);
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Test set TstFlags=0 where nmProjectId="
-									+ stPk
-									+ " and nmBaseline="
-									+ this.nmBaseline
-									+ " "
-									+ "and TstId > "
-									+ rs1.getString("TstId")
-									+ " and TstId < "
-									+ getEnd(stChild, stPk, rs1));
+					this.ebEnt.dbDyn.ExecuteUpdate("update Test set TstFlags=0 where RecId= " + iRecIdDo + " and nmBaseline="
+							+ this.nmBaseline);
+					this.ebEnt.dbDyn.ExecuteUpdate("update Test set TstFlags=0 where nmProjectId=" + stPk + " and nmBaseline="
+							+ this.nmBaseline + " " + "and TstId > " + rs1.getString("TstId") + " and TstId < "
+							+ getEnd(stChild, stPk, rs1));
 				} else if (stAction.equals("insert")) {
-					int iRecMax = this.ebEnt.dbDyn
-							.ExecuteSql1n("select max(RecId) from Test");
+					int iRecMax = this.ebEnt.dbDyn.ExecuteSql1n("select max(RecId) from Test");
 					iRecMax++;
-					String stWhat = this.ebEnt.ebUd.request
-							.getParameter("what");
+					String stWhat = this.ebEnt.ebUd.request.getParameter("what");
 					try {
 						iEditId = rs1.getInt("TstId");
 						if (stWhat.equals("below")) {
 							iEditId++;
-							this.ebEnt.dbDyn
-									.ExecuteUpdate("update Test set TstId=(TstId+1) where TstId > "
-											+ rs1.getString("TstId")
-											+ " and  nmProjectId="
-											+ stPk
-											+ " and nmBaseline="
-											+ this.nmBaseline + " ");
+							this.ebEnt.dbDyn.ExecuteUpdate("update Test set TstId=(TstId+1) where TstId > " + rs1.getString("TstId")
+									+ " and  nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline + " ");
 						} else {
 							// Above
-							this.ebEnt.dbDyn
-									.ExecuteUpdate("update Test set TstId=(TstId+1) where TstId >= "
-											+ rs1.getString("TstId")
-											+ " and  nmProjectId="
-											+ stPk
-											+ " and nmBaseline="
-											+ this.nmBaseline + " ");
+							this.ebEnt.dbDyn.ExecuteUpdate("update Test set TstId=(TstId+1) where TstId >= " + rs1.getString("TstId")
+									+ " and  nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline + " ");
 						}
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("insert into Test (RecId,nmProjectId,TstId,nmBaseline,TstLevel) "
-										+ "values("
-										+ iRecMax
-										+ ","
-										+ stPk
-										+ ","
-										+ iEditId
-										+ ","
-										+ rs1.getInt("nmBaseline")
-										+ ","
-										+ rs1.getInt("TstLevel") + ")");
+						this.ebEnt.dbDyn.ExecuteUpdate("insert into Test (RecId,nmProjectId,TstId,nmBaseline,TstLevel) " + "values("
+								+ iRecMax + "," + stPk + "," + iEditId + "," + rs1.getInt("nmBaseline") + "," + rs1.getInt("TstLevel")
+								+ ")");
 					} catch (Exception e) {
 						iEditId = 1;
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("insert into Test (RecId,nmProjectId,TstId,nmBaseline,TstLevel) "
-										+ "values("
-										+ iRecMax
-										+ ","
-										+ stPk
-										+ ",1," + this.nmBaseline + ",0)");
+						this.ebEnt.dbDyn.ExecuteUpdate("insert into Test (RecId,nmProjectId,TstId,nmBaseline,TstLevel) " + "values("
+								+ iRecMax + "," + stPk + ",1," + this.nmBaseline + ",0)");
 					}
 					// this.ebEnt.ebUd.setRedirect(stLink + "&edit=" + iRecMax +
 					// "&new=y#row" + iEditId);
 					// ?stAction=projects&t=12&do=xls&pk=5&parent=&child=21&from=0&a=editfull&r=8#row8
-					this.ebEnt.ebUd.setRedirect(stLink + "&a=editfull&r="
-							+ iRecMax + "#row" + iEditId);
+					this.ebEnt.ebUd.setRedirect(stLink + "&a=editfull&r=" + iRecMax + "#row" + iEditId);
 					return ""; // ----------------------------->
 				} else if (stAction.equals("delete")) {
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("delete from Test where RecId="
-									+ iRecIdDo + " and  nmProjectId=" + stPk
-									+ " and nmBaseline=" + this.nmBaseline);
-					String stWhat = this.ebEnt.ebUd.request
-							.getParameter("what");
+					this.ebEnt.dbDyn.ExecuteUpdate("delete from Test where RecId=" + iRecIdDo + " and  nmProjectId=" + stPk
+							+ " and nmBaseline=" + this.nmBaseline);
+					String stWhat = this.ebEnt.ebUd.request.getParameter("what");
 					int iDel = 1;
 					if (stWhat.equals("children")) {
 						int iTstIdEnd = getEnd(stChild, stPk, rs1);
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("delete from Test where nmProjectId="
-										+ stPk
-										+ " and nmBaseline="
-										+ this.nmBaseline
-										+ " "
-										+ "and TstId > "
-										+ rs1.getString("TstId")
-										+ " and TstId < " + iTstIdEnd);
+						this.ebEnt.dbDyn.ExecuteUpdate("delete from Test where nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline
+								+ " " + "and TstId > " + rs1.getString("TstId") + " and TstId < " + iTstIdEnd);
 						iDel += (iTstIdEnd - rs1.getInt("TstId") - 1);
 					} else {
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("update Test set TstLevel=(TstLevel-1) where nmProjectId="
-										+ stPk
-										+ " and nmBaseline="
-										+ this.nmBaseline
-										+ " "
-										+ "and TstId > "
-										+ rs1.getString("TstId")
-										+ " and TstId < "
-										+ getEnd(stChild, stPk, rs1));
+						this.ebEnt.dbDyn.ExecuteUpdate("update Test set TstLevel=(TstLevel-1) where nmProjectId=" + stPk
+								+ " and nmBaseline=" + this.nmBaseline + " " + "and TstId > " + rs1.getString("TstId") + " and TstId < "
+								+ getEnd(stChild, stPk, rs1));
 					}
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Test set TstId=(TstId-"
-									+ iDel + ") where TstId > "
-									+ rs1.getString("TstId")
-									+ " and  nmProjectId=" + stPk
-									+ " and nmBaseline=" + this.nmBaseline
-									+ " " + "and TstId > "
-									+ rs1.getString("TstId"));
+					this.ebEnt.dbDyn.ExecuteUpdate("update Test set TstId=(TstId-" + iDel + ") where TstId > " + rs1.getString("TstId")
+							+ " and  nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline + " " + "and TstId > "
+							+ rs1.getString("TstId"));
 				} else if (stAction.equals("demote")) {
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Test set TstLevel=(TstLevel-1) where RecId="
-									+ iRecIdDo);
-					String stWhat = this.ebEnt.ebUd.request
-							.getParameter("what");
+					this.ebEnt.dbDyn.ExecuteUpdate("update Test set TstLevel=(TstLevel-1) where RecId=" + iRecIdDo);
+					String stWhat = this.ebEnt.ebUd.request.getParameter("what");
 					if (stWhat.equals("children")) {
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("update Test set TstLevel=(TstLevel-1) where nmProjectId="
-										+ stPk
-										+ " and nmBaseline="
-										+ this.nmBaseline
-										+ " "
-										+ "and TstId > "
-										+ rs1.getString("TstId")
-										+ " and TstId < "
-										+ getEnd(stChild, stPk, rs1));
+						this.ebEnt.dbDyn.ExecuteUpdate("update Test set TstLevel=(TstLevel-1) where nmProjectId=" + stPk
+								+ " and nmBaseline=" + this.nmBaseline + " " + "and TstId > " + rs1.getString("TstId") + " and TstId < "
+								+ getEnd(stChild, stPk, rs1));
 					}
 				} else if (stAction.equals("promote")) {
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Test set TstLevel=(TstLevel+1) where RecId="
-									+ iRecIdDo);
-					String stWhat = this.ebEnt.ebUd.request
-							.getParameter("what");
+					this.ebEnt.dbDyn.ExecuteUpdate("update Test set TstLevel=(TstLevel+1) where RecId=" + iRecIdDo);
+					String stWhat = this.ebEnt.ebUd.request.getParameter("what");
 					if (stWhat.equals("children")) {
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("update Test set TstLevel=(TstLevel+1) where nmProjectId="
-										+ stPk
-										+ " and nmBaseline="
-										+ this.nmBaseline
-										+ " "
-										+ "and TstId > "
-										+ rs1.getString("TstId")
-										+ " and TstId < "
-										+ getEnd(stChild, stPk, rs1));
+						this.ebEnt.dbDyn.ExecuteUpdate("update Test set TstLevel=(TstLevel+1) where nmProjectId=" + stPk
+								+ " and nmBaseline=" + this.nmBaseline + " " + "and TstId > " + rs1.getString("TstId") + " and TstId < "
+								+ getEnd(stChild, stPk, rs1));
 					}
 				} else if (stAction.equals("customize")) {
 					stTemp = this.ebEnt.ebUd.request.getParameter("savedata");
@@ -753,20 +501,12 @@ class EpsXlsProject // extends EpsUserData
 				} else if (stAction.equals("custom")) {
 					String stB = this.ebEnt.ebUd.request.getParameter("b");
 					if (stB != null) {
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("update Test set TstFlags=0 where nmProjectId="
-										+ stPk
-										+ " and nmBaseline="
-										+ this.nmBaseline + "");
+						this.ebEnt.dbDyn.ExecuteUpdate("update Test set TstFlags=0 where nmProjectId=" + stPk + " and nmBaseline="
+								+ this.nmBaseline + "");
 						try {
 							int iLevel = Integer.parseInt(stB);
-							this.ebEnt.dbDyn
-									.ExecuteUpdate("update Test set TstFlags=1 "
-											+ "where nmProjectId="
-											+ stPk
-											+ " and nmBaseline="
-											+ this.nmBaseline
-											+ " and TstLevel > " + iLevel);
+							this.ebEnt.dbDyn.ExecuteUpdate("update Test set TstFlags=1 " + "where nmProjectId=" + stPk + " and nmBaseline="
+									+ this.nmBaseline + " and TstLevel > " + iLevel);
 						} catch (Exception e) {
 						}
 						setFlags(stChild);
@@ -782,30 +522,20 @@ class EpsXlsProject // extends EpsUserData
 				}
 			}
 			String stHeader = xlsHeaders(stChild);
-			String s1 = "</form><form method=post name='form" + stChild
-					+ "' id='form" + stChild
-					+ "' onsubmit='return myValidation(this)'>"
-					+ "<input type=hidden name=from value='" + iFrom
-					+ "'><table class=l1table><tr><td class=l1td colspan="
-					+ iMaxFields + " align=center><h2>"
-					+ this.rsProject.getString("ProjectName")
-					+ "</h2></td></tr>";
+			String s1 = "</form><form method=post name='form" + stChild + "' id='form" + stChild
+					+ "' onsubmit='return myValidation(this)'>" + "<input type=hidden name=from value='" + iFrom
+					+ "'><table class=l1table><tr><td class=l1td colspan=" + iMaxFields + " align=center><h2>"
+					+ this.rsProject.getString("ProjectName") + "</h2></td></tr>";
 			sbReturn.append(s1);
 			String stEdit = this.ebEnt.ebUd.request.getParameter("edit");
 			if (stEdit != null && stEdit.length() > 0)
 				iEditId = Integer.parseInt(stEdit);
 			else
 				iEditId = -2;
-			int iMaxRecords = this.ebEnt.dbDyn
-					.ExecuteSql1n("select count(*) from Test where nmProjectId="
-							+ stPk
-							+ " and nmBaseline="
-							+ this.nmBaseline
-							+ " and TstFlags != 1");
-			stSql = "select * from Test where nmProjectId=" + stPk
-					+ " and nmBaseline=" + this.nmBaseline
-					+ " and TstFlags != 1 order by TstId,RecId desc limit "
-					+ iFrom + "," + iBlock;
+			int iMaxRecords = this.ebEnt.dbDyn.ExecuteSql1n("select count(*) from Test where nmProjectId=" + stPk + " and nmBaseline="
+					+ this.nmBaseline + " and TstFlags != 1");
+			stSql = "select * from Test where nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline
+					+ " and TstFlags != 1 order by TstId,RecId desc limit " + iFrom + "," + iBlock;
 			ResultSet rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
 			rs.last();
 			int iMax = rs.getRow();
@@ -815,26 +545,17 @@ class EpsXlsProject // extends EpsUserData
 			{
 				iFrom = 0; // reset to 0
 				rs.close();
-				stSql = "select * from Test where nmProjectId=" + stPk
-						+ " and nmBaseline=" + this.nmBaseline
-						+ " and TstFlags != 1 order by TstId,RecId desc limit "
-						+ iFrom + "," + iBlock;
+				stSql = "select * from Test where nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline
+						+ " and TstFlags != 1 order by TstId,RecId desc limit " + iFrom + "," + iBlock;
 				rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
 				rs.last();
 				iMax = rs.getRow();
 				if (iMax <= 0) { // Clear all collapsed flags -- do EXPAND ALL
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Test set TstFlags=0 where nmProjectId="
-									+ stPk
-									+ " and nmBaseline="
-									+ this.nmBaseline + "");
+					this.ebEnt.dbDyn.ExecuteUpdate("update Test set TstFlags=0 where nmProjectId=" + stPk + " and nmBaseline="
+							+ this.nmBaseline + "");
 					rs.close();
-					stSql = "select * from Test where nmProjectId="
-							+ stPk
-							+ " and nmBaseline="
-							+ this.nmBaseline
-							+ " and TstFlags != 1 order by TstId,RecId desc limit "
-							+ iFrom + "," + iBlock;
+					stSql = "select * from Test where nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline
+							+ " and TstFlags != 1 order by TstId,RecId desc limit " + iFrom + "," + iBlock;
 					rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
 					rs.last();
 					iMax = rs.getRow();
@@ -881,39 +602,29 @@ class EpsXlsProject // extends EpsUserData
 						// iNextLevel + "," + iPrevLevel + "," + iNextShow +
 						// ",'" + stLink +
 						// "' )\""
-						s1 = "<tr  " + " onClick=" + "\"setActionsClick(3,"
-								+ rs.getInt("RecId") + "," + rs.getInt("TstId")
-								+ "," + rs.getInt("TstFlags") + ","
-								+ rs.getInt("TstLevel") + "," + iNextLevel
-								+ "," + iPrevLevel + "," + iNextShow + ",'"
-								+ stLink + "'," + iMaxFields + " )\"" + " >";
+						s1 = "<tr  " + " onClick=" + "\"setActionsClick(3," + rs.getInt("RecId") + "," + rs.getInt("TstId") + ","
+								+ rs.getInt("TstFlags") + "," + rs.getInt("TstLevel") + "," + iNextLevel + "," + iPrevLevel + ","
+								+ iNextShow + ",'" + stLink + "'," + iMaxFields + " )\"" + " >";
 						sbReturn.append(s1);
 					} else {
 						sbReturn.append("<tr>)");
 					}
 					for (int iF = 1; iF <= this.iMaxFields; iF++) {
 						this.rsFields.absolute(iF);
-						sbReturn.append("<td " + stClass + stId + iF + stNm
-								+ iF + " " + getStyle(0) + ">");
+						sbReturn.append("<td " + stClass + stId + iF + stNm + iF + " " + getStyle(0) + ">");
 						if (iF == 1)
-							sbReturn.append("<a name='row"
-									+ rs.getString("TstId") + "'></a>");
+							sbReturn.append("<a name='row" + rs.getString("TstId") + "'></a>");
 
-						String stValue = rs.getString(rsFields
-								.getString("stDbFieldName"));
+						String stValue = rs.getString(rsFields.getString("stDbFieldName"));
 						if (stValue == null)
 							stValue = "";
-						if (this.rsFields.getInt("nmDataType") == 5
-								&& stValue.length() > 0)
-							sbReturn.append(this.epsUd.rsMyDiv
-									.getString("stMoneySymbol") + " ");
+						if (this.rsFields.getInt("nmDataType") == 5 && stValue.length() > 0)
+							sbReturn.append(this.epsUd.rsMyDiv.getString("stMoneySymbol") + " ");
 
-						if (iEditId == rs.getInt("RecId")
-								&& (rsFields.getInt("nmFlags") & 0x1) != 0) {
+						if (iEditId == rs.getInt("RecId") && (rsFields.getInt("nmFlags") & 0x1) != 0) {
 							sbReturn.append(editXlsField(stValue));
 						} else {
-							if (rsFields.getString("stDbFieldName").equals(
-									"TstTitle"))
+							if (rsFields.getString("stDbFieldName").equals("TstTitle"))
 								for (int i = 0; i < rs.getInt("TstLevel"); i++)
 									sbReturn.append("&nbsp;&nbsp;");
 							sbReturn.append(stValue.replace("\n", "<BR>"));
@@ -922,17 +633,14 @@ class EpsXlsProject // extends EpsUserData
 					sbReturn.append("</tr>");
 					iPrevLevel = rs.getInt("TstLevel");
 				}
-				sbReturn.append(doNext(stChild, iMaxFields, iMaxRecords, iFrom,
-						iBlock, stGoBack, stPk));
+				sbReturn.append(doNext(stChild, iMaxFields, iMaxRecords, iFrom, iBlock, stGoBack, stPk));
 			} else {
-				sbReturn.append(doNext(stChild, iMaxFields, 0, 0, iBlock,
-						stGoBack, stPk));
+				sbReturn.append(doNext(stChild, iMaxFields, 0, 0, iBlock, stGoBack, stPk));
 			}
 			sbReturn.append("</table></form><br/>");
 			if (iMax > 0) {
-				sbReturn.append(epsUd.makeToolbar(false, iMaxRecords, iFrom,
-						iBlock, "./?stAction=projects&t=12&do=xls&pk=" + stPk
-								+ "&parent=12&child=" + stChild + ""));
+				sbReturn.append(epsUd.makeToolbar(false, iMaxRecords, iFrom, iBlock, "./?stAction=projects&t=12&do=xls&pk=" + stPk
+						+ "&parent=12&child=" + stChild + ""));
 			}
 		} catch (Exception e) {
 			this.stError += "<br>ERROR xlsTestEdit: " + e;
@@ -948,9 +656,8 @@ class EpsXlsProject // extends EpsUserData
 		try {
 			stPk = this.ebEnt.ebUd.request.getParameter("pk");
 			stGoBack = "?stAction=projects&t=12";
-			String stLink = "?stAction=projects&t="
-					+ this.ebEnt.ebUd.request.getParameter("t") + "&do=xls&pk="
-					+ stPk + "&parent=" + stTemp + "&child=" + stChild;
+			String stLink = "?stAction=projects&t=" + this.ebEnt.ebUd.request.getParameter("t") + "&do=xls&pk=" + stPk + "&parent="
+					+ stTemp + "&child=" + stChild;
 			int iFrom = 0;
 			int iBlock = this.epsUd.rsMyDiv.getInt("ReqSchRows");
 			String stBlock = this.ebEnt.ebUd.request.getParameter("display");
@@ -961,8 +668,7 @@ class EpsXlsProject // extends EpsUserData
 
 				}
 			}
-			this.rsProject = this.ebEnt.dbDyn
-					.ExecuteSql("select * from Projects where RecId=" + stPk);
+			this.rsProject = this.ebEnt.dbDyn.ExecuteSql("select * from Projects where RecId=" + stPk);
 			this.rsProject.absolute(1);
 			nmBaseline = this.rsProject.getInt("CurrentBaseline");
 			stTemp = this.ebEnt.ebUd.request.getParameter("from");
@@ -982,250 +688,122 @@ class EpsXlsProject // extends EpsUserData
 					// check low level indicators #110
 					this.analyzeLowLevelTasks();
 				}
-				this.ebEnt.ebUd.setRedirect(stLink + "#row"
-						+ this.ebEnt.ebUd.request.getParameter("edit"));
+				this.ebEnt.ebUd.setRedirect(stLink + "#row" + this.ebEnt.ebUd.request.getParameter("edit"));
 				return ""; // redirect, to remove EDIT tag
 							// ----------------------------->
 			}
 			String stAction = this.ebEnt.ebUd.request.getParameter("a");
 			String stR = this.ebEnt.ebUd.request.getParameter("r");
-			if (stAction != null && stAction.length() > 0 && stR != null
-					&& stR.length() > 0) { // PROCESS ACTIONS
+			if (stAction != null && stAction.length() > 0 && stR != null && stR.length() > 0) { // PROCESS
+																								// ACTIONS
 				int iRecIdDo = Integer.parseInt(stR);
-				ResultSet rs1 = this.ebEnt.dbDyn
-						.ExecuteSql("select * from Schedule where nmProjectId="
-								+ stPk + " and nmBaseline=" + this.nmBaseline
-								+ " and RecId=" + iRecIdDo);
+				ResultSet rs1 = this.ebEnt.dbDyn.ExecuteSql("select * from Schedule where nmProjectId=" + stPk + " and nmBaseline="
+						+ this.nmBaseline + " and RecId=" + iRecIdDo);
 				rs1.absolute(1);
 				if (stAction.equals("collapse")) {
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Schedule set SchFlags = (SchFlags | 2) where RecId= "
-									+ iRecIdDo
-									+ " and nmProjectId="
-									+ stPk
-									+ " and nmBaseline=" + this.nmBaseline);
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Schedule set SchFlags = (SchFlags | 1) where nmProjectId="
-									+ stPk
-									+ " and nmBaseline="
-									+ this.nmBaseline
-									+ " "
-									+ "and SchId > "
-									+ rs1.getString("SchId")
-									+ " and SchId < "
-									+ getEnd(stChild, stPk, rs1));
+					this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchFlags = (SchFlags | 2) where RecId= " + iRecIdDo
+							+ " and nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline);
+					this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchFlags = (SchFlags | 1) where nmProjectId=" + stPk
+							+ " and nmBaseline=" + this.nmBaseline + " " + "and SchId > " + rs1.getString("SchId") + " and SchId < "
+							+ getEnd(stChild, stPk, rs1));
 				} else if (stAction.equals("expand")) {
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Schedule set SchFlags = (SchFlags & ~0x3) where RecId= "
-									+ iRecIdDo
-									+ " and nmProjectId="
-									+ stPk
-									+ " and nmBaseline=" + this.nmBaseline);
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Schedule set SchFlags = (SchFlags & ~0x3) where nmProjectId="
-									+ stPk
-									+ " and nmBaseline="
-									+ this.nmBaseline
-									+ " "
-									+ "and SchId > "
-									+ rs1.getString("SchId")
-									+ " and SchId < "
-									+ getEnd(stChild, stPk, rs1));
+					this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchFlags = (SchFlags & ~0x3) where RecId= " + iRecIdDo
+							+ " and nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline);
+					this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchFlags = (SchFlags & ~0x3) where nmProjectId=" + stPk
+							+ " and nmBaseline=" + this.nmBaseline + " " + "and SchId > " + rs1.getString("SchId") + " and SchId < "
+							+ getEnd(stChild, stPk, rs1));
 				} else if (stAction.equals("insert")) {
-					int iRecMax = this.ebEnt.dbDyn
-							.ExecuteSql1n("select max(RecId) from Schedule");
+					int iRecMax = this.ebEnt.dbDyn.ExecuteSql1n("select max(RecId) from Schedule");
 					iRecMax++;
-					String stWhat = this.ebEnt.ebUd.request
-							.getParameter("what");
+					String stWhat = this.ebEnt.ebUd.request.getParameter("what");
 					try {
 						iEditId = rs1.getInt("SchId");
 						if (stWhat.equals("below")) {
 							iEditId++;
-							this.ebEnt.dbDyn
-									.ExecuteUpdate("update Schedule set SchId=(SchId+1) where SchId > "
-											+ rs1.getString("SchId")
-											+ " and  nmProjectId="
-											+ stPk
-											+ " and nmBaseline="
-											+ this.nmBaseline + " ");
+							this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchId=(SchId+1) where SchId > " + rs1.getString("SchId")
+									+ " and  nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline + " ");
 						} else {
 							// Above
-							this.ebEnt.dbDyn
-									.ExecuteUpdate("update Schedule set SchId=(SchId+1) where SchId >= "
-											+ rs1.getString("SchId")
-											+ " and  nmProjectId="
-											+ stPk
-											+ " and nmBaseline="
-											+ this.nmBaseline + " ");
+							this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchId=(SchId+1) where SchId >= " + rs1.getString("SchId")
+									+ " and  nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline + " ");
 						}
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("insert into Schedule (RecId,nmProjectId,SchId,nmBaseline,SchLevel) "
-										+ "values("
-										+ iRecMax
-										+ ","
-										+ stPk
-										+ ","
-										+ iEditId
-										+ ","
-										+ rs1.getInt("nmBaseline")
-										+ ","
-										+ rs1.getInt("SchLevel") + ")");
+						this.ebEnt.dbDyn.ExecuteUpdate("insert into Schedule (RecId,nmProjectId,SchId,nmBaseline,SchLevel) " + "values("
+								+ iRecMax + "," + stPk + "," + iEditId + "," + rs1.getInt("nmBaseline") + "," + rs1.getInt("SchLevel")
+								+ ")");
 
 						// check low level indicators #110
 						this.analyzeLowLevelTasks();
 					} catch (Exception e) {
 						iEditId = 1;
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("insert into Schedule (RecId,nmProjectId,SchId,nmBaseline,SchLevel) "
-										+ "values("
-										+ iRecMax
-										+ ","
-										+ stPk
-										+ ","
-										+ iEditId
-										+ ","
-										+ nmBaseline
-										+ ",0)");
+						this.ebEnt.dbDyn.ExecuteUpdate("insert into Schedule (RecId,nmProjectId,SchId,nmBaseline,SchLevel) " + "values("
+								+ iRecMax + "," + stPk + "," + iEditId + "," + nmBaseline + ",0)");
 						iRecIdDo = iRecMax;
 					}
-					this.epsUd.makeTask(16, this.epsUd.epsEf.getScheduleName(""
-							+ iRecIdDo, stPk, nmBaseline)); // New Project
-															// Schedule
-					this.ebEnt.ebUd.setRedirect(stLink + "&edit=" + iRecMax
-							+ "&new=y#row" + iEditId);
+					this.epsUd.makeTask(16, this.epsUd.epsEf.getScheduleName("" + iRecIdDo, stPk, nmBaseline)); // New
+																												// Project
+																												// Schedule
+					this.ebEnt.ebUd.setRedirect(stLink + "&edit=" + iRecMax + "&new=y#row" + iEditId);
 					return ""; // ----------------------------->
 				} else if (stAction.equals("send")) {
-					ResultSet rset = this.ebEnt.dbDyn
-							.ExecuteSql("select SchEstimatedEffort, SchEfforttoDate from schedule where RecId="
-									+ iRecIdDo
-									+ " and  nmProjectId="
-									+ stPk
-									+ " and nmBaseline=" + this.nmBaseline);
+					ResultSet rset = this.ebEnt.dbDyn.ExecuteSql("select SchEstimatedEffort, SchEfforttoDate from schedule where RecId="
+							+ iRecIdDo + " and  nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline);
 					rset.absolute(1);
-					if (rset.getInt("SchEfforttoDate") > rset
-							.getInt("SchEstimatedEffort")) {
+					if (rset.getInt("SchEfforttoDate") > rset.getInt("SchEstimatedEffort")) {
 						this.ebEnt.ebUd
 								.setPopupMessage("Expended hours may not be more than estimated hours. Please adjust estimated hours first.");
 					} else {
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("update Schedule set SchMessage='Y', dtSchLastUpdate=now() where RecId="
-										+ iRecIdDo
-										+ " and  nmProjectId="
-										+ stPk
-										+ " and nmBaseline="
-										+ this.nmBaseline);
+						this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchMessage='Y', dtSchLastUpdate=now() where RecId=" + iRecIdDo
+								+ " and  nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline);
 						int iDel = 1;
 
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("update Schedule set SchLevel=(SchLevel-1) where nmProjectId="
-										+ stPk
-										+ " and nmBaseline="
-										+ this.nmBaseline
-										+ " "
-										+ "and SchId > "
-										+ rs1.getString("SchId")
-										+ " and SchId < "
-										+ getEnd(stChild, stPk, rs1));
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("update Schedule set SchId=(SchId-"
-										+ iDel
-										+ ") where SchId > "
-										+ rs1.getString("SchId")
-										+ " and  nmProjectId="
-										+ stPk
-										+ " and nmBaseline="
-										+ this.nmBaseline
-										+ " "
-										+ "and SchId > "
-										+ rs1.getString("SchId"));
+						this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchLevel=(SchLevel-1) where nmProjectId=" + stPk
+								+ " and nmBaseline=" + this.nmBaseline + " " + "and SchId > " + rs1.getString("SchId") + " and SchId < "
+								+ getEnd(stChild, stPk, rs1));
+						this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchId=(SchId-" + iDel + ") where SchId > "
+								+ rs1.getString("SchId") + " and  nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline + " "
+								+ "and SchId > " + rs1.getString("SchId"));
 					}
 				} else if (stAction.equals("delete")) {
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("delete from Schedule where RecId="
-									+ iRecIdDo + " and  nmProjectId=" + stPk
-									+ " and nmBaseline=" + this.nmBaseline);
-					String stWhat = this.ebEnt.ebUd.request
-							.getParameter("what");
+					this.ebEnt.dbDyn.ExecuteUpdate("delete from Schedule where RecId=" + iRecIdDo + " and  nmProjectId=" + stPk
+							+ " and nmBaseline=" + this.nmBaseline);
+					String stWhat = this.ebEnt.ebUd.request.getParameter("what");
 					int iDel = 1;
 					if (stWhat.equals("children")) {
 						int iSchIdEnd = getEnd(stChild, stPk, rs1);
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("delete from Schedule where nmProjectId="
-										+ stPk
-										+ " and nmBaseline="
-										+ this.nmBaseline
-										+ " "
-										+ "and SchId > "
-										+ rs1.getString("SchId")
-										+ " and SchId < " + iSchIdEnd);
+						this.ebEnt.dbDyn.ExecuteUpdate("delete from Schedule where nmProjectId=" + stPk + " and nmBaseline="
+								+ this.nmBaseline + " " + "and SchId > " + rs1.getString("SchId") + " and SchId < " + iSchIdEnd);
 						iDel += (iSchIdEnd - rs1.getInt("SchId") - 1);
 					} else {
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("update Schedule set SchLevel=(SchLevel-1) where nmProjectId="
-										+ stPk
-										+ " and nmBaseline="
-										+ this.nmBaseline
-										+ " "
-										+ "and SchId > "
-										+ rs1.getString("SchId")
-										+ " and SchId < "
-										+ getEnd(stChild, stPk, rs1));
+						this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchLevel=(SchLevel-1) where nmProjectId=" + stPk
+								+ " and nmBaseline=" + this.nmBaseline + " " + "and SchId > " + rs1.getString("SchId") + " and SchId < "
+								+ getEnd(stChild, stPk, rs1));
 					}
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Schedule set SchId=(SchId-"
-									+ iDel + ") where SchId > "
-									+ rs1.getString("SchId")
-									+ " and  nmProjectId=" + stPk
-									+ " and nmBaseline=" + this.nmBaseline
-									+ " " + "and SchId > "
-									+ rs1.getString("SchId"));
+					this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchId=(SchId-" + iDel + ") where SchId > " + rs1.getString("SchId")
+							+ " and  nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline + " " + "and SchId > "
+							+ rs1.getString("SchId"));
 
 					// check low level indicators #110
 					this.analyzeLowLevelTasks();
 				} else if (stAction.equals("demote")) {
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Schedule set SchLevel=(SchLevel-1) where RecId="
-									+ iRecIdDo
-									+ " and nmProjectId="
-									+ stPk
-									+ " and nmBaseline=" + this.nmBaseline);
-					String stWhat = this.ebEnt.ebUd.request
-							.getParameter("what");
+					this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchLevel=(SchLevel-1) where RecId=" + iRecIdDo
+							+ " and nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline);
+					String stWhat = this.ebEnt.ebUd.request.getParameter("what");
 					if (stWhat.equals("children")) {
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("update Schedule set SchLevel=(SchLevel-1) where nmProjectId="
-										+ stPk
-										+ " and nmBaseline="
-										+ this.nmBaseline
-										+ " "
-										+ "and SchId > "
-										+ rs1.getString("SchId")
-										+ " and SchId < "
-										+ getEnd(stChild, stPk, rs1));
+						this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchLevel=(SchLevel-1) where nmProjectId=" + stPk
+								+ " and nmBaseline=" + this.nmBaseline + " " + "and SchId > " + rs1.getString("SchId") + " and SchId < "
+								+ getEnd(stChild, stPk, rs1));
 					}
 
 					// check low level indicators #110
 					this.analyzeLowLevelTasks();
 				} else if (stAction.equals("promote")) {
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Schedule set SchLevel=(SchLevel+1) where RecId="
-									+ iRecIdDo
-									+ " and nmProjectId="
-									+ stPk
-									+ " and nmBaseline=" + this.nmBaseline);
-					String stWhat = this.ebEnt.ebUd.request
-							.getParameter("what");
+					this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchLevel=(SchLevel+1) where RecId=" + iRecIdDo
+							+ " and nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline);
+					String stWhat = this.ebEnt.ebUd.request.getParameter("what");
 					if (stWhat.equals("children")) {
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("update Schedule set SchLevel=(SchLevel+1) where nmProjectId="
-										+ stPk
-										+ " and nmBaseline="
-										+ this.nmBaseline
-										+ " "
-										+ "and SchId > "
-										+ rs1.getString("SchId")
-										+ " and SchId < "
-										+ getEnd(stChild, stPk, rs1));
+						this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchLevel=(SchLevel+1) where nmProjectId=" + stPk
+								+ " and nmBaseline=" + this.nmBaseline + " " + "and SchId > " + rs1.getString("SchId") + " and SchId < "
+								+ getEnd(stChild, stPk, rs1));
 					}
 
 					// check low level indicators #110
@@ -1238,20 +816,12 @@ class EpsXlsProject // extends EpsUserData
 				} else if (stAction.equals("custom")) {
 					String stB = this.ebEnt.ebUd.request.getParameter("b");
 					if (stB != null) {
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("update Schedule set SchFlags = (SchFlags & ~0x3) where nmProjectId="
-										+ stPk
-										+ " and nmBaseline="
-										+ this.nmBaseline + "");
+						this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchFlags = (SchFlags & ~0x3) where nmProjectId=" + stPk
+								+ " and nmBaseline=" + this.nmBaseline + "");
 						try {
 							int iLevel = Integer.parseInt(stB);
-							this.ebEnt.dbDyn
-									.ExecuteUpdate("update Schedule set SchFlags = (SchFlags | 1) "
-											+ "where nmProjectId="
-											+ stPk
-											+ " and nmBaseline="
-											+ this.nmBaseline
-											+ " and SchLevel > " + iLevel);
+							this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchFlags = (SchFlags | 1) " + "where nmProjectId=" + stPk
+									+ " and nmBaseline=" + this.nmBaseline + " and SchLevel > " + iLevel);
 						} catch (Exception e) {
 						}
 						setFlags(stChild);
@@ -1275,38 +845,25 @@ class EpsXlsProject // extends EpsUserData
 				}
 			}
 			String stHeader = xlsHeaders(stChild);
-			stTemp = "</form><form method=post name='form" + stChild
-					+ "' id='form" + stChild
-					+ "' onsubmit='return myValidation(this)'>"
-					+ "<input type=hidden name=from value='" + iFrom
-					+ "'><table class=l1table><tr><td class=l1td colspan="
-					+ iMaxFields + " align=center><h2>"
-					+ this.rsProject.getString("ProjectName")
-					+ "</h2></td></tr>";
+			stTemp = "</form><form method=post name='form" + stChild + "' id='form" + stChild + "' onsubmit='return myValidation(this)'>"
+					+ "<input type=hidden name=from value='" + iFrom + "'><table class=l1table><tr><td class=l1td colspan=" + iMaxFields
+					+ " align=center><h2>" + this.rsProject.getString("ProjectName") + "</h2></td></tr>";
 			sbReturn.append(stTemp);
 			String stEdit = this.ebEnt.ebUd.request.getParameter("edit");
 			if (stEdit != null && stEdit.length() > 0)
 				iEditId = Integer.parseInt(stEdit);
 			else
 				iEditId = -2;
-			int iMaxRecords = this.ebEnt.dbDyn
-					.ExecuteSql1n("select count(*) from Schedule where nmProjectId="
-							+ stPk
-							+ " and nmBaseline="
-							+ this.nmBaseline
-							+ " and (SchFlags & 0x1) != 1");
+			int iMaxRecords = this.ebEnt.dbDyn.ExecuteSql1n("select count(*) from Schedule where nmProjectId=" + stPk + " and nmBaseline="
+					+ this.nmBaseline + " and (SchFlags & 0x1) != 1");
 
 			// do not go back to first page if click next on last page
 			if (iFrom > iMaxRecords) {
 				iFrom -= iBlock;
 			}
 
-			stSql = "select * from Schedule where nmProjectId="
-					+ stPk
-					+ " and nmBaseline="
-					+ this.nmBaseline
-					+ " and (SchFlags & 0x1) != 1 order by SchId,RecId desc limit "
-					+ iFrom + "," + iBlock;
+			stSql = "select * from Schedule where nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline
+					+ " and (SchFlags & 0x1) != 1 order by SchId,RecId desc limit " + iFrom + "," + iBlock;
 			ResultSet rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
 			rs.last();
 			int iMax = rs.getRow();
@@ -1316,28 +873,17 @@ class EpsXlsProject // extends EpsUserData
 			{
 				iFrom = 0; // reset to 0
 				rs.close();
-				stSql = "select * from Schedule where SchMessage IS NULL and nmProjectId="
-						+ stPk
-						+ " and nmBaseline="
-						+ this.nmBaseline
-						+ " and (SchFlags & 0x1) != 1 order by SchId,RecId desc limit "
-						+ iFrom + "," + iBlock;
+				stSql = "select * from Schedule where SchMessage IS NULL and nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline
+						+ " and (SchFlags & 0x1) != 1 order by SchId,RecId desc limit " + iFrom + "," + iBlock;
 				rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
 				rs.last();
 				iMax = rs.getRow();
 				if (iMax <= 0) { // Clear all collapsed flags -- do EXPAND ALL
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Schedule set SchFlags = (SchFlags & ~0x3) where nmProjectId="
-									+ stPk
-									+ " and nmBaseline="
-									+ this.nmBaseline + "");
+					this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchFlags = (SchFlags & ~0x3) where nmProjectId=" + stPk
+							+ " and nmBaseline=" + this.nmBaseline + "");
 					rs.close();
-					stSql = "select * from Schedule where SchMessage IS NULL and nmProjectId="
-							+ stPk
-							+ " and nmBaseline="
-							+ this.nmBaseline
-							+ " and (SchFlags & 0x1) != 1 order by SchId,RecId desc limit "
-							+ iFrom + "," + iBlock;
+					stSql = "select * from Schedule where SchMessage IS NULL and nmProjectId=" + stPk + " and nmBaseline="
+							+ this.nmBaseline + " and (SchFlags & 0x1) != 1 order by SchId,RecId desc limit " + iFrom + "," + iBlock;
 					rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
 					rs.last();
 					iMax = rs.getRow();
@@ -1376,11 +922,10 @@ class EpsXlsProject // extends EpsUserData
 						stDescription = "";
 					else
 						stDescription = stDescription.trim();
-					if (iEditId <= 0
-							&& (this.ebEnt.ebUd.getLoginPersonFlags() & 0x60) != 0) // Only
-																					// PM
-																					// and
-																					// PPM
+					if (iEditId <= 0 && (this.ebEnt.ebUd.getLoginPersonFlags() & 0x60) != 0) // Only
+																								// PM
+																								// and
+																								// PPM
 					{
 						// onmouseover="
 						// + "\"setActions(1," + rs.getInt("RecId") + "," +
@@ -1389,13 +934,9 @@ class EpsXlsProject // extends EpsUserData
 						// iNextLevel + "," + iPrevLevel + "," + iNextShow +
 						// ",'" + stLink +
 						// "' )\""
-						sbReturn.append("<tr  " + " onClick="
-								+ "\"setActionsClick(1," + rs.getInt("RecId")
-								+ "," + rs.getInt("SchId") + ","
-								+ rs.getInt("SchFlags") + ","
-								+ rs.getInt("SchLevel") + "," + iNextLevel
-								+ "," + iPrevLevel + "," + iNextShow + ",'"
-								+ stLink + "'," + iMaxFields + " )\"" + " >");
+						sbReturn.append("<tr  " + " onClick=" + "\"setActionsClick(1," + rs.getInt("RecId") + "," + rs.getInt("SchId")
+								+ "," + rs.getInt("SchFlags") + "," + rs.getInt("SchLevel") + "," + iNextLevel + "," + iPrevLevel + ","
+								+ iNextShow + ",'" + stLink + "'," + iMaxFields + " )\"" + " >");
 					} else {
 						sbReturn.append("<tr>");
 					}
@@ -1405,45 +946,35 @@ class EpsXlsProject // extends EpsUserData
 					// insert each field as column
 					for (int iF = 1; iF <= this.iMaxFields; iF++) {
 						this.rsFields.absolute(iF);
-						String stValue = rs.getString(rsFields
-								.getString("stDbFieldName"));
+						String stValue = rs.getString(rsFields.getString("stDbFieldName"));
 
-						if (rsFields.getInt("nmForeignId") == 825
-								&& this.ebEnt.ebUd.request.getParameter("edit") != null) {
+						if (rsFields.getInt("nmForeignId") == 825 && this.ebEnt.ebUd.request.getParameter("edit") != null) {
 							// don't append labor categories if inline edit but
 							// store labor
 							// categories and process below all fields
 							laborcat = stValue;
 						} else {
-							tbstyle = stClass + stId + iF + stNm + iF + " "
-									+ getStyle(0);
-							if (rsFields.getInt("nmDataType") == 3
-									|| rsFields.getInt("nmDataType") == 4
+							tbstyle = stClass + stId + iF + stNm + iF + " " + getStyle(0);
+							if (rsFields.getInt("nmDataType") == 3 || rsFields.getInt("nmDataType") == 4
 									|| rsFields.getInt("nmDataType") == 41)
-								sbReturn.append("<td " + tbstyle
-										+ " align='left'>"); // align
-																// text
-																// left
+								sbReturn.append("<td " + tbstyle + " align='left'>"); // align
+																						// text
+																						// left
 							else
 								sbReturn.append("<td " + tbstyle + ">");
 							if (iF == 1)
-								sbReturn.append("<a name='row"
-										+ rs.getString("SchId") + "'></a>");
+								sbReturn.append("<a name='row" + rs.getString("SchId") + "'></a>");
 							if (stValue == null)
 								stValue = "";
-							if (this.rsFields.getInt("nmDataType") == 5
-									&& stValue.length() > 0) {
-								sbReturn.append(this.epsUd.rsMyDiv
-										.getString("stMoneySymbol") + " "); // inline
-																			// fields
+							if (this.rsFields.getInt("nmDataType") == 5 && stValue.length() > 0) {
+								sbReturn.append(this.epsUd.rsMyDiv.getString("stMoneySymbol") + " "); // inline
+																										// fields
 							}
-							if (rsFields.getInt("nmForeignId") == 813
-									&& iEditId == rs.getInt("RecId")
+							if (rsFields.getInt("nmForeignId") == 813 && iEditId == rs.getInt("RecId")
 									&& (rsFields.getInt("nmFlags") & 0x1) != 0) {
 								stValue = makeDependenciesTB(rs, stChild);
 								sbReturn.append(stValue.replace("\n", "<BR>"));
-							} else if (iEditId == rs.getInt("RecId")
-									&& (rsFields.getInt("nmFlags") & 0x1) != 0) {
+							} else if (iEditId == rs.getInt("RecId") && (rsFields.getInt("nmFlags") & 0x1) != 0) {
 								sbReturn.append(editXlsField(stValue)); // passes
 																		// value
 																		// into
@@ -1451,39 +982,30 @@ class EpsXlsProject // extends EpsUserData
 																		// editable
 																		// field
 							} else {
-								if (rsFields.getString("stDbFieldName").equals(
-										"SchTitle"))
+								if (rsFields.getString("stDbFieldName").equals("SchTitle"))
 									for (int i = 0; i < rs.getInt("SchLevel"); i++)
 										sbReturn.append("&nbsp;&nbsp;"); // indentations
 																			// for
 																			// levels
 
 								// labor categories column
-								if (!stValue.equals("")
-										&& rsFields.getString("stDbFieldName")
-												.equals("SchLaborCategories")) {
+								if (!stValue.equals("") && rsFields.getString("stDbFieldName").equals("SchLaborCategories")) {
 									String stReturn = "";
 									String stRowspan = "";
 									String[] aFields = null;
-									String[] aRecords = stValue
-											.split("\\|", -1);
+									String[] aRecords = stValue.split("\\|", -1);
 									int iRecMax = aRecords.length;
 
 									for (int iRa = 0; iRa < iRecMax; iRa++) {
 										if (iRa < iRecMax) {
-											aFields = aRecords[iRa].split("~",
-													-1); // LcId,
-															// MaxEmployess,
-															// Effort,
-											ResultSet rsLcAll = this.ebEnt.dbDyn
-													.ExecuteSql("SELECT * FROM LaborCategory WHERE nmLcId="
-															+ aFields[0]);
+											aFields = aRecords[iRa].split("~", -1); // LcId,
+																					// MaxEmployess,
+																					// Effort,
+											ResultSet rsLcAll = this.ebEnt.dbDyn.ExecuteSql("SELECT * FROM LaborCategory WHERE nmLcId="
+													+ aFields[0]);
 											rsLcAll.last();
-											stValue = makeListValue(
-													rsFields,
-													rsLcAll.getString("LaborCategory"));
-											sbReturn.append(stValue.replace(
-													"\n", "<BR>") + "<BR>");
+											stValue = makeListValue(rsFields, rsLcAll.getString("LaborCategory"));
+											sbReturn.append(stValue.replace("\n", "<BR>") + "<BR>");
 										} else {
 											aFields = new String[7];
 											for (int i = 0; i < aFields.length; i++) {
@@ -1494,25 +1016,16 @@ class EpsXlsProject // extends EpsUserData
 											}
 										}
 									}
-								} else if (stValue.equals("")
-										&& rsFields.getString("stDbFieldName")
-												.equals("SchLaborCategories")) {
+								} else if (stValue.equals("") && rsFields.getString("stDbFieldName").equals("SchLaborCategories")) {
 									stValue = makeListValue(rsFields, "");
-									sbReturn.append(stValue.replace("\n",
-											"<BR>"));
-								} else if (rsFields.getString("stDbFieldName")
-										.equals("SchDependencies")) {
+									sbReturn.append(stValue.replace("\n", "<BR>"));
+								} else if (rsFields.getString("stDbFieldName").equals("SchDependencies")) {
 									// stValue = makeListValue(rsFields,
 									// stValue+"");
-									String stdSql = "select * from teb_link where nmProjectId="
-											+ this.stPk
-											+ " and nmBaseline="
-											+ this.nmBaseline
-											+ " and nmLinkFlags=2 and nmToId="
-											+ rs.getInt("RecId")
+									String stdSql = "select * from teb_link where nmProjectId=" + this.stPk + " and nmBaseline="
+											+ this.nmBaseline + " and nmLinkFlags=2 and nmToId=" + rs.getInt("RecId")
 											+ " and nmToProject=nmProjectId order by nmFromId";
-									ResultSet res = this.ebEnt.dbDyn
-											.ExecuteSql(stdSql);
+									ResultSet res = this.ebEnt.dbDyn.ExecuteSql(stdSql);
 									res.last();
 									int rws = res.getRow();
 									res.absolute(1);
@@ -1523,10 +1036,8 @@ class EpsXlsProject // extends EpsUserData
 											stValue += ",";
 										res.next();
 									}
-									sbReturn.append(stValue.replace("\n",
-											"<BR>"));
-								} else if (rsFields.getString("stDbFieldName")
-										.equals("SchDone")) {
+									sbReturn.append(stValue.replace("\n", "<BR>"));
+								} else if (rsFields.getString("stDbFieldName").equals("SchDone")) {
 									if (stValue.equals("Y")) {
 										stValue = "<input type='checkbox' disabled='disabled' checked='checked' value='Y'>";
 									} else {
@@ -1540,29 +1051,24 @@ class EpsXlsProject // extends EpsUserData
 								// is low level when you display a schedule
 								// task's attributes.
 								// #110
-								else if (rsFields.getString("stDbFieldName")
-										.equals("SchLevel")) {
+								else if (rsFields.getString("stDbFieldName").equals("SchLevel")) {
 
-									if (rs.getInt("lowlvl") == 1
-											&& rs.getInt("SchLevel") == Integer
-													.parseInt(stValue)) { // same
-																			// level
-																			// as
-																			// before,
-																			// therefore
-																			// we
-																			// are
-																			// LAST
+									if (rs.getInt("lowlvl") == 1 && rs.getInt("SchLevel") == Integer.parseInt(stValue)) { // same
+																															// level
+																															// as
+																															// before,
+																															// therefore
+																															// we
+																															// are
+																															// LAST
 										sbReturn.append("(LL) ");
 									}
 
 									stValue = makeListValue(rsFields, stValue);
-									sbReturn.append(stValue.replace("\n",
-											"<BR>"));
+									sbReturn.append(stValue.replace("\n", "<BR>"));
 								} else {
 									stValue = makeListValue(rsFields, stValue);
-									sbReturn.append(stValue.replace("\n",
-											"<BR>"));
+									sbReturn.append(stValue.replace("\n", "<BR>"));
 								}
 							}
 						}
@@ -1570,16 +1076,12 @@ class EpsXlsProject // extends EpsUserData
 					sbReturn.append("</tr>");
 
 					// append labor category row
-					if (iEditId == rs.getInt("RecId")
-							&& (rsFields.getInt("nmFlags") & 0x1) != 0) {
-						sbReturn.append("<tr><td "
-								+ tbstyle
-								+ "><input type=submit name=savedataxls value='Save' onClick=\"return setSubmitId(9970);\"></td>"
-								+ "<td "
+					if (iEditId == rs.getInt("RecId") && (rsFields.getInt("nmFlags") & 0x1) != 0) {
+						sbReturn.append("<tr><td " + tbstyle
+								+ "><input type=submit name=savedataxls value='Save' onClick=\"return setSubmitId(9970);\"></td>" + "<td "
 								+ tbstyle
 								+ "><input type=submit name=savedataxls value='Cancel' onClick=\"return setSubmitId(8888);\"></td>"
-								+ "<td " + tbstyle + " colspan='"
-								+ this.iMaxFields + "'>");
+								+ "<td " + tbstyle + " colspan='" + this.iMaxFields + "'>");
 
 						// parse labor cat rows
 						String stReturn = "";
@@ -1618,128 +1120,68 @@ class EpsXlsProject // extends EpsUserData
 									}
 								}
 
-								stReturn += "<td " + stRowspan
-										+ "><select name=lc_" + iRa + " id=lc_"
-										+ iRa + ">";
-								ResultSet rsLcAll = this.ebEnt.dbDyn
-										.ExecuteSql("SELECT * FROM LaborCategory order by LaborCategory");
+								stReturn += "<td " + stRowspan + "><select name=lc_" + iRa + " id=lc_" + iRa + ">";
+								ResultSet rsLcAll = this.ebEnt.dbDyn.ExecuteSql("SELECT * FROM LaborCategory order by LaborCategory");
 								rsLcAll.last();
 								int iMaxLc = rsLcAll.getRow();
 								// populate dropdown
-								stReturn += this.ebEnt.ebUd.addOption2(
-										"-- Select Labor Category --", "0",
-										aFields[0]);
+								stReturn += this.ebEnt.ebUd.addOption2("-- Select Labor Category --", "0", aFields[0]);
 								for (int iLc = 1; iLc <= iMaxLc; iLc++) {
 									rsLcAll.absolute(iLc);
-									stReturn += this.ebEnt.ebUd.addOption2(
-											rsLcAll.getString("LaborCategory"),
-											rsLcAll.getString("nmLcId"),
+									stReturn += this.ebEnt.ebUd.addOption2(rsLcAll.getString("LaborCategory"), rsLcAll.getString("nmLcId"),
 											aFields[0]);
 								}
 								stReturn += "</select></td>";
-								stReturn += "<td " + stRowspan
-										+ "><select name=nr_" + iRa + " id=nr_"
-										+ iRa + ">";
+								stReturn += "<td " + stRowspan + "><select name=nr_" + iRa + " id=nr_" + iRa + ">";
 								for (int iLc = 1; iLc <= 20; iLc++) {
-									stReturn += this.ebEnt.ebUd.addOption2(""
-											+ iLc, "" + iLc, aFields[1]);
+									stReturn += this.ebEnt.ebUd.addOption2("" + iLc, "" + iLc, aFields[1]);
 								}
 								stReturn += "</select></td>";
-								stReturn += "<td "
-										+ stRowspan
-										+ "><input type=text size=5 style='text-align:right' name=est_"
-										+ iRa + " id=est_" + iRa + " value=\""
-										+ aFields[2] + "\"></td>";
-								stReturn += "<td "
-										+ stRowspan
-										+ ">"
-										+ this.epsUd.epsEf.getMulitUsers(
-												stChild, 9001, "_must_" + iRa,
-												aFields[3], "lc_" + iRa)
-										+ "</td>";
-								stReturn += "<td "
-										+ stRowspan
-										+ ">"
-										+ this.epsUd.epsEf.getMulitUsers(
-												stChild, 9002, "_most_" + iRa,
-												aFields[4], "lc_" + iRa)
-										+ "</td>";
-								stReturn += "<td "
-										+ stRowspan
-										+ ">"
-										+ this.epsUd.epsEf.getMulitUsers(
-												stChild, 9003, "_least_" + iRa,
-												aFields[5], "lc_" + iRa)
-										+ "</td>";
-								stReturn += "<td "
-										+ stRowspan
-										+ ">"
-										+ this.epsUd.epsEf.getMulitUsers(
-												stChild, 9004, "_not_" + iRa,
-												aFields[6], "lc_" + iRa)
-										+ "</td>";
+								stReturn += "<td " + stRowspan + "><input type=text size=5 style='text-align:right' name=est_" + iRa
+										+ " id=est_" + iRa + " value=\"" + aFields[2] + "\"></td>";
+								stReturn += "<td " + stRowspan + ">"
+										+ this.epsUd.epsEf.getMulitUsers(stChild, 9001, "_must_" + iRa, aFields[3], "lc_" + iRa) + "</td>";
+								stReturn += "<td " + stRowspan + ">"
+										+ this.epsUd.epsEf.getMulitUsers(stChild, 9002, "_most_" + iRa, aFields[4], "lc_" + iRa) + "</td>";
+								stReturn += "<td " + stRowspan + ">"
+										+ this.epsUd.epsEf.getMulitUsers(stChild, 9003, "_least_" + iRa, aFields[5], "lc_" + iRa) + "</td>";
+								stReturn += "<td " + stRowspan + ">"
+										+ this.epsUd.epsEf.getMulitUsers(stChild, 9004, "_not_" + iRa, aFields[6], "lc_" + iRa) + "</td>";
 								stReturn += "</tr>";
 							}
 						}
 						// add new labor category row
 						stReturn += "<tr class=d0>";
-						stReturn += "<td " + stRowspan
-								+ " align='left'>Add New:<br><select name=lc_"
-								+ iRa + " id=lc_" + iRa + ">";
-						ResultSet rsLcAll = this.ebEnt.dbDyn
-								.ExecuteSql("SELECT * FROM LaborCategory order by LaborCategory");
+						stReturn += "<td " + stRowspan + " align='left'>Add New:<br><select name=lc_" + iRa + " id=lc_" + iRa + ">";
+						ResultSet rsLcAll = this.ebEnt.dbDyn.ExecuteSql("SELECT * FROM LaborCategory order by LaborCategory");
 						rsLcAll.last();
 						int iMaxLc = rsLcAll.getRow();
 						// populate dropdown
-						stReturn += this.ebEnt.ebUd.addOption2(
-								"-- Select Labor Category --", "0", "");
+						stReturn += this.ebEnt.ebUd.addOption2("-- Select Labor Category --", "0", "");
 						for (int iLc = 1; iLc <= iMaxLc; iLc++) {
 							rsLcAll.absolute(iLc);
-							stReturn += this.ebEnt.ebUd.addOption2(
-									rsLcAll.getString("LaborCategory"),
-									rsLcAll.getString("nmLcId"), "");
+							stReturn += this.ebEnt.ebUd.addOption2(rsLcAll.getString("LaborCategory"), rsLcAll.getString("nmLcId"), "");
 						}
 						stReturn += "</select></td>";
-						stReturn += "<td " + stRowspan + "><select name=nr_"
-								+ iRa + " id=nr_" + iRa + ">";
+						stReturn += "<td " + stRowspan + "><select name=nr_" + iRa + " id=nr_" + iRa + ">";
 						for (int iLc = 1; iLc <= 20; iLc++) {
-							stReturn += this.ebEnt.ebUd.addOption2("" + iLc, ""
-									+ iLc, "");
+							stReturn += this.ebEnt.ebUd.addOption2("" + iLc, "" + iLc, "");
 						}
 						stReturn += "</select></td>";
-						stReturn += "<td "
-								+ stRowspan
-								+ "><input type=text size=5 style='text-align:right' name=est_"
-								+ iRa + " id=est_" + iRa + " value=\"\"></td>";
-						stReturn += "<td "
-								+ stRowspan
-								+ ">"
-								+ this.epsUd.epsEf.getMulitUsers(stChild, 9001,
-										"_must_" + iRa, "", "lc_" + iRa)
-								+ "</td>";
-						stReturn += "<td "
-								+ stRowspan
-								+ ">"
-								+ this.epsUd.epsEf.getMulitUsers(stChild, 9002,
-										"_most_" + iRa, "", "lc_" + iRa)
-								+ "</td>";
-						stReturn += "<td "
-								+ stRowspan
-								+ ">"
-								+ this.epsUd.epsEf.getMulitUsers(stChild, 9003,
-										"_least_" + iRa, "", "lc_" + iRa)
-								+ "</td>";
-						stReturn += "<td "
-								+ stRowspan
-								+ ">"
-								+ this.epsUd.epsEf.getMulitUsers(stChild, 9004,
-										"_not_" + iRa, "", "lc_" + iRa)
-								+ "</td>";
+						stReturn += "<td " + stRowspan + "><input type=text size=5 style='text-align:right' name=est_" + iRa + " id=est_"
+								+ iRa + " value=\"\"></td>";
+						stReturn += "<td " + stRowspan + ">"
+								+ this.epsUd.epsEf.getMulitUsers(stChild, 9001, "_must_" + iRa, "", "lc_" + iRa) + "</td>";
+						stReturn += "<td " + stRowspan + ">"
+								+ this.epsUd.epsEf.getMulitUsers(stChild, 9002, "_most_" + iRa, "", "lc_" + iRa) + "</td>";
+						stReturn += "<td " + stRowspan + ">"
+								+ this.epsUd.epsEf.getMulitUsers(stChild, 9003, "_least_" + iRa, "", "lc_" + iRa) + "</td>";
+						stReturn += "<td " + stRowspan + ">"
+								+ this.epsUd.epsEf.getMulitUsers(stChild, 9004, "_not_" + iRa, "", "lc_" + iRa) + "</td>";
 						stReturn += "</tr>";
 
 						// close the labor category table
-						stReturn += "</table><input type=hidden name=imax id=imax value='"
-								+ (iRecMax + 1) + "'>";
+						stReturn += "</table><input type=hidden name=imax id=imax value='" + (iRecMax + 1) + "'>";
 						sbReturn.append(stReturn);
 					}
 
@@ -1754,17 +1196,14 @@ class EpsXlsProject // extends EpsUserData
 				 * sbReturn.append(stChild); sbReturn.append("&from=");
 				 */
 
-				sbReturn.append(doNext(stChild, iMaxFields, iMaxRecords, iFrom,
-						iBlock, stGoBack, stPk));
+				sbReturn.append(doNext(stChild, iMaxFields, iMaxRecords, iFrom, iBlock, stGoBack, stPk));
 			} else {
-				sbReturn.append(doNext(stChild, iMaxFields, 0, 0, iBlock,
-						stGoBack, stPk));
+				sbReturn.append(doNext(stChild, iMaxFields, 0, 0, iBlock, stGoBack, stPk));
 			}
 			sbReturn.append("</table></form><br/>");
 			if (iMax > 0) {
-				sbReturn.append(epsUd.makeToolbar(false, iMaxRecords, iFrom,
-						iBlock, "./?stAction=projects&t=12&do=xls&pk=" + stPk
-								+ "&parent=12&child=" + stChild + ""));
+				sbReturn.append(epsUd.makeToolbar(false, iMaxRecords, iFrom, iBlock, "./?stAction=projects&t=12&do=xls&pk=" + stPk
+						+ "&parent=12&child=" + stChild + ""));
 			}
 		} catch (Exception e) {
 			this.stError += "<br>ERROR xlsSchedulesEdit: " + e;
@@ -1780,26 +1219,17 @@ class EpsXlsProject // extends EpsUserData
 		try {
 			if (stChild.equals("19")) // Requirements
 			{
-				stSql = "select RecId,ReqId,ReqFlags,ReqLevel from Requirements where nmProjectId="
-						+ this.rsProject.getString("RecId")
-						+ " and nmBaseline="
-						+ this.nmBaseline
-						+ " and (ReqFlags & 0x1) = 1";
+				stSql = "select RecId,ReqId,ReqFlags,ReqLevel from Requirements where nmProjectId=" + this.rsProject.getString("RecId")
+						+ " and nmBaseline=" + this.nmBaseline + " and (ReqFlags & 0x1) = 1";
 				stOrder = " order by ReqId";
 			} else if (stChild.equals("21")) // Requirements
 			{
-				stSql = "select RecId,SchId,SchFlags,SchLevel from Schedule where nmProjectId="
-						+ this.rsProject.getString("RecId")
-						+ " and nmBaseline="
-						+ this.nmBaseline
-						+ " and (SchFlags & 0x1) = 1 ";
+				stSql = "select RecId,SchId,SchFlags,SchLevel from Schedule where nmProjectId=" + this.rsProject.getString("RecId")
+						+ " and nmBaseline=" + this.nmBaseline + " and (SchFlags & 0x1) = 1 ";
 				stOrder = " order by SchId";
 			} else {
-				stSql = "select RecId,TstId,TstFlags,TstLevel from Test where nmProjectId="
-						+ this.rsProject.getString("RecId")
-						+ " and nmBaseline="
-						+ this.nmBaseline
-						+ " and (TstFlags &0x1) = 1";
+				stSql = "select RecId,TstId,TstFlags,TstLevel from Test where nmProjectId=" + this.rsProject.getString("RecId")
+						+ " and nmBaseline=" + this.nmBaseline + " and (TstFlags &0x1) = 1";
 				stOrder = " order by TstId";
 			}
 			ResultSet rs1 = this.ebEnt.dbDyn.ExecuteSql(stSql + stOrder);
@@ -1815,67 +1245,42 @@ class EpsXlsProject // extends EpsUserData
 					if (stChild.equals("19")) // Requirements
 					{
 						if (rs1.getInt(2) > 2)
-							iFlags2above = this.ebEnt.dbDyn
-									.ExecuteSql1n("select ReqFlags from Requirements where nmProjectId="
-											+ this.rsProject.getString("RecId")
-											+ " and nmBaseline="
-											+ this.nmBaseline
-											+ " and ReqId="
-											+ (rs1.getInt(2) - 2));
+							iFlags2above = this.ebEnt.dbDyn.ExecuteSql1n("select ReqFlags from Requirements where nmProjectId="
+									+ this.rsProject.getString("RecId") + " and nmBaseline=" + this.nmBaseline + " and ReqId="
+									+ (rs1.getInt(2) - 2));
 						if (iFlags2above != 0)
 							iNewFlags = 4; // Record ABOVE is hidden
 						else
 							iNewFlags = 2;
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("update Requirements set ReqFlags =( ReqFlags | "
-										+ iNewFlags
-										+ ") where nmProjectId="
-										+ this.rsProject.getString("RecId")
-										+ " and nmBaseline="
-										+ this.nmBaseline
-										+ " and ReqId=" + (rs1.getInt(2) - 1));
+						this.ebEnt.dbDyn.ExecuteUpdate("update Requirements set ReqFlags =( ReqFlags | " + iNewFlags
+								+ ") where nmProjectId=" + this.rsProject.getString("RecId") + " and nmBaseline=" + this.nmBaseline
+								+ " and ReqId=" + (rs1.getInt(2) - 1));
 					} else if (stChild.equals("21")) // Schedule
 					{
 						if (rs1.getInt(2) > 2)
-							iFlags2above = this.ebEnt.dbDyn
-									.ExecuteSql1n("select SchFlags from Schedule where nmProjectId="
-											+ this.rsProject.getString("RecId")
-											+ " and nmBaseline="
-											+ this.nmBaseline
-											+ " and SchId="
-											+ (rs1.getInt(2) - 2));
+							iFlags2above = this.ebEnt.dbDyn.ExecuteSql1n("select SchFlags from Schedule where nmProjectId="
+									+ this.rsProject.getString("RecId") + " and nmBaseline=" + this.nmBaseline + " and SchId="
+									+ (rs1.getInt(2) - 2));
 						if (iFlags2above != 0)
 							iNewFlags = 4; // Record ABOVE is hidden
 						else
 							iNewFlags = 2;
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("update Schedule set SchFlags= (SchFlags | "
-										+ iNewFlags
-										+ ") where nmProjectId="
-										+ this.rsProject.getString("RecId")
-										+ " and nmBaseline="
-										+ this.nmBaseline
-										+ " and SchId=" + (rs1.getInt(2) - 1));
+						this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchFlags= (SchFlags | " + iNewFlags + ") where nmProjectId="
+								+ this.rsProject.getString("RecId") + " and nmBaseline=" + this.nmBaseline + " and SchId="
+								+ (rs1.getInt(2) - 1));
 					} else // Test
 					{
 						if (rs1.getInt(2) > 2)
-							iFlags2above = this.ebEnt.dbDyn
-									.ExecuteSql1n("select TstFlags from Test where nmProjectId="
-											+ this.rsProject.getString("RecId")
-											+ " and nmBaseline="
-											+ this.nmBaseline
-											+ " and TstId="
-											+ (rs1.getInt(2) - 2));
+							iFlags2above = this.ebEnt.dbDyn.ExecuteSql1n("select TstFlags from Test where nmProjectId="
+									+ this.rsProject.getString("RecId") + " and nmBaseline=" + this.nmBaseline + " and TstId="
+									+ (rs1.getInt(2) - 2));
 						if (iFlags2above != 0)
 							iNewFlags = 4; // Record ABOVE is hidden
 						else
 							iNewFlags = 2;
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("update Test set TstFlags="
-										+ iNewFlags + " where nmProjectId="
-										+ this.rsProject.getString("RecId")
-										+ " and nmBaseline=" + this.nmBaseline
-										+ " and ReqId=" + (rs1.getInt(2) - 1));
+						this.ebEnt.dbDyn.ExecuteUpdate("update Test set TstFlags=" + iNewFlags + " where nmProjectId="
+								+ this.rsProject.getString("RecId") + " and nmBaseline=" + this.nmBaseline + " and ReqId="
+								+ (rs1.getInt(2) - 1));
 					}
 				}
 				iLastId = rs1.getInt(2);
@@ -1895,22 +1300,13 @@ class EpsXlsProject // extends EpsUserData
 			sbReturn.append("<tr><td align=right>Show levels:</td><td align=left><select name=b id=b  onChange=\"document.form4.submit();\" >");
 			int iLevelMax = 0;
 			if (stChild.equals("19"))
-				iLevelMax = this.ebEnt.dbDyn
-						.ExecuteSql1n("select max(ReqLevel) from Requirements where nmProjectId="
-								+ stPk
-								+ " and nmBaseline="
-								+ this.nmBaseline
-								+ " ");
+				iLevelMax = this.ebEnt.dbDyn.ExecuteSql1n("select max(ReqLevel) from Requirements where nmProjectId=" + stPk
+						+ " and nmBaseline=" + this.nmBaseline + " ");
 			else
-				iLevelMax = this.ebEnt.dbDyn
-						.ExecuteSql1n("select max(SchLevel) from Schedule where nmProjectId="
-								+ stPk
-								+ " and nmBaseline="
-								+ this.nmBaseline
-								+ " ");
+				iLevelMax = this.ebEnt.dbDyn.ExecuteSql1n("select max(SchLevel) from Schedule where nmProjectId=" + stPk
+						+ " and nmBaseline=" + this.nmBaseline + " ");
 			sbReturn.append(this.ebEnt.ebUd.addOption("-- Level --", "", ""));
-			sbReturn.append(this.ebEnt.ebUd.addOption("All", ""
-					+ (iLevelMax + 1), ""));
+			sbReturn.append(this.ebEnt.ebUd.addOption("All", "" + (iLevelMax + 1), ""));
 			for (int i = 0; i <= iLevelMax; i++)
 				sbReturn.append(this.ebEnt.ebUd.addOption("" + i, "" + i, ""));
 			sbReturn.append("</select>");
@@ -1918,9 +1314,7 @@ class EpsXlsProject // extends EpsUserData
 
 			sbReturn.append("</table></form>");
 
-			ResultSet rsTable = this.ebEnt.dbDyn
-					.ExecuteSql("SELECT * FROM teb_table where nmTableId="
-							+ stChild);
+			ResultSet rsTable = this.ebEnt.dbDyn.ExecuteSql("SELECT * FROM teb_table where nmTableId=" + stChild);
 			rsTable.absolute(1);
 			EpsReport epsReport = new EpsReport();
 			if (stChild.equals("19"))
@@ -1957,8 +1351,7 @@ class EpsXlsProject // extends EpsUserData
 			for (int iF = 1; iF <= iMaxFields; iF++) {
 				rsFields.absolute(iF);
 
-				if (rsFields.getInt("nmForeignId") == 825
-						&& this.ebEnt.ebUd.request.getParameter("edit") != null) {
+				if (rsFields.getInt("nmForeignId") == 825 && this.ebEnt.ebUd.request.getParameter("edit") != null) {
 					// skip labor category column if inline edit
 				} else {
 					stLabel = rsFields.getString("stShort");
@@ -1981,15 +1374,13 @@ class EpsXlsProject // extends EpsUserData
 		return sbReturn.toString();
 	}
 
-	private String doNext(String stChild, int iCol, int iMaxRecords, int iFrom,
-			int iBlock, String stGoBack, String stPk) {
+	private String doNext(String stChild, int iCol, int iMaxRecords, int iFrom, int iBlock, String stGoBack, String stPk) {
 		StringBuilder sbReturn = new StringBuilder(5000);
 		sbReturn.append("<tr><td colspan=");
 		sbReturn.append(iCol);
 		sbReturn.append(" width='100%' ><table border=0 bgcolor=skyblue width='100%'><tr><td align=center>");
 		// http://localhost:8084/eps/?stAction=projects&t=0&do=xls&pk=5&parent=12&child=46#next
-		sbReturn.append("<input type=button onClick=\"parent.location='")
-				.append(stGoBack);
+		sbReturn.append("<input type=button onClick=\"parent.location='").append(stGoBack);
 		sbReturn.append("&pk=");
 		sbReturn.append(stPk);
 		sbReturn.append("&do=edit'\" value='Go Back to Projects'>");
@@ -2047,53 +1438,24 @@ class EpsXlsProject // extends EpsUserData
 		int iReturn = 0;
 		try {
 			if (stChild.equals("19")) {
-				iReturn = this.ebEnt.dbDyn
-						.ExecuteSql1n("select min(ReqId) from Requirements where nmProjectId="
-								+ stPk
-								+ " and nmBaseline="
-								+ this.nmBaseline
-								+ " and ReqId > "
-								+ rs1.getString("ReqId")
-								+ " and ReqLevel <= "
-								+ rs1.getString("ReqLevel"));
+				iReturn = this.ebEnt.dbDyn.ExecuteSql1n("select min(ReqId) from Requirements where nmProjectId=" + stPk
+						+ " and nmBaseline=" + this.nmBaseline + " and ReqId > " + rs1.getString("ReqId") + " and ReqLevel <= "
+						+ rs1.getString("ReqLevel"));
 				if (iReturn <= 0)
-					iReturn = this.ebEnt.dbDyn
-							.ExecuteSql1n("select (max(ReqId)+1) from Requirements where nmProjectId="
-									+ stPk
-									+ " and nmBaseline="
-									+ this.nmBaseline);
+					iReturn = this.ebEnt.dbDyn.ExecuteSql1n("select (max(ReqId)+1) from Requirements where nmProjectId=" + stPk
+							+ " and nmBaseline=" + this.nmBaseline);
 			} else if (stChild.equals("21")) {
-				iReturn = this.ebEnt.dbDyn
-						.ExecuteSql1n("select min(SchId) from Schedule where nmProjectId="
-								+ stPk
-								+ " and nmBaseline="
-								+ this.nmBaseline
-								+ " and SchId > "
-								+ rs1.getString("SchId")
-								+ " and SchLevel <= "
-								+ rs1.getString("SchLevel"));
+				iReturn = this.ebEnt.dbDyn.ExecuteSql1n("select min(SchId) from Schedule where nmProjectId=" + stPk + " and nmBaseline="
+						+ this.nmBaseline + " and SchId > " + rs1.getString("SchId") + " and SchLevel <= " + rs1.getString("SchLevel"));
 				if (iReturn <= 0)
-					iReturn = this.ebEnt.dbDyn
-							.ExecuteSql1n("select (max(SchId)+1) from Schedule where nmProjectId="
-									+ stPk
-									+ " and nmBaseline="
-									+ this.nmBaseline);
+					iReturn = this.ebEnt.dbDyn.ExecuteSql1n("select (max(SchId)+1) from Schedule where nmProjectId=" + stPk
+							+ " and nmBaseline=" + this.nmBaseline);
 			} else {
-				iReturn = this.ebEnt.dbDyn
-						.ExecuteSql1n("select min(TstId) from Test where nmProjectId="
-								+ stPk
-								+ " and nmBaseline="
-								+ this.nmBaseline
-								+ " and TstId > "
-								+ rs1.getString("TstId")
-								+ " and TstLevel <= "
-								+ rs1.getString("TstLevel"));
+				iReturn = this.ebEnt.dbDyn.ExecuteSql1n("select min(TstId) from Test where nmProjectId=" + stPk + " and nmBaseline="
+						+ this.nmBaseline + " and TstId > " + rs1.getString("TstId") + " and TstLevel <= " + rs1.getString("TstLevel"));
 				if (iReturn <= 0)
-					iReturn = this.ebEnt.dbDyn
-							.ExecuteSql1n("select (max(TstId)+1) from Test where nmProjectId="
-									+ stPk
-									+ " and nmBaseline="
-									+ this.nmBaseline);
+					iReturn = this.ebEnt.dbDyn.ExecuteSql1n("select (max(TstId)+1) from Test where nmProjectId=" + stPk
+							+ " and nmBaseline=" + this.nmBaseline);
 			}
 		} catch (Exception e) {
 			this.stError += "<BR>ERROR getEnd " + e;
@@ -2113,51 +1475,38 @@ class EpsXlsProject // extends EpsUserData
 													// requirements
 			{
 			case 4:
-				s1 = "<textarea name=f" + rsFields.getString("nmForeignId")
-						+ " id=f" + rsFields.getString("nmForeignId")
-						+ " rows=4 " + stStyle + ">" + stValue + "</textarea>";
+				s1 = "<textarea name=f" + rsFields.getString("nmForeignId") + " id=f" + rsFields.getString("nmForeignId") + " rows=4 "
+						+ stStyle + ">" + stValue + "</textarea>";
 				sbReturn.append(s1);
 				break;
 			default:
-				if ((rsFields.getString("nmForeignId").equals("231") && Integer
-						.parseInt(this.ebEnt.ebUd.request.getParameter("child")) == 19)
-						|| (rsFields.getString("nmForeignId").equals("271") && Integer
-								.parseInt(this.ebEnt.ebUd.request
-										.getParameter("child")) == 21)) {
+				if ((rsFields.getString("nmForeignId").equals("231") && Integer.parseInt(this.ebEnt.ebUd.request.getParameter("child")) == 19)
+						|| (rsFields.getString("nmForeignId").equals("271") && Integer.parseInt(this.ebEnt.ebUd.request
+								.getParameter("child")) == 21)) {
 					// drop down for req level 0-x+1
-					s1 = "<select " + stStyle + " type=text name=f"
-							+ rsFields.getString("nmForeignId") + " id=f"
+					s1 = "<select " + stStyle + " type=text name=f" + rsFields.getString("nmForeignId") + " id=f"
 							+ rsFields.getString("nmForeignId") + ">";
 					for (int i = 0; i < Integer.parseInt(stValue); i++) {
 						s1 += "<option value=\"" + i + "\">" + i + "</option>";
 					}
-					s1 += "<option value=\"" + stValue
-							+ "\" selected='selected'>" + stValue + "</option>";
+					s1 += "<option value=\"" + stValue + "\" selected='selected'>" + stValue + "</option>";
 					if (stNew != null && "y".equals(stNew)) {
-						s1 += "<option value=\""
-								+ (Integer.parseInt(stValue) + 1) + "\">"
-								+ (Integer.parseInt(stValue) + 1) + "</option>";
+						s1 += "<option value=\"" + (Integer.parseInt(stValue) + 1) + "\">" + (Integer.parseInt(stValue) + 1) + "</option>";
 					}
 					s1 += "</select>";
 					sbReturn.append(s1);
-				} else if (rsFields.getString("stDbFieldName")
-						.equals("SchDone")) {
+				} else if (rsFields.getString("stDbFieldName").equals("SchDone")) {
 					if (stValue.equals("Y"))
-						s1 = "<input type='checkbox' checked='checked' name=f"
-								+ rsFields.getString("nmForeignId") + " id=f"
+						s1 = "<input type='checkbox' checked='checked' name=f" + rsFields.getString("nmForeignId") + " id=f"
 								+ rsFields.getString("nmForeignId") + ">";
 					else
-						s1 = "<input type='checkbox' name=f"
-								+ rsFields.getString("nmForeignId") + " id=f"
+						s1 = "<input type='checkbox' name=f" + rsFields.getString("nmForeignId") + " id=f"
 								+ rsFields.getString("nmForeignId") + ">";
 					sbReturn.append(s1);
 				} else {
-					s1 = "<input '" + stStyle + "' maxsize="
-							+ rsFields.getString("nmMaxBytes")
-							+ " type=text name=f"
-							+ rsFields.getString("nmForeignId") + " id=f"
-							+ rsFields.getString("nmForeignId") + " value=\""
-							+ stValue + "\">";
+					s1 = "<input '" + stStyle + "' maxsize=" + rsFields.getString("nmMaxBytes") + " type=text name=f"
+							+ rsFields.getString("nmForeignId") + " id=f" + rsFields.getString("nmForeignId") + " value=\"" + stValue
+							+ "\">";
 					sbReturn.append(s1);
 				}
 
@@ -2168,14 +1517,12 @@ class EpsXlsProject // extends EpsUserData
 				 * "\">"; sbReturn.append(s1); }
 				 */
 
-				if (iSubmit == 0
-						&& Integer.parseInt(this.ebEnt.ebUd.request
-								.getParameter("child")) != 21) // submit
-																// and
-																// cancel
-																// buttons
-																// for
-																// non-schedule
+				if (iSubmit == 0 && Integer.parseInt(this.ebEnt.ebUd.request.getParameter("child")) != 21) // submit
+																											// and
+																											// cancel
+																											// buttons
+																											// for
+																											// non-schedule
 				{
 					iSubmit++; // only do it once
 					s1 = "<center><br><input type=submit name=savedataxls value='Save' onClick=\"return setSubmitId(9970);\">";
@@ -2209,8 +1556,7 @@ class EpsXlsProject // extends EpsUserData
 			stStyle = " style='width:" + iWidth + "px;";
 
 			String stAlign = rsFields.getString("stCustom");
-			if (stAlign == null || stAlign.length() <= 0
-					|| stAlign.equals("null")) {
+			if (stAlign == null || stAlign.length() <= 0 || stAlign.equals("null")) {
 				switch (rsFields.getInt("nmDataType")) {
 				case 1:
 				case 9:
@@ -2240,89 +1586,66 @@ class EpsXlsProject // extends EpsUserData
 		String stValue = "";
 		int rLvl = -1;
 		try {
-			String doneID = this.ebEnt.dbDyn
-					.ExecuteSql1("SELECT nmForeignId FROM teb_fields WHERE stDbFieldName='SchDone'"); // id
-																										// for
-																										// schedule
-																										// done
-																										// checkbox
-			ResultSet rsTable = this.ebEnt.dbDyn
-					.ExecuteSql("SELECT * FROM teb_table where nmTableId="
-							+ stChild);
+			String doneID = this.ebEnt.dbDyn.ExecuteSql1("SELECT nmForeignId FROM teb_fields WHERE stDbFieldName='SchDone'"); // id
+																																// for
+																																// schedule
+																																// done
+																																// checkbox
+			ResultSet rsTable = this.ebEnt.dbDyn.ExecuteSql("SELECT * FROM teb_table where nmTableId=" + stChild);
 			rsTable.absolute(1);
-			stSqlOld = "select * from " + rsTable.getString("stDbTableName")
-					+ " ";
+			stSqlOld = "select * from " + rsTable.getString("stDbTableName") + " ";
 			xlsHeaders(stChild);
 			stSql = "update " + rsTable.getString("stDbTableName") + " set ";
 			int iCount = 0;
 			for (int iF = 1; iF <= this.iMaxFields; iF++) {
 				this.rsFields.absolute(iF);
-				stValue = this.ebEnt.ebUd.request.getParameter("f"
-						+ this.rsFields.getString("nmForeignId"));
-				if (stValue != null
-						&& !this.rsFields.getString("nmForeignId").equals(
-								doneID)) // append
-											// post
-											// value
-											// to
-											// update
-											// query
-											// if not
-											// empty
-											// and
-											// not
-											// done
-											// checkbox
+				stValue = this.ebEnt.ebUd.request.getParameter("f" + this.rsFields.getString("nmForeignId"));
+				if (stValue != null && !this.rsFields.getString("nmForeignId").equals(doneID)) // append
+																								// post
+																								// value
+																								// to
+																								// update
+																								// query
+																								// if
+																								// not
+																								// empty
+																								// and
+																								// not
+																								// done
+																								// checkbox
 				{
 					String stTemp = this.rsFields.getString("stValidation");
-					if (stTemp != null && stTemp.length() > 0
-							&& stTemp.toLowerCase().equals("d22")) {
-						stValue = this.epsUd.validateD22(rsTable,
-								this.rsFields,
-								this.ebEnt.ebUd.request.getParameter("edit"),
-								stValue, stPk, nmBaseline);
-					} else if (stTemp != null && stTemp.length() > 0
-							&& stTemp.toLowerCase().equals("d50")) {
-						stValue = this.epsUd.validateD50(rsTable,
-								this.rsFields,
-								this.ebEnt.ebUd.request.getParameter("edit"),
-								stValue, stPk, nmBaseline);
-					} else if (stTemp != null && stTemp.length() > 0
-							&& stTemp.toLowerCase().equals("d53")) {
-						stValue = this.epsUd.validateD53(rsTable,
-								this.rsFields,
-								this.ebEnt.ebUd.request.getParameter("edit"),
-								stValue, stPk, nmBaseline);
-					} else if (this.rsFields.getString("stDbFieldName").equals(
-							"SchEstimatedEffort")
-							&& stChild.equals("21")) {
-						stValue = this.epsUd.validateEffort(this.rsFields,
-								this.ebEnt.ebUd.request.getParameter("edit"),
-								stValue, stPk, nmBaseline);
+					if (stTemp != null && stTemp.length() > 0 && stTemp.toLowerCase().equals("d22")) {
+						stValue = this.epsUd.validateD22(rsTable, this.rsFields, this.ebEnt.ebUd.request.getParameter("edit"), stValue,
+								stPk, nmBaseline);
+					} else if (stTemp != null && stTemp.length() > 0 && stTemp.toLowerCase().equals("d50")) {
+						stValue = this.epsUd.validateD50(rsTable, this.rsFields, this.ebEnt.ebUd.request.getParameter("edit"), stValue,
+								stPk, nmBaseline);
+					} else if (stTemp != null && stTemp.length() > 0 && stTemp.toLowerCase().equals("d53")) {
+						stValue = this.epsUd.validateD53(rsTable, this.rsFields, this.ebEnt.ebUd.request.getParameter("edit"), stValue,
+								stPk, nmBaseline);
+					} else if (this.rsFields.getString("stDbFieldName").equals("SchEstimatedEffort") && stChild.equals("21")) {
+						stValue = this.epsUd.validateEffort(this.rsFields, this.ebEnt.ebUd.request.getParameter("edit"), stValue, stPk,
+								nmBaseline);
 					}
 					if (iCount > 0)
 						stSql += ",";
-					stSql += this.rsFields.getString("stDbFieldName") + "="
-							+ this.ebEnt.dbDyn.fmtDbString(stValue);
+					stSql += this.rsFields.getString("stDbFieldName") + "=" + this.ebEnt.dbDyn.fmtDbString(stValue);
 					iCount++;
 
-					if (this.rsFields.getString("stDbFieldName").equals(
-							"ReqLevel")
-							&& stChild.equals("19")) {
+					if (this.rsFields.getString("stDbFieldName").equals("ReqLevel") && stChild.equals("19")) {
 						rLvl = Integer.parseInt(stValue); // requirement level
 					}
 				}
 			}
 
 			// set done checkbox for tasks
-			if (stChild.equals("21")
-					&& this.ebEnt.ebUd.request.getParameter("f" + doneID) != null) {
+			if (stChild.equals("21") && this.ebEnt.ebUd.request.getParameter("f" + doneID) != null) {
 				if (iCount > 0)
 					stSql += ",";
 				stSql += this.rsFields.getString("stDbFieldName") + "='Y'";
 				iCount++;
-			} else if (stChild.equals("21")
-					&& this.ebEnt.ebUd.request.getParameter("f" + doneID) == null) {
+			} else if (stChild.equals("21") && this.ebEnt.ebUd.request.getParameter("f" + doneID) == null) {
 				if (iCount > 0)
 					stSql += ",";
 				stSql += this.rsFields.getString("stDbFieldName") + "='N'";
@@ -2332,70 +1655,50 @@ class EpsXlsProject // extends EpsUserData
 			// build labor category string
 			double nmEffort = 0;
 			if (this.ebEnt.ebUd.request.getParameter("lc_0") != null
-					&& Integer.parseInt(this.ebEnt.ebUd.request
-							.getParameter("child")) == 21
-					&& Integer.parseInt(this.ebEnt.ebUd.request
-							.getParameter("imax")) > 0) {
+					&& Integer.parseInt(this.ebEnt.ebUd.request.getParameter("child")) == 21
+					&& Integer.parseInt(this.ebEnt.ebUd.request.getParameter("imax")) > 0) {
 				String lcfields = "";
-				for (int iR = 0; iR < Integer.parseInt(this.ebEnt.ebUd.request
-						.getParameter("imax")); iR++) {
+				for (int iR = 0; iR < Integer.parseInt(this.ebEnt.ebUd.request.getParameter("imax")); iR++) {
 					if (iR == 0)
 						stSql += ", SchLaborCategories=";
-					else if (!this.ebEnt.ebUd.request.getParameter("lc_" + iR)
-							.equals("0")) // don't add | to new row fields
+					else if (!this.ebEnt.ebUd.request.getParameter("lc_" + iR).equals("0")) // don't
+																							// add
+																							// |
+																							// to
+																							// new
+																							// row
+																							// fields
 						lcfields += "|";
-					if (!this.ebEnt.ebUd.request.getParameter("lc_" + iR)
-							.equals("0")) { // skip
-											// the
-											// add
-											// new
-											// labor
-											// category
-											// row
-						String stEffort = this.ebEnt.ebUd.request
-								.getParameter("est_" + iR);
+					if (!this.ebEnt.ebUd.request.getParameter("lc_" + iR).equals("0")) { // skip
+																							// the
+																							// add
+																							// new
+																							// labor
+																							// category
+																							// row
+						String stEffort = this.ebEnt.ebUd.request.getParameter("est_" + iR);
 						if (stEffort != null && !"".equals(stEffort))
 							nmEffort += Double.parseDouble(stEffort);
-						lcfields += this.ebEnt.ebUd.request.getParameter("lc_"
-								+ iR)
-								+ "~"
-								+ this.ebEnt.ebUd.request.getParameter("nr_"
-										+ iR)
-								+ "~"
-								+ stEffort
-								+ "~"
-								+ this.ebEnt.ebUd.request
-										.getParameter("f9001_must_" + iR)
-								+ "~"
-								+ this.ebEnt.ebUd.request
-										.getParameter("f9002_most_" + iR)
-								+ "~"
-								+ this.ebEnt.ebUd.request
-										.getParameter("f9003_least_" + iR)
-								+ "~"
-								+ this.ebEnt.ebUd.request
-										.getParameter("f9004_not_" + iR) + "~";
+						lcfields += this.ebEnt.ebUd.request.getParameter("lc_" + iR) + "~"
+								+ this.ebEnt.ebUd.request.getParameter("nr_" + iR) + "~" + stEffort + "~"
+								+ this.ebEnt.ebUd.request.getParameter("f9001_must_" + iR) + "~"
+								+ this.ebEnt.ebUd.request.getParameter("f9002_most_" + iR) + "~"
+								+ this.ebEnt.ebUd.request.getParameter("f9003_least_" + iR) + "~"
+								+ this.ebEnt.ebUd.request.getParameter("f9004_not_" + iR) + "~";
 					}
 				}
 				stSql += this.ebEnt.dbDyn.fmtDbString(lcfields);
 			}
 			if (stChild.equals("21")) {
-				stSql += ", SchEstimatedEffort="
-						+ (new DecimalFormat("#0.0").format(nmEffort));
+				stSql += ", SchEstimatedEffort=" + (new DecimalFormat("#0.0").format(nmEffort));
 
 				// popup messages for larger 40 hours
-				String sql = "SELECT * FROM schedule where nmProjectId=" + stPk
-						+ " and nmBaseline=" + nmBaseline + " and RecId="
+				String sql = "SELECT * FROM schedule where nmProjectId=" + stPk + " and nmBaseline=" + nmBaseline + " and RecId="
 						+ this.ebEnt.ebUd.request.getParameter("edit");
 				String lowlvl = this.ebEnt.dbDyn.ExecuteSql1(sql);
-				if (lowlvl != null
-						&& Integer.parseInt(lowlvl) > 0
-						&& nmEffort > epsUd.rsMyDiv
-								.getDouble("MaximumTaskHours")) {
-					this.ebEnt.ebUd.setPopupMessage("Estimate (" + nmEffort
-							+ ") exceeds maximum task hours ("
-							+ this.epsUd.rsMyDiv.getDouble("MaximumTaskHours")
-							+ ")");
+				if (lowlvl != null && Integer.parseInt(lowlvl) > 0 && nmEffort > epsUd.rsMyDiv.getDouble("MaximumTaskHours")) {
+					this.ebEnt.ebUd.setPopupMessage("Estimate (" + nmEffort + ") exceeds maximum task hours ("
+							+ this.epsUd.rsMyDiv.getDouble("MaximumTaskHours") + ")");
 				}
 
 				// same level as before, therefore we are LAST
@@ -2407,58 +1710,33 @@ class EpsXlsProject // extends EpsUserData
 
 			// build dependencies string
 			if (Integer.parseInt(this.ebEnt.ebUd.request.getParameter("child")) == 21
-					&& !this.ebEnt.ebUd.request.getParameter("did_1")
-							.equals("")
-					&& Integer.parseInt(this.ebEnt.ebUd.request
-							.getParameter("dmax")) > 0) {
+					&& !this.ebEnt.ebUd.request.getParameter("did_1").equals("")
+					&& Integer.parseInt(this.ebEnt.ebUd.request.getParameter("dmax")) > 0) {
 				String dfields = "";
-				for (int d = 1; d <= Integer.parseInt(this.ebEnt.ebUd.request
-						.getParameter("dmax")); d++) {
+				for (int d = 1; d <= Integer.parseInt(this.ebEnt.ebUd.request.getParameter("dmax")); d++) {
 					if (d == 1) {
 						stSql += ", SchDependencies=";
-					} else if (!this.ebEnt.ebUd.request
-							.getParameter("did_" + d).equals("")) {
+					} else if (!this.ebEnt.ebUd.request.getParameter("did_" + d).equals("")) {
 						dfields += ",";
 					}
 
 					if (this.ebEnt.ebUd.request.getParameter("did_" + d) != null
-							&& !this.ebEnt.ebUd.request
-									.getParameter("did_" + d).equals("")
-							&& !this.ebEnt.ebUd.request
-									.getParameter("lag_" + d).equals("0")
-							&& !this.ebEnt.ebUd.request
-									.getParameter("lag_" + d).equals("")) {
-						dfields += this.ebEnt.ebUd.request.getParameter("did_"
-								+ d)
-								+ this.ebEnt.ebUd.request.getParameter("type_"
-										+ d)
-								+ "+"
-								+ this.ebEnt.ebUd.request.getParameter("lag_"
-										+ d) + "days";
-						linkMap(2, stPk, nmBaseline, stPk,
-								Integer.parseInt(this.ebEnt.ebUd.request
-										.getParameter("did_" + d)), stPk,
-								Integer.parseInt(this.ebEnt.ebUd.request
-										.getParameter("edit")),
-								Double.parseDouble(this.ebEnt.ebUd.request
-										.getParameter("lag_" + d)),
-								this.ebEnt.ebUd.request.getParameter("type_"
-										+ d), 0, 0);
+							&& !this.ebEnt.ebUd.request.getParameter("did_" + d).equals("")
+							&& !this.ebEnt.ebUd.request.getParameter("lag_" + d).equals("0")
+							&& !this.ebEnt.ebUd.request.getParameter("lag_" + d).equals("")) {
+						dfields += this.ebEnt.ebUd.request.getParameter("did_" + d) + this.ebEnt.ebUd.request.getParameter("type_" + d)
+								+ "+" + this.ebEnt.ebUd.request.getParameter("lag_" + d) + "days";
+						linkMap(2, stPk, nmBaseline, stPk, Integer.parseInt(this.ebEnt.ebUd.request.getParameter("did_" + d)), stPk,
+								Integer.parseInt(this.ebEnt.ebUd.request.getParameter("edit")),
+								Double.parseDouble(this.ebEnt.ebUd.request.getParameter("lag_" + d)),
+								this.ebEnt.ebUd.request.getParameter("type_" + d), 0, 0);
 
 					} else if (this.ebEnt.ebUd.request.getParameter("did_" + d) != null
-							&& !this.ebEnt.ebUd.request
-									.getParameter("did_" + d).equals("")) {
-						dfields += this.ebEnt.ebUd.request.getParameter("did_"
-								+ d)
-								+ this.ebEnt.ebUd.request.getParameter("type_"
-										+ d);
-						linkMap(2, stPk, nmBaseline, stPk,
-								Integer.parseInt(this.ebEnt.ebUd.request
-										.getParameter("did_" + d)), stPk,
-								Integer.parseInt(this.ebEnt.ebUd.request
-										.getParameter("edit")), 0,
-								this.ebEnt.ebUd.request.getParameter("type_"
-										+ d), 0, 0);
+							&& !this.ebEnt.ebUd.request.getParameter("did_" + d).equals("")) {
+						dfields += this.ebEnt.ebUd.request.getParameter("did_" + d) + this.ebEnt.ebUd.request.getParameter("type_" + d);
+						linkMap(2, stPk, nmBaseline, stPk, Integer.parseInt(this.ebEnt.ebUd.request.getParameter("did_" + d)), stPk,
+								Integer.parseInt(this.ebEnt.ebUd.request.getParameter("edit")), 0,
+								this.ebEnt.ebUd.request.getParameter("type_" + d), 0, 0);
 					}
 				}
 				stSql += this.ebEnt.dbDyn.fmtDbString(dfields);
@@ -2472,29 +1750,17 @@ class EpsXlsProject // extends EpsUserData
 				// level
 				if (rLvl > 0) {
 					// edit parent according to level
-					int rId = this.ebEnt.dbDyn
-							.ExecuteSql1n("SELECT ReqId FROM requirements WHERE RecId = "
-									+ this.ebEnt.ebUd.request
-											.getParameter("edit"));
+					int rId = this.ebEnt.dbDyn.ExecuteSql1n("SELECT ReqId FROM requirements WHERE RecId = "
+							+ this.ebEnt.ebUd.request.getParameter("edit"));
 					stSql += ", ReqParentRecId="
-							+ this.ebEnt.dbDyn
-									.fmtDbString(this.ebEnt.dbDyn
-											.ExecuteSql1n("SELECT RecId FROM requirements WHERE ReqId < "
-													+ rId
-													+ " AND ReqLevel="
-													+ (rLvl - 1)
-													+ " AND nmProjectId="
-													+ stPk
-													+ " AND nmBaseLine="
-													+ nmBaseline
-													+ " ORDER BY ReqId DESC")
-											+ "");
+							+ this.ebEnt.dbDyn.fmtDbString(this.ebEnt.dbDyn.ExecuteSql1n("SELECT RecId FROM requirements WHERE ReqId < "
+									+ rId + " AND ReqLevel=" + (rLvl - 1) + " AND nmProjectId=" + stPk + " AND nmBaseLine=" + nmBaseline
+									+ " ORDER BY ReqId DESC")
+									+ "");
 				}
 			}
 
-			String stWhere = " where RecId = "
-					+ this.ebEnt.ebUd.request.getParameter("edit")
-					+ " and nmBaseline=" + this.nmBaseline
+			String stWhere = " where RecId = " + this.ebEnt.ebUd.request.getParameter("edit") + " and nmBaseline=" + this.nmBaseline
 					+ " and nmProjectId=" + stPk;
 
 			stSql += stWhere;
@@ -2506,15 +1772,12 @@ class EpsXlsProject // extends EpsUserData
 			ResultSet rsNew = this.ebEnt.dbDyn.ExecuteSql(stSqlOld);
 			if (Integer.parseInt(this.ebEnt.ebUd.request.getParameter("child")) == 21) {
 				epsUd.calculateScheduleCost(stWhere);
-				processScheduleRequirementCost(Integer
-						.parseInt(this.ebEnt.ebUd.request.getParameter("edit"))); // calculate
-																					// linked
-																					// requirement
-																					// costs
+				processScheduleRequirementCost(Integer.parseInt(this.ebEnt.ebUd.request.getParameter("edit"))); // calculate
+																												// linked
+																												// requirement
+																												// costs
 			}
-			this.epsUd.epsEf.addAuditTrail(rsTable, rsOld, rsNew,
-					this.ebEnt.ebUd.request.getParameter("edit"), stPk,
-					nmBaseline);
+			this.epsUd.epsEf.addAuditTrail(rsTable, rsOld, rsNew, this.ebEnt.ebUd.request.getParameter("edit"), stPk, nmBaseline);
 		} catch (Exception e) {
 			this.stError += "<br>ERROR saveInline " + e;
 		}
@@ -2523,9 +1786,7 @@ class EpsXlsProject // extends EpsUserData
 	private String editFull(String stChild, String stPk) {
 		StringBuilder sbReturn = new StringBuilder(5000);
 		try {
-			ResultSet rsTable = this.ebEnt.dbDyn
-					.ExecuteSql("SELECT * FROM teb_table  where nmTableId="
-							+ stChild);
+			ResultSet rsTable = this.ebEnt.dbDyn.ExecuteSql("SELECT * FROM teb_table  where nmTableId=" + stChild);
 			rsTable.absolute(1);
 			String stSave = this.ebEnt.ebUd.request.getParameter("savedata");
 			String stCancel = this.ebEnt.ebUd.request.getParameter("cancel");
@@ -2546,21 +1807,16 @@ class EpsXlsProject // extends EpsUserData
 				String stFrom = this.ebEnt.ebUd.request.getParameter("from");
 				if (stFrom == null)
 					stFrom = "0";
-				String stParent = this.ebEnt.ebUd.request
-						.getParameter("parent");
+				String stParent = this.ebEnt.ebUd.request.getParameter("parent");
 				if (stParent == null)
 					stParent = "";
-				String stLink = "?stAction=projects&t="
-						+ this.ebEnt.ebUd.request.getParameter("t")
-						+ "&do=xls&pk="
-						+ this.ebEnt.ebUd.request.getParameter("pk")
-						+ "&parent=" + stParent + "&child=" + stChild;
+				String stLink = "?stAction=projects&t=" + this.ebEnt.ebUd.request.getParameter("t") + "&do=xls&pk="
+						+ this.ebEnt.ebUd.request.getParameter("pk") + "&parent=" + stParent + "&child=" + stChild;
 				if (stSave != null && stSave.length() > 0) {
 					if (!stSave.toLowerCase().contains("and")) {
 						ResultSet rsF = this.ebEnt.dbDyn
 								.ExecuteSql("select * from teb_fields f, teb_epsfields ef where f.nmForeignId=ef.nmForeignId and f.nmTabId in ("
-										+ rsTable.getString("stTabList")
-										+ ") order by f.nmHeaderOrder, f.nmForeignId ");
+										+ rsTable.getString("stTabList") + ") order by f.nmHeaderOrder, f.nmForeignId ");
 						rsF.last();
 						int iMaxF = rsF.getRow();
 						this.epsUd.saveTable(rsTable, rsF, iMaxF, stPk, 0, 0);
@@ -2573,183 +1829,98 @@ class EpsXlsProject // extends EpsUserData
 						case 9974:
 						case 9994: // Other Resources
 							stPrj = this.ebEnt.ebUd.request.getParameter("pk");
-							iBaseline = this.ebEnt.dbDyn
-									.ExecuteSql1n("select CurrentBaseline from Projects where RecId="
-											+ stPrj);
-							stTemp = this.ebEnt.ebUd.request
-									.getParameter("imax");
+							iBaseline = this.ebEnt.dbDyn.ExecuteSql1n("select CurrentBaseline from Projects where RecId=" + stPrj);
+							stTemp = this.ebEnt.ebUd.request.getParameter("imax");
 							if (stTemp != null && stTemp.length() > 0) {
 								int iMax = Integer.parseInt(stTemp);
 								String SchOtherResources = "";
 								for (int i = 0; i < iMax; i++) {
 									if (i == iDelete)
 										continue;
-									String stCst = this.ebEnt.ebUd.request
-											.getParameter("cst_" + i);
-									if (stCst != null && stCst.length() > 0
-											&& !stCst.equals("0")) {
+									String stCst = this.ebEnt.ebUd.request.getParameter("cst_" + i);
+									if (stCst != null && stCst.length() > 0 && !stCst.equals("0")) {
 										if (SchOtherResources.length() > 0)
 											SchOtherResources += "|";
-										SchOtherResources += this.ebEnt.ebUd.request
-												.getParameter("oth_" + i) + "~";
-										SchOtherResources += this.ebEnt.ebUd.request
-												.getParameter("cst_" + i) + "~";
+										SchOtherResources += this.ebEnt.ebUd.request.getParameter("oth_" + i) + "~";
+										SchOtherResources += this.ebEnt.ebUd.request.getParameter("cst_" + i) + "~";
 									}
 								}
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("update Schedule set SchOtherResources = "
-												+ this.ebEnt.dbDyn
-														.fmtDbString(SchOtherResources)
-												+ " where nmProjectId="
-												+ stPrj
-												+ " and nmBaseline="
-												+ iBaseline
-												+ " and RecId="
-												+ this.ebEnt.ebUd.request
-														.getParameter("r"));
+								this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchOtherResources = "
+										+ this.ebEnt.dbDyn.fmtDbString(SchOtherResources) + " where nmProjectId=" + stPrj
+										+ " and nmBaseline=" + iBaseline + " and RecId=" + this.ebEnt.ebUd.request.getParameter("r"));
 							}
 							stMake = "oth";
 							break;
 						case 9973:
 						case 9993: // Inventory
 							stPrj = this.ebEnt.ebUd.request.getParameter("pk");
-							iBaseline = this.ebEnt.dbDyn
-									.ExecuteSql1n("select CurrentBaseline from Projects where RecId="
-											+ stPrj);
-							stTemp = this.ebEnt.ebUd.request
-									.getParameter("imax");
+							iBaseline = this.ebEnt.dbDyn.ExecuteSql1n("select CurrentBaseline from Projects where RecId=" + stPrj);
+							stTemp = this.ebEnt.ebUd.request.getParameter("imax");
 							if (stTemp != null && stTemp.length() > 0) {
 								int iMax = Integer.parseInt(stTemp);
 								String SchInventory = "";
 								for (int i = 0; i < iMax; i++) {
-									String stQty = this.ebEnt.ebUd.request
-											.getParameter("qty_" + i);
+									String stQty = this.ebEnt.ebUd.request.getParameter("qty_" + i);
 									if (i == iDelete) { // Add QTY
-										if (stQty != null && stQty.length() > 0
-												&& !stQty.equals("0"))
-											this.ebEnt.dbDyn
-													.ExecuteUpdate("update Inventory set"
-															+ " DateLastUsed = now(), ProjectLastUsing = "
-															+ stPrj
-															+ " where RecId ="
-															+ this.ebEnt.ebUd.request
-																	.getParameter("inv_"
-																			+ i));
-										this.ebEnt.dbDyn
-												.ExecuteUpdate("delete from teb_refinventory where nmProjectId="
-														+ stPrj
-														+ " and nmInventoryId="
-														+ this.ebEnt.ebUd.request
-																.getParameter("inv_"
-																		+ i)
-														+ " and nmTaskId="
-														+ stPk);
+										if (stQty != null && stQty.length() > 0 && !stQty.equals("0"))
+											this.ebEnt.dbDyn.ExecuteUpdate("update Inventory set"
+													+ " DateLastUsed = now(), ProjectLastUsing = " + stPrj + " where RecId ="
+													+ this.ebEnt.ebUd.request.getParameter("inv_" + i));
+										this.ebEnt.dbDyn.ExecuteUpdate("delete from teb_refinventory where nmProjectId=" + stPrj
+												+ " and nmInventoryId=" + this.ebEnt.ebUd.request.getParameter("inv_" + i)
+												+ " and nmTaskId=" + stPk);
 										continue;
 									}
-									if (stQty != null && stQty.length() > 0
-											&& !stQty.equals("0")) {
+									if (stQty != null && stQty.length() > 0 && !stQty.equals("0")) {
 										int iQty = 0;
 										try {
 											int iMissing = 0;
-											iQty = Integer
-													.parseInt(this.ebEnt.ebUd.request
-															.getParameter("qty_"
-																	+ i));
+											iQty = Integer.parseInt(this.ebEnt.ebUd.request.getParameter("qty_" + i));
 											if (iQty > 0) {
 												ResultSet rsAvail = this.ebEnt.dbDyn
 														.ExecuteSql("select Quantity,sum(ri.nmQty) as used,sum(ri.nmMissing) missing"
 																+ " from Inventory i left join teb_refinventory ri on i.RecId=ri.nmInventoryId"
-																+ " and ! ( ri.nmProjectId="
-																+ stPrj
-																+ " and ri.nmTaskId="
-																+ stPk
-																+ " )"
-																+ " where i.RecId="
-																+ this.ebEnt.ebUd.request
-																		.getParameter("inv_"
-																				+ i));
+																+ " and ! ( ri.nmProjectId=" + stPrj + " and ri.nmTaskId=" + stPk + " )"
+																+ " where i.RecId=" + this.ebEnt.ebUd.request.getParameter("inv_" + i));
 												rsAvail.absolute(1);
-												int iAvail = rsAvail
-														.getInt("Quantity")
-														- rsAvail
-																.getInt("used")
-														+ rsAvail
-																.getInt("missing");
+												int iAvail = rsAvail.getInt("Quantity") - rsAvail.getInt("used")
+														+ rsAvail.getInt("missing");
 												if (iAvail < iQty) {
-													this.ebEnt.ebUd
-															.setPopupMessage("Not enough ("
-																	+ iAvail
-																	+ ") resources available. "
-																	+ "You requested ("
-																	+ iQty
-																	+ ")");
+													this.ebEnt.ebUd.setPopupMessage("Not enough (" + iAvail + ") resources available. "
+															+ "You requested (" + iQty + ")");
 													iMissing = iQty - iAvail;
 												}
-												this.ebEnt.dbDyn
-														.ExecuteUpdate("replace into teb_refinventory"
-																+ " (nmProjectId,nmInventoryId,nmTaskId,nmQty,dtLastChanged,nmMissing)values"
-																+ " ("
-																+ stPrj
-																+ ","
-																+ this.ebEnt.ebUd.request
-																		.getParameter("inv_"
-																				+ i)
-																+ ","
-																+ stPk
-																+ ","
-																+ iQty
-																+ ",now(),"
-																+ iMissing
-																+ ")");
-												this.ebEnt.dbDyn
-														.ExecuteUpdate("update Inventory set"
-																+ " DateLastUsed = now(), ProjectLastUsing = "
-																+ stPrj
-																+ " where RecId ="
-																+ this.ebEnt.ebUd.request
-																		.getParameter("inv_"
-																				+ i));
+												this.ebEnt.dbDyn.ExecuteUpdate("replace into teb_refinventory"
+														+ " (nmProjectId,nmInventoryId,nmTaskId,nmQty,dtLastChanged,nmMissing)values"
+														+ " (" + stPrj + "," + this.ebEnt.ebUd.request.getParameter("inv_" + i) + ","
+														+ stPk + "," + iQty + ",now()," + iMissing + ")");
+												this.ebEnt.dbDyn.ExecuteUpdate("update Inventory set"
+														+ " DateLastUsed = now(), ProjectLastUsing = " + stPrj + " where RecId ="
+														+ this.ebEnt.ebUd.request.getParameter("inv_" + i));
 											}
 										} catch (Exception e) {
 										}
 										if (SchInventory.length() > 0)
 											SchInventory += "|";
-										SchInventory += this.ebEnt.ebUd.request
-												.getParameter("inv_" + i) + "~";
+										SchInventory += this.ebEnt.ebUd.request.getParameter("inv_" + i) + "~";
 										SchInventory += iQty + "~";
 									}
 								}
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("update Schedule set SchInventory = "
-												+ this.ebEnt.dbDyn
-														.fmtDbString(SchInventory)
-												+ " where nmProjectId="
-												+ stPrj
-												+ " and nmBaseline="
-												+ iBaseline
-												+ " and RecId="
-												+ this.ebEnt.ebUd.request
-														.getParameter("r"));
+								this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchInventory = "
+										+ this.ebEnt.dbDyn.fmtDbString(SchInventory) + " where nmProjectId=" + stPrj + " and nmBaseline="
+										+ iBaseline + " and RecId=" + this.ebEnt.ebUd.request.getParameter("r"));
 							}
 							stMake = "inv";
 							break;
 						case 9972:
 						case 9992: // Successors
-							stTemp = this.ebEnt.ebUd.request
-									.getParameter("imax");
+							stTemp = this.ebEnt.ebUd.request.getParameter("imax");
 							stPrj = this.ebEnt.ebUd.request.getParameter("pk");
-							iBaseline = this.ebEnt.dbDyn
-									.ExecuteSql1n("select CurrentBaseline from Projects where RecId="
-											+ stPrj);
+							iBaseline = this.ebEnt.dbDyn.ExecuteSql1n("select CurrentBaseline from Projects where RecId=" + stPrj);
 							stR = this.ebEnt.ebUd.request.getParameter("r");
 
-							String stSql = "delete from teb_link where nmProjectId="
-									+ stPrj
-									+ " and nmBaseline="
-									+ iBaseline
-									+ " and nmLinkFlags=2 "
-									+ "and nmFromId="
-									+ stR + " and nmFromProject=nmProjectId";
+							String stSql = "delete from teb_link where nmProjectId=" + stPrj + " and nmBaseline=" + iBaseline
+									+ " and nmLinkFlags=2 " + "and nmFromId=" + stR + " and nmFromProject=nmProjectId";
 							this.ebEnt.dbDyn.ExecuteUpdate(stSql);
 							String stSuc = "";
 							int iForeign = 0;
@@ -2758,54 +1929,29 @@ class EpsXlsProject // extends EpsUserData
 								int iFrom = Integer.parseInt(stR);
 								for (int i = 1; i <= iMax; i++) {
 									if (i != iDelete) {
-										String stToProject = this.ebEnt.ebUd.request
-												.getParameter("prj_" + i);
-										String stToId = this.ebEnt.ebUd.request
-												.getParameter("id_" + i);
-										if (stToProject != null
-												&& stToProject.length() > 0
-												&& stToId != null
-												&& stToId.length() > 0) {
-											ResultSet rs1 = this.ebEnt.dbDyn
-													.ExecuteSql("select * from Projects p left join Schedule s"
-															+ " on s.nmProjectId=p.RecId and s.nmBaseline=p.CurrentBaseline and s.RecId="
-															+ stToId
-															+ " where  p.RecId="
-															+ stToProject);
+										String stToProject = this.ebEnt.ebUd.request.getParameter("prj_" + i);
+										String stToId = this.ebEnt.ebUd.request.getParameter("id_" + i);
+										if (stToProject != null && stToProject.length() > 0 && stToId != null && stToId.length() > 0) {
+											ResultSet rs1 = this.ebEnt.dbDyn.ExecuteSql("select * from Projects p left join Schedule s"
+													+ " on s.nmProjectId=p.RecId and s.nmBaseline=p.CurrentBaseline and s.RecId=" + stToId
+													+ " where  p.RecId=" + stToProject);
 											rs1.absolute(1);
-											if (rs1.getString("SchFlags") == null
-													|| (rs1.getInt("SchFlags") & 0x10) == 0) {
+											if (rs1.getString("SchFlags") == null || (rs1.getInt("SchFlags") & 0x10) == 0) {
 												if (rs1.getString("SchFlags") == null)
-													this.ebEnt.ebUd
-															.setPopupMessage("Project: "
-																	+ rs1.getString("ProjectName")
-																	+ " Task ID: "
-																	+ stToId
-																	+ " not found");
+													this.ebEnt.ebUd.setPopupMessage("Project: " + rs1.getString("ProjectName")
+															+ " Task ID: " + stToId + " not found");
 												else
-													this.ebEnt.ebUd
-															.setPopupMessage("Project: "
-																	+ rs1.getString("ProjectName")
-																	+ " Task ID: "
-																	+ stToId
-																	+ " is not a low level schedule");
+													this.ebEnt.ebUd.setPopupMessage("Project: " + rs1.getString("ProjectName")
+															+ " Task ID: " + stToId + " is not a low level schedule");
 											} else {
 												int iTo1 = 0;
-												if (stToId != null
-														&& stToId.length() > 0)
-													iTo1 = Integer
-															.parseInt(stToId);
-												String stLag = this.ebEnt.ebUd.request
-														.getParameter("lag_"
-																+ i);
+												if (stToId != null && stToId.length() > 0)
+													iTo1 = Integer.parseInt(stToId);
+												String stLag = this.ebEnt.ebUd.request.getParameter("lag_" + i);
 												double dLag = 0;
-												if (stLag != null
-														&& stLag.length() > 0)
-													dLag = Double
-															.parseDouble(stLag);
-												String stType = this.ebEnt.ebUd.request
-														.getParameter("type_"
-																+ i);
+												if (stLag != null && stLag.length() > 0)
+													dLag = Double.parseDouble(stLag);
+												String stType = this.ebEnt.ebUd.request.getParameter("type_" + i);
 												if (stType.equals("sf")) // we
 																			// reverse
 																			// FINISH
@@ -2815,34 +1961,22 @@ class EpsXlsProject // extends EpsUserData
 																			// FS
 												{
 													stType = "fs";
-													linkMap(2, stPrj,
-															iBaseline,
-															stToProject, iTo1,
-															stPrj, iFrom, dLag,
-															stType, 0, 0);
+													linkMap(2, stPrj, iBaseline, stToProject, iTo1, stPrj, iFrom, dLag, stType, 0, 0);
 												} else {
 													if (stSuc.length() > 0)
 														stSuc += ", ";
-													if (!stToProject
-															.equals(stPrj)) {
+													if (!stToProject.equals(stPrj)) {
 														iForeign++;
-														stSuc += stToProject
-																+ ".";
+														stSuc += stToProject + ".";
 													}
 													stSuc += iTo1;
-													linkMap(2, stPrj,
-															iBaseline, stPrj,
-															iFrom, stToProject,
-															iTo1, dLag, stType,
-															0, 0);
+													linkMap(2, stPrj, iBaseline, stPrj, iFrom, stToProject, iTo1, dLag, stType, 0, 0);
 												}
 											}
 										} else {
 											if (i != iMax) // Only last one may
 															// have missing ID
-												this.ebEnt.ebUd
-														.setPopupMessage("Invalid Project and/or ID "
-																+ i);
+												this.ebEnt.ebUd.setPopupMessage("Invalid Project and/or ID " + i);
 										}
 									}
 								}
@@ -2851,90 +1985,51 @@ class EpsXlsProject // extends EpsUserData
 								else
 									stTemp = "";
 
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("update Schedule set SchSuccessors = "
-												+ this.ebEnt.dbDyn
-														.fmtDbString(stSuc)
-												+ stTemp
-												+ " where nmProjectId="
-												+ this.ebEnt.ebUd.request
-														.getParameter("pk")
-												+ " and nmBaseline="
-												+ nmBaseline
-												+ " and RecId="
-												+ this.ebEnt.ebUd.request
-														.getParameter("r"));
+								this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchSuccessors = " + this.ebEnt.dbDyn.fmtDbString(stSuc)
+										+ stTemp + " where nmProjectId=" + this.ebEnt.ebUd.request.getParameter("pk") + " and nmBaseline="
+										+ nmBaseline + " and RecId=" + this.ebEnt.ebUd.request.getParameter("r"));
 							}
 							stMake = "suc";
 							break;
 						case 9971:
 						case 9991: // Dependents
-							stTemp = this.ebEnt.ebUd.request
-									.getParameter("imax");
+							stTemp = this.ebEnt.ebUd.request.getParameter("imax");
 							stPrj = this.ebEnt.ebUd.request.getParameter("pk");
-							iBaseline = this.ebEnt.dbDyn
-									.ExecuteSql1n("select CurrentBaseline from Projects where RecId="
-											+ stPrj);
+							iBaseline = this.ebEnt.dbDyn.ExecuteSql1n("select CurrentBaseline from Projects where RecId=" + stPrj);
 							stR = this.ebEnt.ebUd.request.getParameter("r");
 							String stDep = "";
-							stSql = "delete from teb_link where nmProjectId="
-									+ stPrj + " and nmBaseline=" + iBaseline
-									+ " and nmLinkFlags=2 " + "and nmToId="
-									+ stR + " and nmToProject=nmProjectId";
+							stSql = "delete from teb_link where nmProjectId=" + stPrj + " and nmBaseline=" + iBaseline
+									+ " and nmLinkFlags=2 " + "and nmToId=" + stR + " and nmToProject=nmProjectId";
 							this.ebEnt.dbDyn.ExecuteUpdate(stSql);
 							if (stTemp != null && stTemp.length() > 0) {
 								int iMax = Integer.parseInt(stTemp);
 								int iTo = Integer.parseInt(stR);
 								for (int i = 1; i <= iMax; i++) {
 									if (i != iDelete) {
-										String stFromProject = this.ebEnt.ebUd.request
-												.getParameter("prj_" + i);
-										String stFromId = this.ebEnt.ebUd.request
-												.getParameter("id_" + i);
-										if (stFromProject != null
-												&& stFromProject.length() > 0
-												&& stFromId != null
+										String stFromProject = this.ebEnt.ebUd.request.getParameter("prj_" + i);
+										String stFromId = this.ebEnt.ebUd.request.getParameter("id_" + i);
+										if (stFromProject != null && stFromProject.length() > 0 && stFromId != null
 												&& stFromId.length() > 0) {
-											ResultSet rs1 = this.ebEnt.dbDyn
-													.ExecuteSql("select * from Projects p left join Schedule s"
-															+ " on s.nmProjectId=p.RecId and s.nmBaseline=p.CurrentBaseline and s.RecId="
-															+ stFromId
-															+ " where  p.RecId="
-															+ stFromProject);
+											ResultSet rs1 = this.ebEnt.dbDyn.ExecuteSql("select * from Projects p left join Schedule s"
+													+ " on s.nmProjectId=p.RecId and s.nmBaseline=p.CurrentBaseline and s.RecId="
+													+ stFromId + " where  p.RecId=" + stFromProject);
 											rs1.absolute(1);
-											if (rs1.getString("SchFlags") == null
-													|| (rs1.getInt("SchFlags") & 0x10) == 0) {
+											if (rs1.getString("SchFlags") == null || (rs1.getInt("SchFlags") & 0x10) == 0) {
 												if (rs1.getString("SchFlags") == null)
-													this.ebEnt.ebUd
-															.setPopupMessage("Project: "
-																	+ rs1.getString("ProjectName")
-																	+ " Task ID: "
-																	+ stFromId
-																	+ " not found");
+													this.ebEnt.ebUd.setPopupMessage("Project: " + rs1.getString("ProjectName")
+															+ " Task ID: " + stFromId + " not found");
 												else
-													this.ebEnt.ebUd
-															.setPopupMessage("Project: "
-																	+ rs1.getString("ProjectName")
-																	+ " Task ID: "
-																	+ stFromId
-																	+ " is not a low level schedule");
+													this.ebEnt.ebUd.setPopupMessage("Project: " + rs1.getString("ProjectName")
+															+ " Task ID: " + stFromId + " is not a low level schedule");
 											} else {
 												int iFrom = 0;
-												if (stFromId != null
-														&& stFromId.length() > 0)
-													iFrom = Integer
-															.parseInt(stFromId);
-												String stLag = this.ebEnt.ebUd.request
-														.getParameter("lag_"
-																+ i);
+												if (stFromId != null && stFromId.length() > 0)
+													iFrom = Integer.parseInt(stFromId);
+												String stLag = this.ebEnt.ebUd.request.getParameter("lag_" + i);
 												double dLag = 0;
-												if (stLag != null
-														&& stLag.length() > 0)
-													dLag = Double
-															.parseDouble(stLag);
-												String stType = this.ebEnt.ebUd.request
-														.getParameter("type_"
-																+ i);
+												if (stLag != null && stLag.length() > 0)
+													dLag = Double.parseDouble(stLag);
+												String stType = this.ebEnt.ebUd.request.getParameter("type_" + i);
 												if (stType.equals("sf")) // we
 																			// reverse
 																			// START
@@ -2944,32 +2039,20 @@ class EpsXlsProject // extends EpsUserData
 																			// FS
 												{
 													stType = "fs";
-													linkMap(2, stPrj,
-															iBaseline, stPrj,
-															iTo, stFromProject,
-															iFrom, dLag,
-															stType, 0, 0);
+													linkMap(2, stPrj, iBaseline, stPrj, iTo, stFromProject, iFrom, dLag, stType, 0, 0);
 												} else {
 													if (stDep.length() > 0)
 														stDep += ", ";
-													if (!stFromProject
-															.equals(stPrj))
-														stDep += stFromProject
-																+ ".";
+													if (!stFromProject.equals(stPrj))
+														stDep += stFromProject + ".";
 													stDep += iFrom;
-													linkMap(2, stPrj,
-															iBaseline,
-															stFromProject,
-															iFrom, stPrj, iTo,
-															dLag, stType, 0, 0);
+													linkMap(2, stPrj, iBaseline, stFromProject, iFrom, stPrj, iTo, dLag, stType, 0, 0);
 												}
 											}
 										} else {
 											if (i != iMax) // Only last one may
 															// have missing ID
-												this.ebEnt.ebUd
-														.setPopupMessage("Invalid Project and/or ID "
-																+ i);
+												this.ebEnt.ebUd.setPopupMessage("Invalid Project and/or ID " + i);
 										}
 									}
 								}
@@ -2977,23 +2060,18 @@ class EpsXlsProject // extends EpsUserData
 								// fixed dates
 								this.ebEnt.dbDyn
 										.ExecuteUpdate("update Schedule set SchFixedFinishDate = null, SchFixedStartDate = null, SchDependencies = "
-												+ this.ebEnt.dbDyn
-														.fmtDbString(stDep)
+												+ this.ebEnt.dbDyn.fmtDbString(stDep)
 												+ " where nmProjectId="
-												+ this.ebEnt.ebUd.request
-														.getParameter("pk")
+												+ this.ebEnt.ebUd.request.getParameter("pk")
 												+ " and nmBaseline="
 												+ nmBaseline
-												+ " and RecId="
-												+ this.ebEnt.ebUd.request
-														.getParameter("r"));
+												+ " and RecId=" + this.ebEnt.ebUd.request.getParameter("r"));
 							}
 							stMake = "dep";
 							break;
 						case 9970:
 						case 9990:
-							stTemp = this.ebEnt.ebUd.request
-									.getParameter("imax");
+							stTemp = this.ebEnt.ebUd.request.getParameter("imax");
 							if (stTemp != null && stTemp.length() > 0) {
 								int iMax = Integer.parseInt(stTemp);
 								String SchLaborCategories = "";
@@ -3004,39 +2082,24 @@ class EpsXlsProject // extends EpsUserData
 								for (int i = 0; i < iMax; i++) {
 									if (i == iDelete)
 										continue;
-									String stLc = this.ebEnt.ebUd.request
-											.getParameter("lc_" + i);
+									String stLc = this.ebEnt.ebUd.request.getParameter("lc_" + i);
 									if (stLc != null && !stLc.equals("0")) {
 										if (SchLaborCategories.length() > 0)
 											SchLaborCategories += "|";
-										SchLaborCategories += this.ebEnt.ebUd.request
-												.getParameter("lc_" + i) + "~";
-										SchLaborCategories += this.ebEnt.ebUd.request
-												.getParameter("nr_" + i) + "~";
-										stTemp = this.ebEnt.ebUd.request
-												.getParameter("est_" + i);
+										SchLaborCategories += this.ebEnt.ebUd.request.getParameter("lc_" + i) + "~";
+										SchLaborCategories += this.ebEnt.ebUd.request.getParameter("nr_" + i) + "~";
+										stTemp = this.ebEnt.ebUd.request.getParameter("est_" + i);
 										double d = Double.parseDouble(stTemp);
-										int iNr = Integer
-												.parseInt(this.ebEnt.ebUd.request
-														.getParameter("nr_" + i));
+										int iNr = Integer.parseInt(this.ebEnt.ebUd.request.getParameter("nr_" + i));
 										double d2 = d;
 										if (iNr > 0)
 											d2 = d / iNr;
 										dEffort += d;
 										SchLaborCategories += stTemp + "~";
-										SchLaborCategories += this.ebEnt.ebUd.request
-												.getParameter("f9001_must_" + i)
-												+ "~";
-										SchLaborCategories += this.ebEnt.ebUd.request
-												.getParameter("f9002_most_" + i)
-												+ "~";
-										SchLaborCategories += this.ebEnt.ebUd.request
-												.getParameter("f9003_least_"
-														+ i)
-												+ "~";
-										SchLaborCategories += this.ebEnt.ebUd.request
-												.getParameter("f9004_not_" + i)
-												+ "~";
+										SchLaborCategories += this.ebEnt.ebUd.request.getParameter("f9001_must_" + i) + "~";
+										SchLaborCategories += this.ebEnt.ebUd.request.getParameter("f9002_most_" + i) + "~";
+										SchLaborCategories += this.ebEnt.ebUd.request.getParameter("f9003_least_" + i) + "~";
+										SchLaborCategories += this.ebEnt.ebUd.request.getParameter("f9004_not_" + i) + "~";
 									}
 								}
 								// if (dEffort > dMax)
@@ -3049,44 +2112,27 @@ class EpsXlsProject // extends EpsUserData
 								// +
 								// ")");
 								// }
-								String stWhere = " where nmProjectId="
-										+ this.ebEnt.ebUd.request
-												.getParameter("pk")
-										+ " and nmBaseline="
-										+ nmBaseline
-										+ " and RecId="
-										+ this.ebEnt.ebUd.request
-												.getParameter("r");
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("update Schedule set SchLaborCategories = "
-												+ this.ebEnt.dbDyn
-														.fmtDbString(SchLaborCategories)
-												+ ",SchEstimatedEffort="
-												+ dEffort + stWhere);
-								double dCost = epsUd
-										.calculateScheduleCost(stWhere);
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("update Schedule set SchCost = "
-												+ dCost + stWhere);
-								processScheduleRequirementCost(Integer
-										.parseInt(this.ebEnt.ebUd.request
-												.getParameter("r"))); // calculate
-																		// requirement
-																		// costs
-																		// linked
-																		// to
-																		// this
-																		// task
+								String stWhere = " where nmProjectId=" + this.ebEnt.ebUd.request.getParameter("pk") + " and nmBaseline="
+										+ nmBaseline + " and RecId=" + this.ebEnt.ebUd.request.getParameter("r");
+								this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchLaborCategories = "
+										+ this.ebEnt.dbDyn.fmtDbString(SchLaborCategories) + ",SchEstimatedEffort=" + dEffort + stWhere);
+								double dCost = epsUd.calculateScheduleCost(stWhere);
+								this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchCost = " + dCost + stWhere);
+								processScheduleRequirementCost(Integer.parseInt(this.ebEnt.ebUd.request.getParameter("r"))); // calculate
+																																// requirement
+																																// costs
+																																// linked
+																																// to
+																																// this
+																																// task
 							}
 							stMake = "lc";
 							break;
 						}
 
 						if (giSubmitId >= 9980 && giSubmitId <= 9990) {
-							this.ebEnt.ebUd.setRedirect(stLink + "&from="
-									+ stFrom + "&a=editfull&r="
-									+ this.ebEnt.ebUd.request.getParameter("r")
-									+ "&make=" + stMake);
+							this.ebEnt.ebUd.setRedirect(stLink + "&from=" + stFrom + "&a=editfull&r="
+									+ this.ebEnt.ebUd.request.getParameter("r") + "&make=" + stMake);
 							return "."; // on return need data to exit loop,
 										// main redirect has
 										// higher priority, (to remove EDIT
@@ -3098,9 +2144,7 @@ class EpsXlsProject // extends EpsUserData
 
 				}
 				if (giSubmitId == 0 || giSubmitId == 9999 || stCancel != null) {
-					this.ebEnt.ebUd.setRedirect(stLink + "&from=" + stFrom
-							+ "#row"
-							+ this.ebEnt.ebUd.request.getParameter("r"));
+					this.ebEnt.ebUd.setRedirect(stLink + "&from=" + stFrom + "#row" + this.ebEnt.ebUd.request.getParameter("r"));
 					return "."; // on return need data to exit loop, main
 								// redirect has
 								// higher priority, (to remove EDIT
@@ -3110,25 +2154,21 @@ class EpsXlsProject // extends EpsUserData
 			if (giSubmitId != 8888) // 9970-9979 is Save and Exit;
 			{
 				stTemp = this.ebEnt.ebUd.request.getParameter("make");
-				if ((giSubmitId <= 0 && stTemp != null && stTemp.length() > 0)
-						|| (giSubmitId >= 9980 && giSubmitId <= 9990)) {
+				if ((giSubmitId <= 0 && stTemp != null && stTemp.length() > 0) || (giSubmitId >= 9980 && giSubmitId <= 9990)) {
 					return this.editMake(stChild, stPk);
 				}
 			}
 
-			String s1 = "<center><table><tr><td valign=middle><h2>"
-					+ this.rsProject.getString("ProjectName")
+			String s1 = "<center><table><tr><td valign=middle><h2>" + this.rsProject.getString("ProjectName")
 					+ "</h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>";
 			sbReturn.append(s1);
 			if (stChild.equals("21")) {
 				sbReturn.append("<td align=left><b>");
-				sbReturn.append(this.epsUd.epsEf.fullSchTitle(stPk, this.stPk,
-						this.nmBaseline));
+				sbReturn.append(this.epsUd.epsEf.fullSchTitle(stPk, this.stPk, this.nmBaseline));
 				sbReturn.append("</b><br>&nbsp;</td>");
 			} else if (stChild.equals("19")) {
 				sbReturn.append("<td align=left><b>");
-				sbReturn.append(this.epsUd.epsEf.fullReqTitle(stPk, this.stPk,
-						this.nmBaseline));
+				sbReturn.append(this.epsUd.epsEf.fullReqTitle(stPk, this.stPk, this.nmBaseline));
 				sbReturn.append("</b><br>&nbsp;</td>");
 			}
 			sbReturn.append("</tr></table>");
@@ -3166,34 +2206,21 @@ class EpsXlsProject // extends EpsUserData
 		} catch (Exception e) {
 			this.stError += "<br>ERROR xlsAnalyze " + e;
 		}
-		this.ebEnt.dbDyn
-				.ExecuteUpdate("update teb_baseline set nmAnalyzeStatus="
-						+ this.iAnalyzeStatus + ",dtLastAnalyze=now(),"
-						+ "stAnalyzeReport="
-						+ this.ebEnt.dbDyn.fmtDbString(sbReturn.toString())
-						+ " where nmProjectId=" + stPk + " and nmBaseline="
-						+ nmBaseline);
+		this.ebEnt.dbDyn.ExecuteUpdate("update teb_baseline set nmAnalyzeStatus=" + this.iAnalyzeStatus + ",dtLastAnalyze=now(),"
+				+ "stAnalyzeReport=" + this.ebEnt.dbDyn.fmtDbString(sbReturn.toString()) + " where nmProjectId=" + stPk
+				+ " and nmBaseline=" + nmBaseline);
 		if (this.ebEnt.ebUd.request.getParameter("pk") != null) {
-			int nmPPM = ebEnt.dbDyn
-					.ExecuteSql1n("select ProjectPortfolioManagerAssignment from Projects where RecId="
-							+ stPk);
+			int nmPPM = ebEnt.dbDyn.ExecuteSql1n("select ProjectPortfolioManagerAssignment from Projects where RecId=" + stPk);
 			String s1 = "";
 			sbReturn.append("</table><br>&nbsp;<br><center>");
-			if (stChild.length() <= 0 && this.iAnalyzeStatus == 0
-					&& ebEnt.ebUd.getLoginId() == nmPPM) {
-				s1 = "<input type=button onClick=\"parent.location='"
-						+ stGoBack
-						+ "&pk="
-						+ stPk
+			if (stChild.length() <= 0 && this.iAnalyzeStatus == 0 && ebEnt.ebUd.getLoginId() == nmPPM) {
+				s1 = "<input type=button onClick=\"parent.location='" + stGoBack + "&pk=" + stPk
 						+ "&do=approve'\" value='Approve'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 				sbReturn.append(s1);
 			}
-			s1 = "<input type=button onClick=\"parent.location='" + stGoBack
-					+ "&pk=" + stPk
-					+ "&do=edit'\" value='Go Back to Projects'>";
+			s1 = "<input type=button onClick=\"parent.location='" + stGoBack + "&pk=" + stPk + "&do=edit'\" value='Go Back to Projects'>";
 			sbReturn.append(s1);
-			if (stChild.length() <= 0 && this.iAnalyzeStatus == 0
-					&& ebEnt.ebUd.getLoginId() == nmPPM) {
+			if (stChild.length() <= 0 && this.iAnalyzeStatus == 0 && ebEnt.ebUd.getLoginId() == nmPPM) {
 				s1 = "<br>&nbsp;<br><b>Note:</b> Selecting the \"Approve\" button will \"freeze\" the existing baseline and will be used for all reports accessing this baseline's attributes.  Without \"approval\" the new baseline will be in \"EDIT\" mode and will not be used for allocation until \"Approved.\"  Clicking on the hyperlink will open a sequential list of requirements or schedule tasks with issues.<br>";
 				sbReturn.append(s1);
 			}
@@ -3221,13 +2248,11 @@ class EpsXlsProject // extends EpsUserData
 			if (stTemp != null && stTemp.length() > 0)
 				stPk = stTemp;
 			stGoBack = "?stAction=projects&t=12";
-			this.rsProject = this.ebEnt.dbDyn
-					.ExecuteSql("select * from Projects where RecId=" + stPk);
+			this.rsProject = this.ebEnt.dbDyn.ExecuteSql("select * from Projects where RecId=" + stPk);
 			this.rsProject.absolute(1);
 			nmBaseline = this.rsProject.getInt("CurrentBaseline");
 			String pm = rsProject.getString("ProjectManagerAssignment");
-			String ppm = rsProject
-					.getString("ProjectPortfolioManagerAssignment");
+			String ppm = rsProject.getString("ProjectPortfolioManagerAssignment");
 			String ba = rsProject.getString("BusinessAnalystAssignment");
 			String sp = rsProject.getString("Sponsor");
 			String stProjectName = this.rsProject.getString("ProjectName");
@@ -3242,12 +2267,10 @@ class EpsXlsProject // extends EpsUserData
 			// first child, 0x10 is Lowest
 			// 1) reset all flags
 			this.ebEnt.dbDyn
-					.ExecuteUpdate("update Requirements set ReqFlags=0 where nmProjectId="
-							+ stPk + " and nmBaseline=" + nmBaseline);
+					.ExecuteUpdate("update Requirements set ReqFlags=0 where nmProjectId=" + stPk + " and nmBaseline=" + nmBaseline);
 
 			// 2) set parent/child flags
-			stSql = "SELECT * FROM Requirements where nmProjectId=" + stPk
-					+ " and nmBaseline=" + nmBaseline + " order by ReqId;";
+			stSql = "SELECT * FROM Requirements where nmProjectId=" + stPk + " and nmBaseline=" + nmBaseline + " order by ReqId;";
 			ResultSet rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
 			rs.last();
 			String stRecIdList = "";
@@ -3255,8 +2278,7 @@ class EpsXlsProject // extends EpsUserData
 			int[] aRecId = new int[100];
 			int iReq = rs.getRow();
 			if (iReq >= 1) {
-				sbReturn.append("<td>Found</td><td valign=top align=right>"
-						+ iReq + "</td>");
+				sbReturn.append("<td>Found</td><td valign=top align=right>" + iReq + "</td>");
 				int iLastLevel = 0;
 				int ReqFlags = 0;
 				iCount = 0;
@@ -3285,48 +2307,29 @@ class EpsXlsProject // extends EpsUserData
 					if ((iAnalyzeStatus & 0x2) != 0 || iR != rs.getInt("ReqId")) {
 						iCount++;
 						iAnalyzeStatus |= 0x2; // out of seq
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("update Requirements set ReqId="
-										+ iR + " where nmProjectId=" + stPk
-										+ " and nmBaseline=" + nmBaseline
-										+ " and RecId=" + rs.getInt("RecId"));
+						this.ebEnt.dbDyn.ExecuteUpdate("update Requirements set ReqId=" + iR + " where nmProjectId=" + stPk
+								+ " and nmBaseline=" + nmBaseline + " and RecId=" + rs.getInt("RecId"));
 					}
 					if (rs.getInt("Reqlevel") > 0) {
-						if (aRecId[rs.getInt("Reqlevel") - 1] != rs
-								.getInt("ReqParentRecId")) {
-							this.ebEnt.dbDyn
-									.ExecuteUpdate("update Requirements set "
-											+ "ReqParentRecId="
-											+ aRecId[rs.getInt("Reqlevel") - 1]
-											+ " " + "where nmProjectId=" + stPk
-											+ " and nmBaseline=" + nmBaseline
-											+ " and RecId="
-											+ rs.getInt("RecId"));
+						if (aRecId[rs.getInt("Reqlevel") - 1] != rs.getInt("ReqParentRecId")) {
+							this.ebEnt.dbDyn.ExecuteUpdate("update Requirements set " + "ReqParentRecId="
+									+ aRecId[rs.getInt("Reqlevel") - 1] + " " + "where nmProjectId=" + stPk + " and nmBaseline="
+									+ nmBaseline + " and RecId=" + rs.getInt("RecId"));
 						}
 					}
 					iLastLevel = rs.getInt("Reqlevel");
 				}
 				// ReqFlags |= 0x8; // This is FRIST child
 				if (stRecIdList.length() > 0)
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Requirements set ReqFlags=(ReqFlags | 0x8 ) where nmProjectId="
-									+ stPk
-									+ " and nmBaseline="
-									+ nmBaseline
-									+ " and RecId in (" + stRecIdList + ")");
+					this.ebEnt.dbDyn.ExecuteUpdate("update Requirements set ReqFlags=(ReqFlags | 0x8 ) where nmProjectId=" + stPk
+							+ " and nmBaseline=" + nmBaseline + " and RecId in (" + stRecIdList + ")");
 				// ReqFlags |= 0x4; // This is a parent
 				if (stRecIdList4.length() > 0)
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Requirements set ReqFlags=(ReqFlags | 0x4) where nmProjectId="
-									+ stPk
-									+ " and nmBaseline="
-									+ nmBaseline
-									+ " and RecId in (" + stRecIdList4 + ")");
+					this.ebEnt.dbDyn.ExecuteUpdate("update Requirements set ReqFlags=(ReqFlags | 0x4) where nmProjectId=" + stPk
+							+ " and nmBaseline=" + nmBaseline + " and RecId in (" + stRecIdList4 + ")");
 				rs.close();
 				// 3) Set LOW LEVEL indicator
-				stSql = "SELECT * FROM Requirements where nmProjectId=" + stPk
-						+ " and nmBaseline=" + nmBaseline
-						+ " order by ReqId desc";
+				stSql = "SELECT * FROM Requirements where nmProjectId=" + stPk + " and nmBaseline=" + nmBaseline + " order by ReqId desc";
 				ResultSet rs1 = this.ebEnt.dbDyn.ExecuteSql(stSql);
 				rs1.last();
 				iReq = rs1.getRow();
@@ -3354,12 +2357,8 @@ class EpsXlsProject // extends EpsUserData
 					}
 					iLastLevel = rs1.getInt("Reqlevel");
 				}
-				this.ebEnt.dbDyn
-						.ExecuteUpdate("update Requirements set ReqFlags = ( ReqFlags | 0x10 ) where nmProjectId="
-								+ stPk
-								+ " and nmBaseline="
-								+ nmBaseline
-								+ " and RecId in (" + stRecIdList + ")");
+				this.ebEnt.dbDyn.ExecuteUpdate("update Requirements set ReqFlags = ( ReqFlags | 0x10 ) where nmProjectId=" + stPk
+						+ " and nmBaseline=" + nmBaseline + " and RecId in (" + stRecIdList + ")");
 				if ((iAnalyzeStatus & 0x2) != 0 || iCount > 0) {
 					iAnalyzeStatus |= 0x2;
 					sbReturn.append("<td style='color:blue;'>fixed ");
@@ -3367,8 +2366,7 @@ class EpsXlsProject // extends EpsUserData
 					sbReturn.append("</td>");
 				} else
 					sbReturn.append("<td style='color:green;'>ok</td>");
-				this.ebEnt.dbDyn.ExecuteUpdate("update Projects set nmReq="
-						+ iReq + " where RecId=" + stPk);
+				this.ebEnt.dbDyn.ExecuteUpdate("update Projects set nmReq=" + iReq + " where RecId=" + stPk);
 			} else {
 				sbReturn.append("<td colspan=2 style='color:red;'>No requirements found</td><td style='color:red;'>fail</td>");
 				iAnalyzeStatus |= 0x1;
@@ -3402,13 +2400,11 @@ class EpsXlsProject // extends EpsUserData
 			if (stTemp != null && stTemp.length() > 0)
 				stPk = stTemp;
 			stGoBack = "?stAction=projects&t=12";
-			this.rsProject = this.ebEnt.dbDyn
-					.ExecuteSql("select * from Projects where RecId=" + stPk);
+			this.rsProject = this.ebEnt.dbDyn.ExecuteSql("select * from Projects where RecId=" + stPk);
 			this.rsProject.absolute(1);
 			nmBaseline = this.rsProject.getInt("CurrentBaseline");
 			String pm = rsProject.getString("ProjectManagerAssignment");
-			String ppm = rsProject
-					.getString("ProjectPortfolioManagerAssignment");
+			String ppm = rsProject.getString("ProjectPortfolioManagerAssignment");
 			String ba = rsProject.getString("BusinessAnalystAssignment");
 			String sp = rsProject.getString("Sponsor");
 			String prjname = rsProject.getString("ProjectName");
@@ -3425,21 +2421,18 @@ class EpsXlsProject // extends EpsUserData
 			 * Foreign Dependency 0x1000 Completed 0x2000 D=Deliverable 0x4000
 			 * M=Milestone 0x8000 Reserved Permanent Flag
 			 */
-			this.ebEnt.dbDyn
-					.ExecuteUpdate("update Schedule set SchFlags= (SchFlags & ~0x0FFF) where nmProjectId="
-							+ stPk + " and nmBaseline=" + nmBaseline);
+			this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchFlags= (SchFlags & ~0x0FFF) where nmProjectId=" + stPk
+					+ " and nmBaseline=" + nmBaseline);
 
 			// 2) set parent/child flags
-			stSql = "SELECT * FROM Schedule where nmProjectId=" + stPk
-					+ " and nmBaseline=" + nmBaseline + " order by SchId;";
+			stSql = "SELECT * FROM Schedule where nmProjectId=" + stPk + " and nmBaseline=" + nmBaseline + " order by SchId;";
 			ResultSet rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
 			rs.last();
 			String stRecIdList = "";
 			String stRecIdList4 = "";
 			int iSch = rs.getRow();
 			if (iSch >= 1) {
-				sbReturn.append("<td>Found</td><td valign=top align=right>"
-						+ iSch + "</td>");
+				sbReturn.append("<td>Found</td><td valign=top align=right>" + iSch + "</td>");
 				int iLastLevel = 0;
 				int iLastId = 0;
 				int SchFlags = 0;
@@ -3470,30 +2463,19 @@ class EpsXlsProject // extends EpsUserData
 					if ((iAnalyzeStatus & 0x8) != 0 || iR != rs.getInt("SchId")) {
 						iCount++;
 						iAnalyzeStatus |= 0x8; // out of seq
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("update Schedule set SchId="
-										+ iR + " where nmProjectId=" + stPk
-										+ " and nmBaseline=" + nmBaseline
-										+ " and RecId=" + rs.getInt("RecId"));
+						this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchId=" + iR + " where nmProjectId=" + stPk
+								+ " and nmBaseline=" + nmBaseline + " and RecId=" + rs.getInt("RecId"));
 					}
 					if (rs.getInt("Schlevel") > 0) {
-						if (aRecId[rs.getInt("Schlevel") - 1] != rs
-								.getInt("SchParentRecId")) {
-							this.ebEnt.dbDyn
-									.ExecuteUpdate("update Schedule set "
-											+ "SchParentRecId="
-											+ aRecId[rs.getInt("Schlevel") - 1]
-											+ " " + "where nmProjectId=" + stPk
-											+ " and nmBaseline=" + nmBaseline
-											+ " and RecId="
-											+ rs.getInt("RecId"));
+						if (aRecId[rs.getInt("Schlevel") - 1] != rs.getInt("SchParentRecId")) {
+							this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set " + "SchParentRecId=" + aRecId[rs.getInt("Schlevel") - 1]
+									+ " " + "where nmProjectId=" + stPk + " and nmBaseline=" + nmBaseline + " and RecId="
+									+ rs.getInt("RecId"));
 						}
 					}
 					ResultSet rsInventory = ebEnt.dbDyn
 							.ExecuteSql("SELECT * FROM teb_refinventory ri, inventory i WHERE ri.nmInventoryId=i.RecId AND ri.nmMissing>0 AND ri.nmProjectId="
-									+ stPk
-									+ " AND ri.nmTaskId="
-									+ rs.getInt("RecId"));
+									+ stPk + " AND ri.nmTaskId=" + rs.getInt("RecId"));
 					rsInventory.last();
 					int total = rsInventory.getRow();
 					if (total > 0) {
@@ -3501,27 +2483,13 @@ class EpsXlsProject // extends EpsUserData
 								+ "<tr><th>Task ID</th><th>Task Title</th><th>Inventory Item</th><th>Missing</th></tr>";
 						for (int i = 1; i <= total; i++) {
 							rsInventory.absolute(i);
-							msgContent += "<tr><td>" + rs.getString("SchId")
-									+ "</td>" + "<td>"
-									+ rs.getString("SchTitle") + "</td>"
-									+ "<td>"
-									+ rsInventory.getString("InventoryName")
-									+ "</td>" + "<td>"
-									+ rsInventory.getString("nmMissing")
-									+ "</td></tr>";
+							msgContent += "<tr><td>" + rs.getString("SchId") + "</td>" + "<td>" + rs.getString("SchTitle") + "</td>"
+									+ "<td>" + rsInventory.getString("InventoryName") + "</td>" + "<td>"
+									+ rsInventory.getString("nmMissing") + "</td></tr>";
 						}
 
 						msgContent += "</table>";
-						epsUd.makeMessage(
-								prjname,
-								ppm
-										+ ","
-										+ pm
-										+ ","
-										+ sp
-										+ ","
-										+ epsUd.getAllUsers(epsUd
-												.getPriviledge("ad")),
+						epsUd.makeMessage(prjname, ppm + "," + pm + "," + sp + "," + epsUd.getAllUsers(epsUd.getPriviledge("ad")),
 								"Missing Inventory", msgContent, dateEnd);
 					}
 					rsInventory.close();
@@ -3530,20 +2498,12 @@ class EpsXlsProject // extends EpsUserData
 				}
 				// SchFlags |= 0x8; // This is a child
 				if (stRecIdList.length() > 0)
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Schedule set SchFlags=(SchFlags | 0x8) where nmProjectId="
-									+ stPk
-									+ " and nmBaseline="
-									+ nmBaseline
-									+ " and RecId in (" + stRecIdList + ")");
+					this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchFlags=(SchFlags | 0x8) where nmProjectId=" + stPk
+							+ " and nmBaseline=" + nmBaseline + " and RecId in (" + stRecIdList + ")");
 				// SchFlags |= 0x4; // This is a parent
 				if (stRecIdList4.length() > 0)
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Schedule set SchFlags=(SchFlags | 0x4) where nmProjectId="
-									+ stPk
-									+ " and nmBaseline="
-									+ nmBaseline
-									+ " and RecId in (" + stRecIdList4 + ")");
+					this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchFlags=(SchFlags | 0x4) where nmProjectId=" + stPk
+							+ " and nmBaseline=" + nmBaseline + " and RecId in (" + stRecIdList4 + ")");
 				// 3) Set LOW LEVEL inidcator
 				// check low level indicators #110
 				this.analyzeLowLevelTasks();
@@ -3587,27 +2547,15 @@ class EpsXlsProject // extends EpsUserData
 						if (stRecIdList.length() > 0)
 							stRecIdList += ",";
 						stRecIdList += rs.getString("RecId");
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("update Schedule set SchCost="
-										+ dCost
-										+ ", SchFlags = ( SchFlags | 0x10 )"
-										+ " where nmProjectId=" + stPk
-										+ " and nmBaseline=" + nmBaseline
-										+ " and RecId =" + rs.getInt("RecId"));
+						this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchCost=" + dCost + ", SchFlags = ( SchFlags | 0x10 )"
+								+ " where nmProjectId=" + stPk + " and nmBaseline=" + nmBaseline + " and RecId =" + rs.getInt("RecId"));
 					} else {
 						// Rollup Hours
 						// if (aHours[rs1.getInt("Schlevel")] !=
 						// rs1.getInt("SchEstimatedEffort"))
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("update Schedule set SchEstimatedEffort="
-										+ aHours[rs.getInt("Schlevel")]
-										+ ",SchCost="
-										+ aCost[rs.getInt("Schlevel")]
-										+ " where nmProjectId="
-										+ stPk
-										+ " and nmBaseline="
-										+ nmBaseline
-										+ " and RecId =" + rs.getInt("RecId"));
+						this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchEstimatedEffort=" + aHours[rs.getInt("Schlevel")]
+								+ ",SchCost=" + aCost[rs.getInt("Schlevel")] + " where nmProjectId=" + stPk + " and nmBaseline="
+								+ nmBaseline + " and RecId =" + rs.getInt("RecId"));
 						dCost = aCost[rs.getInt("Schlevel")];
 						for (int i = rs.getInt("Schlevel"); i < aHours.length; i++) {
 							aHours[i] = 0;
@@ -3622,28 +2570,22 @@ class EpsXlsProject // extends EpsUserData
 				// stRecIdList + ")");
 				if ((iAnalyzeStatus & 0x8) != 0 || iCount > 0) {
 					this.iAnalyzeStatus |= 0x8;
-					sbReturn.append("<td style='color:blue;'>fixed " + iCount
-							+ "</td>");
+					sbReturn.append("<td style='color:blue;'>fixed " + iCount + "</td>");
 				} else
 					sbReturn.append("<td style='color:green;'>ok</td>");
 			} else {
 				sbReturn.append("<td colspan=2 style='color:red;'>No Schedules found</td><td style='color:red;'>fail</td>");
 				iAnalyzeStatus |= 0x4;
-				this.epsUd
-						.makeMessage(prjname, ppm + "," + pm + "," + ba + ","
-								+ sp, "Schedule Warning", "No Schedules found",
-								dateEnd);
+				this.epsUd.makeMessage(prjname, ppm + "," + pm + "," + ba + "," + sp, "Schedule Warning", "No Schedules found", dateEnd);
 			}
 			// 4) Process Low-leves, Rollups, check LC
 			// in Sch -> must get from Schecule
-			this.ebEnt.dbDyn.ExecuteUpdate("update Projects set nmSch=" + iSch
-					+ " where RecId=" + stPk);
+			this.ebEnt.dbDyn.ExecuteUpdate("update Projects set nmSch=" + iSch + " where RecId=" + stPk);
 			sbReturn.append(this.getElapsed());
 
 			int effortFlag = 0;
 			// analyze low level hours
-			stSql = "SELECT * FROM Schedule where nmProjectId=" + stPk
-					+ " and nmBaseline=" + nmBaseline + " order by SchId desc";
+			stSql = "SELECT * FROM Schedule where nmProjectId=" + stPk + " and nmBaseline=" + nmBaseline + " order by SchId desc";
 			ResultSet rs1 = this.ebEnt.dbDyn.ExecuteSql(stSql);
 			rs1.last();
 			iSch = rs1.getRow();
@@ -3652,28 +2594,20 @@ class EpsXlsProject // extends EpsUserData
 
 			for (int iR = 1; iR <= iSch; iR++) {
 				rs1.absolute(iR);
-				if (iLastLevel == rs1.getInt("Schlevel")
-						&& rs1.getInt("SchEstimatedEffort") > epsUd.rsMyDiv
-								.getDouble("MaximumTaskHours")) { // same level
-																	// as
-																	// before,
-																	// therefore
-																	// we are
-																	// LAST
+				if (iLastLevel == rs1.getInt("Schlevel") && rs1.getInt("SchEstimatedEffort") > epsUd.rsMyDiv.getDouble("MaximumTaskHours")) { // same
+																																				// level
+																																				// as
+																																				// before,
+																																				// therefore
+																																				// we
+																																				// are
+																																				// LAST
 					effortFlag++;
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("UPDATE Schedule SET nmEffort40Flag=1 WHERE nmProjectId="
-									+ stPk
-									+ " and nmBaseline="
-									+ nmBaseline
-									+ " and RecID=" + rs1.getInt("RecId"));
+					this.ebEnt.dbDyn.ExecuteUpdate("UPDATE Schedule SET nmEffort40Flag=1 WHERE nmProjectId=" + stPk + " and nmBaseline="
+							+ nmBaseline + " and RecID=" + rs1.getInt("RecId"));
 				} else {
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("UPDATE Schedule SET nmEffort40Flag=0 WHERE nmProjectId="
-									+ stPk
-									+ " and nmBaseline="
-									+ nmBaseline
-									+ " and RecID=" + rs1.getInt("RecId"));
+					this.ebEnt.dbDyn.ExecuteUpdate("UPDATE Schedule SET nmEffort40Flag=0 WHERE nmProjectId=" + stPk + " and nmBaseline="
+							+ nmBaseline + " and RecID=" + rs1.getInt("RecId"));
 				}
 				iLastLevel = rs1.getInt("Schlevel");
 			}
@@ -3683,14 +2617,10 @@ class EpsXlsProject // extends EpsUserData
 			sbReturn.append("<td>Effort</td>");
 
 			if (effortFlag > 0) {
-				sbReturn.append("<td style='color:red;'>Low Level Tasks Exceeding "
-						+ epsUd.rsMyDiv.getDouble("MaximumTaskHours")
-						+ " Hours</td><td valign=top align=right>"
-						+ effortFlag
-						+ "</td><td style='color:red;'>fail</td>");
+				sbReturn.append("<td style='color:red;'>Low Level Tasks Exceeding " + epsUd.rsMyDiv.getDouble("MaximumTaskHours")
+						+ " Hours</td><td valign=top align=right>" + effortFlag + "</td><td style='color:red;'>fail</td>");
 			} else {
-				sbReturn.append("<td>Complete</td><td align='right'>" + iSch
-						+ "</td><td style='color:green;'>ok</td>");
+				sbReturn.append("<td>Complete</td><td align='right'>" + iSch + "</td><td style='color:green;'>ok</td>");
 			}
 			sbReturn.append(this.getElapsed());
 		} catch (Exception e) {
@@ -3725,133 +2655,93 @@ class EpsXlsProject // extends EpsUserData
 					for (int iL = 0; iL < aLines.length; iL++) {
 						if (aLines[iL].trim().startsWith("::")) {
 							iTable = 0;
-							if (aLines[iL].toLowerCase().trim()
-									.startsWith("::div")) {
+							if (aLines[iL].toLowerCase().trim().startsWith("::div")) {
 								sbReturn.append("DIVISION ");
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("truncate table teb_division");
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("truncate table Criteria");
+								this.ebEnt.dbDyn.ExecuteUpdate("truncate table teb_division");
+								this.ebEnt.dbDyn.ExecuteUpdate("truncate table Criteria");
 								iL++; // go past field headers
 								iTable = 1;
-							} else if (aLines[iL].toLowerCase().trim()
-									.startsWith("::lab")) {
+							} else if (aLines[iL].toLowerCase().trim().startsWith("::lab")) {
 								sbReturn.append("LaborCategory ");
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("truncate table teb_reflaborcategory");
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("truncate table LaborCategory");
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("truncate table Cost_Effectiveness_Report");
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("truncate table Missing_Labor_Report");
+								this.ebEnt.dbDyn.ExecuteUpdate("truncate table teb_reflaborcategory");
+								this.ebEnt.dbDyn.ExecuteUpdate("truncate table LaborCategory");
+								this.ebEnt.dbDyn.ExecuteUpdate("truncate table Cost_Effectiveness_Report");
+								this.ebEnt.dbDyn.ExecuteUpdate("truncate table Missing_Labor_Report");
 
 								iL++; // go past field headers
 								iTable = 2;
-							} else if (aLines[iL].toLowerCase().trim()
-									.startsWith("::use")) {
+							} else if (aLines[iL].toLowerCase().trim().startsWith("::use")) {
 								sbReturn.append("USERS ");
 								iL++; // go past field headers
 								iTable = 3;
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("delete from Users where nmUserId > 10 ");
-								this.ebEnt.dbEnterprise
-										.ExecuteUpdate("delete from X25User where RecId > 10 ");
-								this.ebEnt.dbEnterprise
-										.ExecuteUpdate("truncate table X25RefTask");
-								this.ebEnt.dbEnterprise
-										.ExecuteUpdate("truncate table X25Task");
+								this.ebEnt.dbDyn.ExecuteUpdate("delete from Users where nmUserId > 10 ");
+								this.ebEnt.dbEnterprise.ExecuteUpdate("delete from X25User where RecId > 10 ");
+								this.ebEnt.dbEnterprise.ExecuteUpdate("truncate table X25RefTask");
+								this.ebEnt.dbEnterprise.ExecuteUpdate("truncate table X25Task");
 
-							} else if (aLines[iL].toLowerCase().trim()
-									.startsWith("::pro")) {
+							} else if (aLines[iL].toLowerCase().trim().startsWith("::pro")) {
 								sbReturn.append("PROJECTS ");
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("truncate table Projects");
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("truncate table teb_project");
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("truncate table teb_baseline");
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("truncate table teb_link");
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("truncate table Budget_Report");
+								this.ebEnt.dbDyn.ExecuteUpdate("truncate table Projects");
+								this.ebEnt.dbDyn.ExecuteUpdate("truncate table teb_project");
+								this.ebEnt.dbDyn.ExecuteUpdate("truncate table teb_baseline");
+								this.ebEnt.dbDyn.ExecuteUpdate("truncate table teb_link");
+								this.ebEnt.dbDyn.ExecuteUpdate("truncate table Budget_Report");
 
 								iL++; // go past field headers
 								iTable = 4;
-							} else if (aLines[iL].toLowerCase().trim()
-									.startsWith("::req")) {
+							} else if (aLines[iL].toLowerCase().trim().startsWith("::req")) {
 								iRecId = 0;
 								sbReturn.append("REQUIREMENTS ");
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("truncate table Requirements");
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("delete from teb_link where nmLinkFlags=1");
+								this.ebEnt.dbDyn.ExecuteUpdate("truncate table Requirements");
+								this.ebEnt.dbDyn.ExecuteUpdate("delete from teb_link where nmLinkFlags=1");
 								iL++; // go past field headers
 								iTable = 5;
-							} else if (aLines[iL].toLowerCase().trim()
-									.startsWith("::sch")) {
+							} else if (aLines[iL].toLowerCase().trim().startsWith("::sch")) {
 								sbReturn.append("SCHEDULES ");
 								iRecId = 0;
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("truncate table Schedule");
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("delete from teb_link where nmLinkFlags=2");
+								this.ebEnt.dbDyn.ExecuteUpdate("truncate table Schedule");
+								this.ebEnt.dbDyn.ExecuteUpdate("delete from teb_link where nmLinkFlags=2");
 								iL++; // go past field headers
 								iTable = 6;
-							} else if (aLines[iL].toLowerCase().trim()
-									.startsWith("::map")) {
+							} else if (aLines[iL].toLowerCase().trim().startsWith("::map")) {
 								sbReturn.append("MAPS ");
 								iL++; // go past field headers
 								iTable = 7;
-							} else if (aLines[iL].toLowerCase().trim()
-									.startsWith("::tes")) {
+							} else if (aLines[iL].toLowerCase().trim().startsWith("::tes")) {
 								sbReturn.append("TEST ");
 								iRecId = 0;
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("truncate table test");
+								this.ebEnt.dbDyn.ExecuteUpdate("truncate table test");
 								iL++; // go past field headers
 								iTable = 8;
-							} else if (aLines[iL].toLowerCase().trim()
-									.startsWith("::inv")) {
+							} else if (aLines[iL].toLowerCase().trim().startsWith("::inv")) {
 								sbReturn.append("INVENTORY ");
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("truncate table Inventory");
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("truncate table teb_refinventory");
+								this.ebEnt.dbDyn.ExecuteUpdate("truncate table Inventory");
+								this.ebEnt.dbDyn.ExecuteUpdate("truncate table teb_refinventory");
 								iL++; // go past field headers
 								iTable = 10;
-							} else if (aLines[iL].toLowerCase().trim()
-									.startsWith("::hol")) {
+							} else if (aLines[iL].toLowerCase().trim().startsWith("::hol")) {
 								sbReturn.append("HOLIDAYS ");
 								iL++; // go past field headers
 								iHoliday = iTable = 9;
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("update teb_division set stHolidays='' ");
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("truncate table teb_allocate");
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("truncate table teb_allocateprj");
-							} else if (aLines[iL].toLowerCase().trim()
-									.startsWith("::alc")) {
+								this.ebEnt.dbDyn.ExecuteUpdate("update teb_division set stHolidays='' ");
+								this.ebEnt.dbDyn.ExecuteUpdate("truncate table teb_allocate");
+								this.ebEnt.dbDyn.ExecuteUpdate("truncate table teb_allocateprj");
+							} else if (aLines[iL].toLowerCase().trim().startsWith("::alc")) {
 								sbReturn.append("AssignLaborCategory ");
 								iL++; // go past field headers
 								iAssignLaborCategoy = 1;
-							} else if (aLines[iL].toLowerCase().trim()
-									.startsWith("::cost_req")) {
-								ResultSet rsPrjs = ebEnt.dbDyn
-										.ExecuteSql("SELECT * FROM projects");
+							} else if (aLines[iL].toLowerCase().trim().startsWith("::cost_req")) {
+								ResultSet rsPrjs = ebEnt.dbDyn.ExecuteSql("SELECT * FROM projects");
 								while (rsPrjs.next()) {
 									stPk = rsPrjs.getString("RecId");
-									nmBaseline = rsPrjs
-											.getInt("CurrentBaseline");
+									nmBaseline = rsPrjs.getInt("CurrentBaseline");
 									processAllRequirementCost();
 								}
 								return "REQUIREMENTS COST";
 							}
 						} else if (aLines[iL].trim().length() > 0) {
 							stSql = "";
-							String[] aFields = aLines[iL].trim()
-									.split("\t", -1);
+							String[] aFields = aLines[iL].trim().split("\t", -1);
 							for (int i = 0; i < aFields.length; i++) {
 								if (aFields[i] == null)
 									aFields[i] = "";
@@ -3860,21 +2750,9 @@ class EpsXlsProject // extends EpsUserData
 							}
 							switch (iTable) {
 							case 1:
-								stSql = "replace into teb_division"
-										+ " (nmDivision,stDivisionName, stCountry,stCurrency,stMoneySymbol,"
-										+ "nmBurdenFactor,nmExchangeRate,dtExchangeRate,stWorkDays)"
-										+ "values("
-										+ aFields[0]
-										+ " ,\""
-										+ aFields[1]
-										+ "\","
-										+ "\""
-										+ aFields[2]
-										+ "\",\""
-										+ aFields[3]
-										+ "\",\""
-										+ aFields[4]
-										+ "\","
+								stSql = "replace into teb_division" + " (nmDivision,stDivisionName, stCountry,stCurrency,stMoneySymbol,"
+										+ "nmBurdenFactor,nmExchangeRate,dtExchangeRate,stWorkDays)" + "values(" + aFields[0] + " ,\""
+										+ aFields[1] + "\"," + "\"" + aFields[2] + "\",\"" + aFields[3] + "\",\"" + aFields[4] + "\","
 										+ "1.0,'1.0',now(),'Mon,Tue,Wed,Thu,Fri') ";
 								String stTemp = "Alignment Organization Goals	3\nAlignment Project Goals	4\nAvailable Expertise	2\nCash Flow	-3\nCompetitive Advantage	3\nConformance	2\nCost	-5\nEnabler	2\nExternal Contract	5\nFinancial Risk	-2\nGovernment Regulations	2\nManagement Risk	-1\nNegative Consequences	2\nProject Enabler	2\nROI Year 1	5\nROI Year 2	4\nROI Year 3	3\nSchedule Risk	-3\nSecurity	4\nSuccess Factor	3\nSynergy With Organization	3\nSynergy With Other Projects	3\nTechnical Risk	-4\n";
 								String[] aV = stTemp.split("\\n");
@@ -3883,116 +2761,62 @@ class EpsXlsProject // extends EpsUserData
 									String[] v = aV[iV].trim().split("\t");
 									this.ebEnt.dbDyn
 											.ExecuteUpdate("replace into Criteria (nmDivision,nmFlags,CriteriaName,WeightImportance,Responsibilities) values(\""
-													+ aFields[0]
-													+ "\",1,\""
-													+ v[0]
-													+ "\","
-													+ v[1]
-													+ ", \""
-													+ stResponsibilities
-													+ "\") ");
+													+ aFields[0] + "\",1,\"" + v[0] + "\"," + v[1] + ", \"" + stResponsibilities + "\") ");
 								}
 								break;
 							case 9: // Holidays
-								stSql = "update teb_division set"
-										+ " stHolidays = concat( stHolidays,\""
-										+ aFields[1] + "\",\"\n\" )"
+								stSql = "update teb_division set" + " stHolidays = concat( stHolidays,\"" + aFields[1] + "\",\"\n\" )"
 										+ " where nmDivision=" + aFields[0];
 								break;
 							case 2:
-								this.ebEnt.dbDyn
-										.ExecuteUpdate("insert into LaborCategory (LaborCategory) values(\""
-												+ aFields[0] + "\") ");
-								ResultSet fixedUsers = this.ebEnt.dbDyn
-										.ExecuteSql("select * from users where nmUserId <=10");
+								this.ebEnt.dbDyn.ExecuteUpdate("insert into LaborCategory (LaborCategory) values(\"" + aFields[0] + "\") ");
+								ResultSet fixedUsers = this.ebEnt.dbDyn.ExecuteSql("select * from users where nmUserId <=10");
 								while (fixedUsers.next()) {
 									this.ebEnt.dbDyn
 											.ExecuteUpdate("insert into teb_reflaborcategory(nmLaborCategoryId, nmRefType, nmRefId) values "
 													+ "((select nmLcId from LaborCategory where LaborCategory=\""
 													+ aFields[0]
-													+ "\"), 42, "
-													+ fixedUsers
-															.getString("nmUserId")
-													+ "  )");
+													+ "\"), 42, " + fixedUsers.getString("nmUserId") + "  )");
 								}
 								break;
 							case 10:
-								stSql = "replace into Inventory "
-										+ "(InventoryName,Quantity,UnitOfMeasure,CostPerUnit) "
-										+ "values(\"" + aFields[0] + "\"" + ","
-										+ aFields[1] + ",\"" + aFields[2]
-										+ "\"" + ",\""
-										+ this.epsUd.makeDecimal(aFields[3])
-										+ "\"" + ") ";
+								stSql = "replace into Inventory " + "(InventoryName,Quantity,UnitOfMeasure,CostPerUnit) " + "values(\""
+										+ aFields[0] + "\"" + "," + aFields[1] + ",\"" + aFields[2] + "\"" + ",\""
+										+ this.epsUd.makeDecimal(aFields[3]) + "\"" + ") ";
 								break;
 							case 3:
-								stSql = "replace into X25User (RecId,stEMail,stPassword,nmPriviledge) values("
-										+ aFields[2]
-										+ ","
-										+ this.ebEnt.dbEnterprise
-												.fmtDbString(aFields[13])
-										+ ",old_password("
-										+ this.ebEnt.dbEnterprise
-												.fmtDbString(aFields[23])
-										+ "),"
-										+ this.epsUd.getPriviledge(aFields[4])
+								stSql = "replace into X25User (RecId,stEMail,stPassword,nmPriviledge) values(" + aFields[2] + ","
+										+ this.ebEnt.dbEnterprise.fmtDbString(aFields[13]) + ",old_password("
+										+ this.ebEnt.dbEnterprise.fmtDbString(aFields[23]) + ")," + this.epsUd.getPriviledge(aFields[4])
 										+ ")";
 								this.ebEnt.dbEnterprise.ExecuteUpdate(stSql);
 								aV = aFields[5].trim().split(",");
 								for (int iV = 0; iV < aV.length; iV++) {
-									int nmLaborCategoryId = this.ebEnt.dbDyn
-											.ExecuteSql1n("select nmLcId from LaborCategory where "
-													+ "LaborCategory = "
-													+ this.ebEnt.dbDyn
-															.fmtDbString(aV[iV]
-																	.trim()));
+									int nmLaborCategoryId = this.ebEnt.dbDyn.ExecuteSql1n("select nmLcId from LaborCategory where "
+											+ "LaborCategory = " + this.ebEnt.dbDyn.fmtDbString(aV[iV].trim()));
 									if (nmLaborCategoryId > 0) {
 										stSql = "replace INTO teb_reflaborcategory "
 												+ "(nmLaborCategoryId,nmRefType,nmRefId,nmProductiviyFactor,nmTasksCompleted,"
-												+ "nmActualHours,nmEstimatedHours ) VALUES"
-												+ "("
-												+ nmLaborCategoryId
-												+ ",42,"
-												+ aFields[2]
-												+ ","
-												+ aFields[7].replace("(", "-")
-														.replace(")", "")
-												+ ","
-												+ aFields[16]
-												+ ","
-												+ aFields[17]
-												+ ","
-												+ aFields[18] + ")";
+												+ "nmActualHours,nmEstimatedHours ) VALUES" + "(" + nmLaborCategoryId + ",42," + aFields[2]
+												+ "," + aFields[7].replace("(", "-").replace(")", "") + "," + aFields[16] + ","
+												+ aFields[17] + "," + aFields[18] + ")";
 										this.ebEnt.dbDyn.ExecuteUpdate(stSql);
 									} else
-										stError += "<br>USERS ERROR: ID: "
-												+ aFields[2]
-												+ " Labor Category not found: "
-												+ aV[iV].trim();
+										stError += "<br>USERS ERROR: ID: " + aFields[2] + " Labor Category not found: " + aV[iV].trim();
 								}
 
 								aV = aFields[8].trim().split(",");
 								int iPrimary = 1;
 								for (int iV = 0; iV < aV.length; iV++) {
-									int nmDivision = this.ebEnt.dbDyn
-											.ExecuteSql1n("select nmDivision from teb_division where "
-													+ "stDivisionName = "
-													+ this.ebEnt.dbDyn
-															.fmtDbString(aV[iV]
-																	.trim()));
+									int nmDivision = this.ebEnt.dbDyn.ExecuteSql1n("select nmDivision from teb_division where "
+											+ "stDivisionName = " + this.ebEnt.dbDyn.fmtDbString(aV[iV].trim()));
 									if (nmDivision > 0) {
-										stSql = "replace INTO teb_refdivision "
-												+ "(nmDivision,nmRefType,nmRefId,nmFlags) VALUES("
-												+ nmDivision + ",42,"
-												+ aFields[2] + "," + iPrimary
-												+ ")";
+										stSql = "replace INTO teb_refdivision " + "(nmDivision,nmRefType,nmRefId,nmFlags) VALUES("
+												+ nmDivision + ",42," + aFields[2] + "," + iPrimary + ")";
 										this.ebEnt.dbDyn.ExecuteUpdate(stSql);
 										iPrimary = 0;
 									} else
-										stError += "<br>USERS ERROR: ID: "
-												+ aFields[2]
-												+ " Division not found: "
-												+ aV[iV].trim();
+										stError += "<br>USERS ERROR: ID: " + aFields[2] + " Division not found: " + aV[iV].trim();
 								}
 								String ActivityHours = "";
 								String WeeklyWorkHours = "";
@@ -4001,132 +2825,91 @@ class EpsXlsProject // extends EpsUserData
 									for (int i = 0; i < 7; i++)
 										ActivityHours += "~" + aFields[32 + i];
 									for (int i = 0; i < 7; i++)
-										WeeklyWorkHours += "~"
-												+ aFields[25 + i];
+										WeeklyWorkHours += "~" + aFields[25 + i];
 								}
 								String[] aS = aFields[9].split(" ");
 								int iSupervisor = 0;
 								if (aS != null && aS.length > 1)
-									iSupervisor = this.ebEnt.dbDyn
-											.ExecuteSql1n("SELECT max(nmUserId) FROM Users where FirstName = \""
-													+ aS[0].trim()
-													+ "\" and LastName=\""
-													+ aS[1].trim() + "\" ");
-								stSql = "INSERT INTO Users"
-										+ " (nmUserId,CellPhone,Facsimile,FirstName,Answers,Telephone,HourlyRate,"
+									iSupervisor = this.ebEnt.dbDyn.ExecuteSql1n("SELECT max(nmUserId) FROM Users where FirstName = \""
+											+ aS[0].trim() + "\" and LastName=\"" + aS[1].trim() + "\" ");
+								stSql = "INSERT INTO Users" + " (nmUserId,CellPhone,Facsimile,FirstName,Answers,Telephone,HourlyRate,"
 										+ "JobTitle,StartDate,LastName,ActivityHours,WeeklyWorkHours,ProductivityFactor,"
 										+ "NrTasksCompleted,AccumPrjHours,AccumEstPrjHours,NonPrjHours,SickDaysToDate,"
 										+ "VacDaysToDate,Supervisor) VALUES("
 										+ aFields[2]
 										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(aFields[15])
+										+ this.ebEnt.dbDyn.fmtDbString(aFields[15])
 										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(aFields[14])
+										+ this.ebEnt.dbDyn.fmtDbString(aFields[14])
 										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(aFields[1])
+										+ this.ebEnt.dbDyn.fmtDbString(aFields[1])
 										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(aFields[24])
+										+ this.ebEnt.dbDyn.fmtDbString(aFields[24])
 										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(aFields[12])
+										+ this.ebEnt.dbDyn.fmtDbString(aFields[12])
 										+ ","
-										+ this.ebEnt.dbDyn
-												.makeDecimal(aFields[6])
+										+ this.ebEnt.dbDyn.makeDecimal(aFields[6])
 										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(aFields[3])
+										+ this.ebEnt.dbDyn.fmtDbString(aFields[3])
 										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(this.ebEnt.ebUd
-														.fmtDateToDb(aFields[10]))
+										+ this.ebEnt.dbDyn.fmtDbString(this.ebEnt.ebUd.fmtDateToDb(aFields[10]))
 										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(aFields[0])
+										+ this.ebEnt.dbDyn.fmtDbString(aFields[0])
 										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(ActivityHours)
+										+ this.ebEnt.dbDyn.fmtDbString(ActivityHours)
 										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(WeeklyWorkHours)
+										+ this.ebEnt.dbDyn.fmtDbString(WeeklyWorkHours)
 										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(aFields[7]
-														.replace("(", "-")
-														.replace(")", ""))
+										+ this.ebEnt.dbDyn.fmtDbString(aFields[7].replace("(", "-").replace(")", ""))
 										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(aFields[16])
+										+ this.ebEnt.dbDyn.fmtDbString(aFields[16])
 										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(aFields[17])
+										+ this.ebEnt.dbDyn.fmtDbString(aFields[17])
 										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(aFields[18])
+										+ this.ebEnt.dbDyn.fmtDbString(aFields[18])
 										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(aFields[19])
+										+ this.ebEnt.dbDyn.fmtDbString(aFields[19])
 										// + "," +
 										// this.ebEnt.dbDyn.fmtDbString(aFields[20])
 										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(aFields[21])
+										+ this.ebEnt.dbDyn.fmtDbString(aFields[21])
 										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(aFields[22])
-										+ ","
-										+ iSupervisor + ")";
+										+ this.ebEnt.dbDyn.fmtDbString(aFields[22])
+										+ "," + iSupervisor + ")";
 								break;
 							case 4: // ::projects
 								aV = aFields[3].trim().split(" ");
 								if (aV.length > 1)
-									stSql = "select max(nmUserId) from Users where FirstName=\""
-											+ aV[0].trim()
-											+ "\" and LastName=\""
+									stSql = "select max(nmUserId) from Users where FirstName=\"" + aV[0].trim() + "\" and LastName=\""
 											+ aV[1].trim() + "\" ";
 								else
-									stSql = "select max(nmUserId) from Users where FirstName='' and LastName=\""
-											+ aV[0].trim() + "\" ";
+									stSql = "select max(nmUserId) from Users where FirstName='' and LastName=\"" + aV[0].trim() + "\" ";
 								int iPM = this.ebEnt.dbDyn.ExecuteSql1n(stSql);
 								aV = aFields[4].trim().split(" ");
 								if (aV.length > 1)
-									stSql = "select max(nmUserId) from Users where FirstName=\""
-											+ aV[0].trim()
-											+ "\" and LastName=\""
+									stSql = "select max(nmUserId) from Users where FirstName=\"" + aV[0].trim() + "\" and LastName=\""
 											+ aV[1].trim() + "\" ";
 								else
-									stSql = "select max(nmUserId) from Users where FirstName='' and LastName=\""
-											+ aV[0].trim() + "\" ";
+									stSql = "select max(nmUserId) from Users where FirstName='' and LastName=\"" + aV[0].trim() + "\" ";
 								int iBA = this.ebEnt.dbDyn.ExecuteSql1n(stSql);
 								aV = aFields[5].trim().split(" ");
 								if (aV.length > 1)
-									stSql = "select max(nmUserId) from Users where FirstName=\""
-											+ aV[0].trim()
-											+ "\" and LastName=\""
+									stSql = "select max(nmUserId) from Users where FirstName=\"" + aV[0].trim() + "\" and LastName=\""
 											+ aV[1].trim() + "\" ";
 								else
-									stSql = "select max(nmUserId) from Users where FirstName='' and LastName=\""
-											+ aV[0].trim() + "\" ";
+									stSql = "select max(nmUserId) from Users where FirstName='' and LastName=\"" + aV[0].trim() + "\" ";
 								int iPPM = this.ebEnt.dbDyn.ExecuteSql1n(stSql);
 								aV = aFields[6].trim().split(" ");
 								if (aV.length > 1)
-									stSql = "select max(nmUserId) from Users where FirstName=\""
-											+ aV[0].trim()
-											+ "\" and LastName=\""
+									stSql = "select max(nmUserId) from Users where FirstName=\"" + aV[0].trim() + "\" and LastName=\""
 											+ aV[1].trim() + "\" ";
 								else
-									stSql = "select max(nmUserId) from Users where FirstName='' and LastName=\""
-											+ aV[0].trim() + "\" ";
-								int iSponsor = this.ebEnt.dbDyn
-										.ExecuteSql1n(stSql);
+									stSql = "select max(nmUserId) from Users where FirstName='' and LastName=\"" + aV[0].trim() + "\" ";
+								int iSponsor = this.ebEnt.dbDyn.ExecuteSql1n(stSql);
 								int iBaseline = 1;
 								if (aFields[7].length() > 0) {
 									try {
-										iBaseline = Integer
-												.parseInt(aFields[7]);
+										iBaseline = Integer.parseInt(aFields[7]);
 										if (iBaseline < 1)
 											iBaseline = 1;
 									} catch (Exception e) {
@@ -4136,20 +2919,16 @@ class EpsXlsProject // extends EpsUserData
 								int iPrjStatus = 0;
 								if (aFields[8].length() > 0) {
 									try {
-										iPrjStatus = Integer
-												.parseInt(aFields[8]);
+										iPrjStatus = Integer.parseInt(aFields[8]);
 										if (iPrjStatus < 0)
 											iPrjStatus = 0;
 									} catch (Exception e) {
 										iPrjStatus = 1;
 									}
 								}
-								int[] aiFields = { 1026, 932, 1023, 1028, 923,
-										1031, 1027, 895, 811, 1068, 1069, 1070,
-										1071, 1072, 1073, 1074, 1075, 1076,
-										1077, 1078, 1079, 1080, 1081, 1082,
-										1083, 1084, 1085, 1086, 1087, 1088,
-										1089, 1090 };
+								int[] aiFields = { 1026, 932, 1023, 1028, 923, 1031, 1027, 895, 811, 1068, 1069, 1070, 1071, 1072, 1073,
+										1074, 1075, 1076, 1077, 1078, 1079, 1080, 1081, 1082, 1083, 1084, 1085, 1086, 1087, 1088, 1089,
+										1090 };
 								// CPI Tasks Task Done Est. Hours Hours Exp. Prj
 								// Start Est.
 								// Finish Est. Cost Cost to Date AOG
@@ -4162,17 +2941,11 @@ class EpsXlsProject // extends EpsUserData
 										if (stValue.length() > 4) {
 											ProjectStartDate1 = ",ProjectStartDate";
 											ProjectProjectStartDate = ","
-													+ this.ebEnt.dbDyn
-															.fmtDbString(this.ebEnt.ebUd
-																	.fmtDateToDb(stValue));
+													+ this.ebEnt.dbDyn.fmtDbString(this.ebEnt.ebUd.fmtDateToDb(stValue));
 										}
 									try {
-										dValue = Double
-												.parseDouble(this.ebEnt.dbDyn
-														.makeDecimal(stValue));
-										iValue = Integer
-												.parseInt(this.ebEnt.dbDyn
-														.makeDecimal(stValue));
+										dValue = Double.parseDouble(this.ebEnt.dbDyn.makeDecimal(stValue));
+										iValue = Integer.parseInt(this.ebEnt.dbDyn.makeDecimal(stValue));
 									} catch (Exception e) {
 										iValue = 0;
 										dValue = 0;
@@ -4180,33 +2953,16 @@ class EpsXlsProject // extends EpsUserData
 									for (int j = 1; j <= iBaseline; j++) {
 										stSql = "INSERT INTO teb_project "
 												+ "(nmProjectId,nmBaseline,nmFieldId,iValue,nmValue,stValue,nmUserId,dtLastChanged) VALUES("
-												+ aFields[0]
-												+ ","
-												+ j
-												+ ","
-												+ aiFields[i]
-												+ ","
-												+ iValue
-												+ ","
-												+ dValue
-												+ ","
-												+ this.ebEnt.dbDyn
-														.fmtDbString(stValue)
-												+ ","
-												+ this.ebEnt.ebUd.getLoginId()
-												+ ",now())";
+												+ aFields[0] + "," + j + "," + aiFields[i] + "," + iValue + "," + dValue + ","
+												+ this.ebEnt.dbDyn.fmtDbString(stValue) + "," + this.ebEnt.ebUd.getLoginId() + ",now())";
 										this.ebEnt.dbDyn.ExecuteUpdate(stSql);
 									}
 								}
 
 								for (int i = 1; i <= iBaseline; i++) {
-									stSql = "insert into teb_project (nmProjectId,nmBaseline,nmFieldId,nmType) "
-											+ "select "
-											+ aFields[0]
-											+ " as nmProjectId, "
-											+ i
-											+ " as nmBaseline, RecId, 2 as nmType from Criteria where nmDivision="
-											+ aFields[1];
+									stSql = "insert into teb_project (nmProjectId,nmBaseline,nmFieldId,nmType) " + "select " + aFields[0]
+											+ " as nmProjectId, " + i
+											+ " as nmBaseline, RecId, 2 as nmType from Criteria where nmDivision=" + aFields[1];
 									this.ebEnt.dbDyn.ExecuteUpdate(stSql);
 								}
 
@@ -4218,16 +2974,12 @@ class EpsXlsProject // extends EpsUserData
 													+ ","
 													+ i
 													+ ",now(),"
-													+ this.ebEnt.ebUd
-															.getLoginId()
+													+ this.ebEnt.ebUd.getLoginId()
 													+ ","
 													+ (i - 1)
 													+ ",'"
-													+ (iPrjStatus == 3 ? "Suspended"
-															: (iPrjStatus == 2 ? "Completed"
-																	: (iPrjStatus == 1 ? "Approve"
-																			: "Interim")))
-													+ "') ");
+													+ (iPrjStatus == 3 ? "Suspended" : (iPrjStatus == 2 ? "Completed"
+															: (iPrjStatus == 1 ? "Approve" : "Interim"))) + "') ");
 								}
 
 								stSql = "INSERT INTO Projects (RecId,nmDivision,ProjectManagerAssignment,"
@@ -4243,8 +2995,7 @@ class EpsXlsProject // extends EpsUserData
 										+ ","
 										+ iPPM
 										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(aFields[2])
+										+ this.ebEnt.dbDyn.fmtDbString(aFields[2])
 										+ ","
 										+ iSponsor
 										+ ","
@@ -4259,35 +3010,25 @@ class EpsXlsProject // extends EpsUserData
 										+ ","
 										+ aFields[12]
 										+ ","
-										+ this.ebEnt.dbDyn
-												.fmtDbString(this.ebEnt.ebUd
-														.fmtDateToDb(aFields[15]))
-										+ ")";
+										+ this.ebEnt.dbDyn.fmtDbString(this.ebEnt.ebUd.fmtDateToDb(aFields[15])) + ")";
 								break;
 							case 5:
 								iCurrId = Integer.parseInt(aFields[0]);
 								if (iCurrId != iLastId) {
-									nmBaseline = this.ebEnt.dbDyn
-											.ExecuteSql1n("SELECT CurrentBaseline FROM Projects where RecId="
-													+ aFields[0]);
+									nmBaseline = this.ebEnt.dbDyn.ExecuteSql1n("SELECT CurrentBaseline FROM Projects where RecId="
+											+ aFields[0]);
 								}
 								iLastId = iCurrId;
 								iRecId++;
 								if (aFields.length < 8)
-									stError += "<br>REQ ERROR on Line: "
-											+ iRecId;
+									stError += "<br>REQ ERROR on Line: " + iRecId;
 								stSql = "INSERT INTO Requirements "
 										+ "(RecId,nmProjectId,nmBaseline,ReqId,ReqTitle,ReqLevel,ReqDescription)VALUES";
 								for (int iBL = 1; iBL <= nmBaseline; iBL++) {
-									if (aFields.length >= 7
-											&& aFields[5].length() > 0
-											&& aFields[6].length() > 0) {
-										String[] aMap = aFields[5].trim()
-												.split(",");
-										String[] aPercent = aFields[6].trim()
-												.split(",");
-										int iReqId = Integer
-												.parseInt(aFields[1]);
+									if (aFields.length >= 7 && aFields[5].length() > 0 && aFields[6].length() > 0) {
+										String[] aMap = aFields[5].trim().split(",");
+										String[] aPercent = aFields[6].trim().split(",");
+										int iReqId = Integer.parseInt(aFields[1]);
 										int iSchId = 0;
 										double dPercent = 0;
 										String stComment = "";
@@ -4295,67 +3036,38 @@ class EpsXlsProject // extends EpsUserData
 										int iAmortize = 0;
 										for (int iM = 0; iM < aMap.length; iM++) {
 											try {
-												iSchId = Integer
-														.parseInt(aMap[iM]
-																.trim());
+												iSchId = Integer.parseInt(aMap[iM].trim());
 												stComment = "";
 												iAmortize = iRemainder = 0;
-												if (aPercent[iM].toLowerCase()
-														.trim().equals("a")) {
+												if (aPercent[iM].toLowerCase().trim().equals("a")) {
 													iAmortize = 1;
 													dPercent = 0; // Amortize
-												} else if (aPercent[iM]
-														.toLowerCase().trim()
-														.equals("r")) {
+												} else if (aPercent[iM].toLowerCase().trim().equals("r")) {
 													iRemainder = 1;
 													dPercent = 0; // Remainder
 												} else {
-													dPercent = Double
-															.parseDouble(aPercent[iM]
-																	.trim());
+													dPercent = Double.parseDouble(aPercent[iM].trim());
 												}
-												linkMap(1, aFields[0], iBL,
-														aFields[0], iReqId,
-														aFields[0], iSchId,
-														dPercent, stComment,
+												linkMap(1, aFields[0], iBL, aFields[0], iReqId, aFields[0], iSchId, dPercent, stComment,
 														iAmortize, iRemainder);
 											} catch (Exception e) {
-												stError += "<br>Error in mapping: ReqId "
-														+ aFields[1]
-														+ " ["
-														+ aFields[5]
-														+ "] ["
+												stError += "<br>Error in mapping: ReqId " + aFields[1] + " [" + aFields[5] + "] ["
 														+ aFields[6] + "]";
 											}
 										}
 									}
 									if (iBL > 1)
 										stSql += ",";
-									stSql += "("
-											+ aFields[1]
-											+ ","
-											+ aFields[0]
-											+ ","
-											+ iBL
-											+ ","
-											+ aFields[1]
-											+ ","
-											+ this.ebEnt.dbDyn
-													.fmtDbString(aFields[2])
-											+ ","
-											+ aFields[3]
-											+ ","
-											+ this.ebEnt.dbDyn
-													.fmtDbString(aFields[4])
-											+ ")";
+									stSql += "(" + aFields[1] + "," + aFields[0] + "," + iBL + "," + aFields[1] + ","
+											+ this.ebEnt.dbDyn.fmtDbString(aFields[2]) + "," + aFields[3] + ","
+											+ this.ebEnt.dbDyn.fmtDbString(aFields[4]) + ")";
 								}
 								break;
 							case 6:
 								iCurrId = Integer.parseInt(aFields[0]);
 								if (iCurrId != iLastId) {
-									nmBaseline = this.ebEnt.dbDyn
-											.ExecuteSql1n("SELECT CurrentBaseline FROM Projects where RecId="
-													+ aFields[0]);
+									nmBaseline = this.ebEnt.dbDyn.ExecuteSql1n("SELECT CurrentBaseline FROM Projects where RecId="
+											+ aFields[0]);
 								}
 								iLastId = iCurrId;
 
@@ -4372,57 +3084,26 @@ class EpsXlsProject // extends EpsUserData
 												int iDep = 0;
 												double dLag = 0;
 												String stComment = "fs";
-												if (aDep[i].trim()
-														.toLowerCase()
-														.contains("fs")) {
+												if (aDep[i].trim().toLowerCase().contains("fs")) {
 													stComment = "fs";
-													aDep[i] = aDep[i].trim()
-															.toLowerCase()
-															.replace("fs", "");
-												} else if (aDep[i].trim()
-														.toLowerCase()
-														.contains("ss")) {
+													aDep[i] = aDep[i].trim().toLowerCase().replace("fs", "");
+												} else if (aDep[i].trim().toLowerCase().contains("ss")) {
 													stComment = "ss";
-													aDep[i] = aDep[i].trim()
-															.toLowerCase()
-															.replace("ss", "");
-												} else if (aDep[i].trim()
-														.toLowerCase()
-														.contains("sf")) {
+													aDep[i] = aDep[i].trim().toLowerCase().replace("ss", "");
+												} else if (aDep[i].trim().toLowerCase().contains("sf")) {
 													stComment = "sf";
-													aDep[i] = aDep[i].trim()
-															.toLowerCase()
-															.replace("sf", "");
-												} else if (aDep[i].trim()
-														.toLowerCase()
-														.contains("ff")) {
+													aDep[i] = aDep[i].trim().toLowerCase().replace("sf", "");
+												} else if (aDep[i].trim().toLowerCase().contains("ff")) {
 													stComment = "ff";
-													aDep[i] = aDep[i].trim()
-															.toLowerCase()
-															.replace("ff", "");
+													aDep[i] = aDep[i].trim().toLowerCase().replace("ff", "");
 												}
 
-												if (aDep[i].trim()
-														.contains("+")) {
-													String[] aV2 = aDep[i]
-															.trim()
-															.split("\\+");
-													iDep = Integer
-															.parseInt(aV2[0]
-																	.trim());
-													dLag = Double
-															.parseDouble(aV2[1]
-																	.trim()
-																	.replace(
-																			" ",
-																			"")
-																	.replace(
-																			"days",
-																			""));
+												if (aDep[i].trim().contains("+")) {
+													String[] aV2 = aDep[i].trim().split("\\+");
+													iDep = Integer.parseInt(aV2[0].trim());
+													dLag = Double.parseDouble(aV2[1].trim().replace(" ", "").replace("days", ""));
 												} else {
-													iDep = Integer
-															.parseInt(aDep[i]
-																	.trim());
+													iDep = Integer.parseInt(aDep[i].trim());
 												}
 												if (stComment.equals("sf")) // we
 																			// reverse
@@ -4431,29 +3112,14 @@ class EpsXlsProject // extends EpsUserData
 																			// FINISH
 																			// to
 																			// FS
-													linkMap(2,
-															aFields[0],
-															iBL,
-															aFields[0],
-															Integer.parseInt(aFields[1]),
-															aFields[0], iDep,
-															dLag, stComment, 0,
-															0);
+													linkMap(2, aFields[0], iBL, aFields[0], Integer.parseInt(aFields[1]), aFields[0], iDep,
+															dLag, stComment, 0, 0);
 												else
-													linkMap(2,
-															aFields[0],
-															iBL,
-															aFields[0],
-															iDep,
-															aFields[0],
-															Integer.parseInt(aFields[1]),
-															dLag, stComment, 0,
-															0);
+													linkMap(2, aFields[0], iBL, aFields[0], iDep, aFields[0], Integer.parseInt(aFields[1]),
+															dLag, stComment, 0, 0);
 											}
 										} catch (Exception e) {
-											stError += "<BR> Error with Dependencies Schedule: "
-													+ aFields[1]
-													+ " Dep: "
+											stError += "<BR> Error with Dependencies Schedule: " + aFields[1] + " Dep: "
 													+ aFields[8].trim();
 										}
 									}
@@ -4461,69 +3127,31 @@ class EpsXlsProject // extends EpsUserData
 									if (aFields[10].trim().length() > 0) {
 										aV = aFields[10].trim().split(",");
 										for (int iV = 0; iV < aV.length; iV++) {
-											int nmLaborCategoryId = this.ebEnt.dbDyn
-													.ExecuteSql1n("select nmLcId from LaborCategory where "
-															+ "LaborCategory = "
-															+ this.ebEnt.dbDyn
-																	.fmtDbString(aV[iV]
-																			.trim()));
+											int nmLaborCategoryId = this.ebEnt.dbDyn.ExecuteSql1n("select nmLcId from LaborCategory where "
+													+ "LaborCategory = " + this.ebEnt.dbDyn.fmtDbString(aV[iV].trim()));
 											if (nmLaborCategoryId > 0) {
 												if (iV > 0)
 													stLc += "|";
 												double nmHours = 0;
 												try {
-													nmHours = Double
-															.parseDouble(this.epsUd
-																	.makeHours(aFields[5]))
-															/ aV.length;
+													nmHours = Double.parseDouble(this.epsUd.makeHours(aFields[5])) / aV.length;
 												} catch (Exception e) {
-													stError += "<br>ProjectId "
-															+ aFields[0]
-															+ " Task ID: "
-															+ aFields[1]
-															+ " Labor Category invalid EFFORT: "
-															+ aV[iV].trim();
+													stError += "<br>ProjectId " + aFields[0] + " Task ID: " + aFields[1]
+															+ " Labor Category invalid EFFORT: " + aV[iV].trim();
 												}
-												stLc += nmLaborCategoryId
-														+ "~1~" + nmHours
-														+ "~~~~";
+												stLc += nmLaborCategoryId + "~1~" + nmHours + "~~~~";
 											} else
-												stError += "<br>ProjectId "
-														+ aFields[0]
-														+ " Task ID: "
-														+ aFields[1]
-														+ " Labor Category not found: "
-														+ aV[iV].trim();
+												stError += "<br>ProjectId " + aFields[0] + " Task ID: " + aFields[1]
+														+ " Labor Category not found: " + aV[iV].trim();
 										}
 									}
 									if (iBL > 1)
 										stSql += ",";
-									stSql += "("
-											+ aFields[1]
-											+ ","
-											+ aFields[0]
-											+ ","
-											+ iBL
-											+ ","
-											+ aFields[1]
-											+ ","
-											+ this.ebEnt.dbDyn
-													.fmtDbString(aFields[2])
-											+ ","
-											+ this.ebEnt.dbDyn
-													.fmtDbString(aFields[3])
-											+ ","
-											+ aFields[4]
-											+ ","
-											+ this.epsUd.makeHours(aFields[5])
-											+ ","
-											+ this.ebEnt.dbDyn
-													.fmtDbString(aFields[8])
-											+ ","
-											+ this.epsUd.makeYesNo(aFields[9])
-											+ ","
-											+ this.ebEnt.dbDyn
-													.fmtDbString(stLc)
+									stSql += "(" + aFields[1] + "," + aFields[0] + "," + iBL + "," + aFields[1] + ","
+											+ this.ebEnt.dbDyn.fmtDbString(aFields[2]) + "," + this.ebEnt.dbDyn.fmtDbString(aFields[3])
+											+ "," + aFields[4] + "," + this.epsUd.makeHours(aFields[5]) + ","
+											+ this.ebEnt.dbDyn.fmtDbString(aFields[8]) + "," + this.epsUd.makeYesNo(aFields[9]) + ","
+											+ this.ebEnt.dbDyn.fmtDbString(stLc)
 											// +
 											// this.ebEnt.dbDyn.fmtDbString(aFields[11])
 											// --
@@ -4538,47 +3166,25 @@ class EpsXlsProject // extends EpsUserData
 								}
 								iCurrId = Integer.parseInt(aFields[0]);
 								if (iCurrId != iLastId) {
-									nmBaseline = this.ebEnt.dbDyn
-											.ExecuteSql1n("SELECT CurrentBaseline FROM Projects where RecId="
-													+ aFields[0]);
+									nmBaseline = this.ebEnt.dbDyn.ExecuteSql1n("SELECT CurrentBaseline FROM Projects where RecId="
+											+ aFields[0]);
 								}
 								iLastId = iCurrId;
 
-								iRecId++;
 								stSql = "INSERT INTO test (RecId, nmProjectId, nmBaseLine, ReqMap, TstType, TstMethod,"
 										+ " TstId, TstTitle, TstDescription) VALUES";
 								for (int iBL = 1; iBL <= nmBaseline; iBL++) {
-									if (iBL > 0)
+									iRecId++;
+									if (iBL > 1)
 										stSql += ",";
-									stSql += "("
-											+ iRecId
-											+ ","
-											+ aFields[0]
-											+ ","
-											+ "(SELECT CurrentBaseline FROM projects WHERE RecId="
-											+ aFields[0]
-											+ "),"
-											+ aFields[1]
-											+ ","
-											+ this.ebEnt.dbDyn
-													.fmtDbString(aFields[4])
-											+ ","
-											+ this.ebEnt.dbDyn
-													.fmtDbString(aFields[5])
-											+ ","
-											+ aFields[3]
-											+ ","
-											+ this.ebEnt.dbDyn
-													.fmtDbString(aFields[2])
-											+ ","
-											+ this.ebEnt.dbDyn
-													.fmtDbString(aFields[6])
-											+ ")";
+									stSql += "(" + iRecId + "," + aFields[0] + "," + iBL + "," + aFields[1] + ","
+											+ this.ebEnt.dbDyn.fmtDbString(aFields[4]) + "," + this.ebEnt.dbDyn.fmtDbString(aFields[5])
+											+ "," + aFields[3] + "," + this.ebEnt.dbDyn.fmtDbString(aFields[2]) + ","
+											+ this.ebEnt.dbDyn.fmtDbString(aFields[6]) + ")";
 								}
 								break;
 							default:
-								stError += "<BR>ERROR LOADING: Table: "
-										+ iTable;
+								stError += "<BR>ERROR LOADING: Table: " + iTable;
 								break;
 							}
 							if (stSql.length() > 0)
@@ -4593,16 +3199,14 @@ class EpsXlsProject // extends EpsUserData
 					if (iAssignLaborCategoy > 0)
 						this.epsUd.epsEf.processAssignLaborCategory();
 
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Triggers set ContactList='1,2,3', TriggerEvent='Enabled', Communication='No' ");
+					this.ebEnt.dbDyn.ExecuteUpdate("update Triggers set ContactList='1,2,3', TriggerEvent='Enabled', Communication='No' ");
 					EpsReport epsReport = new EpsReport();
 					epsReport.doProjectRanking(this.epsUd);
 					stError += epsReport.getError();
 					// this.epsUd.runEOB();
 					sbReturn.append(" Rows: " + aLines.length);
 					if (this.stError.length() > 0)
-						sbReturn.append(" <font color=red>WITH ERRORS<hr>"
-								+ this.stError + "<br></font>");
+						sbReturn.append(" <font color=red>WITH ERRORS<hr>" + this.stError + "<br></font>");
 					else
 						sbReturn.append(" no errors");
 					this.stError = "";
@@ -4624,34 +3228,17 @@ class EpsXlsProject // extends EpsUserData
 		return sbReturn.toString();
 	}
 
-	public void linkMap(int iFlags, String stPrjId, int iBaseline,
-			String stReqPrj, int iReqRecId, String stSchPrj, int iSchRecId,
+	public void linkMap(int iFlags, String stPrjId, int iBaseline, String stReqPrj, int iReqRecId, String stSchPrj, int iSchRecId,
 			double dPercent, String stComment, int iAmortize, int iRemainder) {
 		try {
-			String stValue = this.ebEnt.dbDyn
-					.ExecuteSql1("select nmPercent from teb_link where nmProjectId="
-							+ stPrjId
-							+ " and nmBaseline="
-							+ iBaseline
-							+ " and nmLinkFlags="
-							+ iFlags
-							+ " and nmFromProject="
-							+ stReqPrj
-							+ " and nmFromId="
-							+ iReqRecId
-							+ " and nmToProject="
-							+ stSchPrj
-							+ " and nmToId="
-							+ iSchRecId);
+			String stValue = this.ebEnt.dbDyn.ExecuteSql1("select nmPercent from teb_link where nmProjectId=" + stPrjId
+					+ " and nmBaseline=" + iBaseline + " and nmLinkFlags=" + iFlags + " and nmFromProject=" + stReqPrj + " and nmFromId="
+					+ iReqRecId + " and nmToProject=" + stSchPrj + " and nmToId=" + iSchRecId);
 			if (stValue != null && stValue.length() > 0) {
-				this.ebEnt.dbDyn.ExecuteUpdate("update teb_link set nmPercent="
-						+ dPercent + ",nmAmortize=" + iAmortize
-						+ ",nmRemainder=" + iRemainder + ",stComment=\""
-						+ stComment + "\" where nmProjectId=" + stPrjId
-						+ " and nmBaseline=" + iBaseline + " and nmLinkFlags="
-						+ iFlags + " and nmFromProject=" + stReqPrj
-						+ " and nmFromId=" + iReqRecId + " and nmToProject="
-						+ stSchPrj + " and nmToId=" + iSchRecId);
+				this.ebEnt.dbDyn.ExecuteUpdate("update teb_link set nmPercent=" + dPercent + ",nmAmortize=" + iAmortize + ",nmRemainder="
+						+ iRemainder + ",stComment=\"" + stComment + "\" where nmProjectId=" + stPrjId + " and nmBaseline=" + iBaseline
+						+ " and nmLinkFlags=" + iFlags + " and nmFromProject=" + stReqPrj + " and nmFromId=" + iReqRecId
+						+ " and nmToProject=" + stSchPrj + " and nmToId=" + iSchRecId);
 			} else {
 				this.ebEnt.dbDyn
 						.ExecuteUpdate("insert into teb_link "
@@ -4669,19 +3256,10 @@ class EpsXlsProject // extends EpsUserData
 								+ ","
 								+ stSchPrj
 								+ ","
-								+ iSchRecId
-								+ ","
-								+ dPercent
-								+ ",\""
-								+ stComment
-								+ "\","
-								+ iAmortize
-								+ ","
-								+ iRemainder + ")");
+								+ iSchRecId + "," + dPercent + ",\"" + stComment + "\"," + iAmortize + "," + iRemainder + ")");
 			}
 		} catch (Exception e) {
-			this.stError += "<br>ERROR linkMap iReqRecId " + iReqRecId
-					+ " iSchRecId " + iSchRecId + " :" + e;
+			this.stError += "<br>ERROR linkMap iReqRecId " + iReqRecId + " iSchRecId " + iSchRecId + " :" + e;
 		}
 		return;
 	}
@@ -4690,8 +3268,7 @@ class EpsXlsProject // extends EpsUserData
 	// nmLinkFlags 0x100 ... OLD/FROZEN entries, do not recalculate
 	// nmLinkFlags 0x200 ... ACTIVE entries, do no change
 	public String analyzeLink() {
-		String stHead = "<tr><td align=right>" + this.stPk
-				+ "</td><td>Map/Link</td>";
+		String stHead = "<tr><td align=right>" + this.stPk + "</td><td>Map/Link</td>";
 		StringBuilder sbReturn = new StringBuilder(5000);
 
 		try {
@@ -4712,14 +3289,10 @@ class EpsXlsProject // extends EpsUserData
 			int linkHit = 0;
 
 			// Verify low level requirements and tasks are mapped #19
-			if (this.ebEnt.ebUd.request.getParameter("stAction").equals(
-					"runeob")) {
+			if (this.ebEnt.ebUd.request.getParameter("stAction").equals("runeob")) {
 				// Verify Low Level Requirements
-				rs = this.ebEnt.dbDyn
-						.ExecuteSql("SELECT * FROM requirements WHERE nmProjectId="
-								+ this.stPk
-								+ " and nmBaseline="
-								+ this.nmBaseline + " ORDER BY RecId DESC");
+				rs = this.ebEnt.dbDyn.ExecuteSql("SELECT * FROM requirements WHERE nmProjectId=" + this.stPk + " and nmBaseline="
+						+ this.nmBaseline + " ORDER BY RecId DESC");
 				rs.last();
 				int iSch = rs.getRow();
 				int iLastLevel = -1;
@@ -4727,56 +3300,33 @@ class EpsXlsProject // extends EpsUserData
 					rs.absolute(i);
 					if (iLastLevel == rs.getInt("ReqLevel")) {
 						// same level as before, therefore we are low level
-						linkHit = this.ebEnt.dbDyn
-								.ExecuteSql1n("SELECT COUNT(*) as c FROM teb_link WHERE nmProjectId="
-										+ this.stPk
-										+ " and nmBaseline="
-										+ this.nmBaseline
-										+ " and nmLinkFlags=1 and nmFromId="
-										+ rs.getInt("RecId"));
+						linkHit = this.ebEnt.dbDyn.ExecuteSql1n("SELECT COUNT(*) as c FROM teb_link WHERE nmProjectId=" + this.stPk
+								+ " and nmBaseline=" + this.nmBaseline + " and nmLinkFlags=1 and nmFromId=" + rs.getInt("RecId"));
 						if (linkHit <= 0) {
-							this.epsUd.makeMessage(
-									prjname,
-									ppm + "," + pm + "," + ba + "," + sp,
-									"Requirement Mapping",
-									"Please Assign a Task to Requirement("
-											+ rs.getString("ReqTitle") + ")",
-									dateEnd);
+							this.epsUd.makeMessage(prjname, ppm + "," + pm + "," + ba + "," + sp, "Requirement Mapping",
+									"Please Assign a Task to Requirement(" + rs.getString("ReqTitle") + ")", dateEnd);
 						}
 					}
 					iLastLevel = rs.getInt("ReqLevel");
 				}
 
 				// Verify Low Level Schedule
-				rs = this.ebEnt.dbDyn
-						.ExecuteSql("SELECT * FROM schedule WHERE nmProjectId="
-								+ this.stPk + " and nmBaseline="
-								+ this.nmBaseline + " ORDER BY RecId DESC");
+				rs = this.ebEnt.dbDyn.ExecuteSql("SELECT * FROM schedule WHERE nmProjectId=" + this.stPk + " and nmBaseline="
+						+ this.nmBaseline + " ORDER BY RecId DESC");
 				rs.last();
 				iSch = rs.getRow();
 				iLastLevel = -1;
 				for (int i = 1; i <= iSch; i++) {
 					rs.absolute(i);
 					if (iLastLevel == rs.getInt("SchLevel")) {
-						int iPrjStatus = this.ebEnt.dbDyn
-								.ExecuteSql1n("SELECT ProjectStatus FROM Projects WHERE RecId="
-										+ this.stPk);
+						int iPrjStatus = this.ebEnt.dbDyn.ExecuteSql1n("SELECT ProjectStatus FROM Projects WHERE RecId=" + this.stPk);
 						// same level as before, therefore we are low level
 						if (iPrjStatus > 0) {
-							linkHit = this.ebEnt.dbDyn
-									.ExecuteSql1n("SELECT COUNT(*) as c FROM teb_link WHERE nmProjectId="
-											+ this.stPk
-											+ " and nmBaseline="
-											+ this.nmBaseline
-											+ " and nmLinkFlags=1 and nmToId="
-											+ rs.getInt("RecId"));
+							linkHit = this.ebEnt.dbDyn.ExecuteSql1n("SELECT COUNT(*) as c FROM teb_link WHERE nmProjectId=" + this.stPk
+									+ " and nmBaseline=" + this.nmBaseline + " and nmLinkFlags=1 and nmToId=" + rs.getInt("RecId"));
 							if (linkHit <= 0) {
-								this.epsUd.makeMessage(prjname, ppm + "," + pm
-										+ "," + ba + "," + sp,
-										"Schedule Mapping",
-										"Please Assign a Requirement to Task("
-												+ rs.getString("SchTitle")
-												+ ")", dateEnd);
+								this.epsUd.makeMessage(prjname, ppm + "," + pm + "," + ba + "," + sp, "Schedule Mapping",
+										"Please Assign a Requirement to Task(" + rs.getString("SchTitle") + ")", dateEnd);
 							}
 						}
 					}
@@ -4785,184 +3335,121 @@ class EpsXlsProject // extends EpsUserData
 			}
 
 			// Remainder calculation
-			this.ebEnt.dbDyn
-					.ExecuteUpdate("update teb_link set nmPercent=0 where nmProjectId="
-							+ this.stPk
-							+ " and nmBaseline="
-							+ this.nmBaseline
-							+ " and nmLinkFlags=1 and "
-							+ "( nmAmortize = 1 or nmRemainder = 1 ) ");
-			rs = this.ebEnt.dbDyn
-					.ExecuteSql("select "
-							// ResultSet rs =
-							// this.ebEnt.dbDyn.ExecuteSql("select "
-							+ "count(*) cnt,nmToId,format(sum(nmPercent),4) nmPercent,sum(nmAmortize) nmAmortize,sum(nmRemainder) nmRemainder "
-							+ "from teb_link where nmProjectId="
-							+ this.stPk
-							+ " and nmBaseline="
-							+ this.nmBaseline
-							+ " and nmLinkFlags=1 and nmAmortize=0 group by nmToId");
+			this.ebEnt.dbDyn.ExecuteUpdate("update teb_link set nmPercent=0 where nmProjectId=" + this.stPk + " and nmBaseline="
+					+ this.nmBaseline + " and nmLinkFlags=1 and " + "( nmAmortize = 1 or nmRemainder = 1 ) ");
+			rs = this.ebEnt.dbDyn.ExecuteSql("select "
+					// ResultSet rs =
+					// this.ebEnt.dbDyn.ExecuteSql("select "
+					+ "count(*) cnt,nmToId,format(sum(nmPercent),4) nmPercent,sum(nmAmortize) nmAmortize,sum(nmRemainder) nmRemainder "
+					+ "from teb_link where nmProjectId=" + this.stPk + " and nmBaseline=" + this.nmBaseline
+					+ " and nmLinkFlags=1 and nmAmortize=0 group by nmToId");
 			rs.last();
 			int iMax = rs.getRow();
 			for (int iL = 1; iL <= iMax; iL++) {
 				rs.absolute(iL);
-				if (rs.getDouble("nmPercent") < 100
-						&& rs.getInt("nmRemainder") > 0) {
-					double nmRemainder = (100.0 - rs.getDouble("nmPercent"))
-							/ rs.getInt("nmRemainder");
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update teb_link set nmPercent="
-									+ nmRemainder + " " + "where nmProjectId="
-									+ this.stPk + " and nmBaseline="
-									+ this.nmBaseline + " and nmLinkFlags=1 "
-									+ "and nmToId=" + rs.getString("nmToId")
-									+ " and nmRemainder != 0");
+				if (rs.getDouble("nmPercent") < 100 && rs.getInt("nmRemainder") > 0) {
+					double nmRemainder = (100.0 - rs.getDouble("nmPercent")) / rs.getInt("nmRemainder");
+					this.ebEnt.dbDyn.ExecuteUpdate("update teb_link set nmPercent=" + nmRemainder + " " + "where nmProjectId=" + this.stPk
+							+ " and nmBaseline=" + this.nmBaseline + " and nmLinkFlags=1 " + "and nmToId=" + rs.getString("nmToId")
+							+ " and nmRemainder != 0");
 				}
 
 				if (rs.getDouble("nmPercent") < 100
-						&& this.ebEnt.dbDyn
-								.ExecuteSql1n("select count(*) from Schedule where"
-										+ " nmProjectId="
-										+ this.stPk
-										+ " and nmBaseline="
-										+ this.nmBaseline
-										+ " and RecId="
-										+ rs.getString("nmToId")
-										+ " and (SchFlags & 0x8000) != 0 ") > 0) {
+						&& this.ebEnt.dbDyn.ExecuteSql1n("select count(*) from Schedule where" + " nmProjectId=" + this.stPk
+								+ " and nmBaseline=" + this.nmBaseline + " and RecId=" + rs.getString("nmToId")
+								+ " and (SchFlags & 0x8000) != 0 ") > 0) {
 					// If < 100 % and SchFlags == Amortize ... Distribute to all
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Requirements r left join teb_link l"
-									+ " on l.nmProjectId=r.nmProjectId and l.nmBaseline=r.nmBaseline and l.nmLinkFlags=1 and l.nmFromId=r.RecId"
-									+ " and l.nmToId="
-									+ rs.getInt("nmToId")
-									+ " set l.nmLinkFlags=5"
-									+ " where (r.ReqFlags & 0x10) != 0 and (l.nmAmortize="
-									+ rs.getInt("nmToId")
-									+ " or l.nmAmortize is null )");
+					this.ebEnt.dbDyn.ExecuteUpdate("update Requirements r left join teb_link l"
+							+ " on l.nmProjectId=r.nmProjectId and l.nmBaseline=r.nmBaseline and l.nmLinkFlags=1 and l.nmFromId=r.RecId"
+							+ " and l.nmToId=" + rs.getInt("nmToId") + " set l.nmLinkFlags=5"
+							+ " where (r.ReqFlags & 0x10) != 0 and (l.nmAmortize=" + rs.getInt("nmToId") + " or l.nmAmortize is null )");
 
-					ResultSet rs2 = this.ebEnt.dbDyn
-							.ExecuteSql("select r.RecId from Requirements r left join teb_link l"
-									+ " on l.nmProjectId=r.nmProjectId and l.nmBaseline=r.nmBaseline and l.nmLinkFlags=1 and l.nmFromId=r.RecId"
-									+ " and l.nmToId="
-									+ rs.getInt("nmToId")
-									+ " where (r.ReqFlags & 0x10) != 0"
-									+ " and (l.nmAmortize="
-									+ rs.getInt("nmToId")
-									+ " or l.nmAmortize is null )");
+					ResultSet rs2 = this.ebEnt.dbDyn.ExecuteSql("select r.RecId from Requirements r left join teb_link l"
+							+ " on l.nmProjectId=r.nmProjectId and l.nmBaseline=r.nmBaseline and l.nmLinkFlags=1 and l.nmFromId=r.RecId"
+							+ " and l.nmToId=" + rs.getInt("nmToId") + " where (r.ReqFlags & 0x10) != 0" + " and (l.nmAmortize="
+							+ rs.getInt("nmToId") + " or l.nmAmortize is null )");
 					rs2.last();
 					int iMax2 = rs2.getRow();
 					if (iMax2 > 0) {
-						double nmRemainder = (100.0 - rs.getDouble("nmPercent"))
-								/ iMax2;
+						double nmRemainder = (100.0 - rs.getDouble("nmPercent")) / iMax2;
 						for (int i2 = 1; i2 <= iMax2; i2++) {
 							rs2.absolute(i2);
-							linkMap(1, stPk, nmBaseline, stPk,
-									rs2.getInt("RecId"), stPk,
-									rs.getInt("nmToId"), nmRemainder, "",
+							linkMap(1, stPk, nmBaseline, stPk, rs2.getInt("RecId"), stPk, rs.getInt("nmToId"), nmRemainder, "",
 									rs.getInt("nmToId"), 0);
 						}
 					}
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("delete from teb_link where nmLinkFlags=5");
+					this.ebEnt.dbDyn.ExecuteUpdate("delete from teb_link where nmLinkFlags=5");
 				}
 			}
 
 			ResultSet rs1;
-			int iPrjStatus = this.ebEnt.dbDyn
-					.ExecuteSql1n("SELECT ProjectStatus FROM Projects WHERE RecId="
-							+ this.stPk);
+			int iPrjStatus = this.ebEnt.dbDyn.ExecuteSql1n("SELECT ProjectStatus FROM Projects WHERE RecId=" + this.stPk);
 			if (iPrjStatus > 0) {
-				rs1 = this.ebEnt.dbDyn
-						.ExecuteSql("select"
-								+ " count(*) cnt,nmToId,format(sum(nmPercent),4) nmPercent,sum(nmAmortize) nmAmortize,sum(nmRemainder) nmRemainder"
-								+ " from teb_link where nmProjectId="
-								+ this.stPk
-								+ " and nmBaseline="
-								+ this.nmBaseline
-								+ " and nmLinkFlags=1 group by nmToId having format(sum(nmPercent),4) = 100");
+				rs1 = this.ebEnt.dbDyn.ExecuteSql("select"
+						+ " count(*) cnt,nmToId,format(sum(nmPercent),4) nmPercent,sum(nmAmortize) nmAmortize,sum(nmRemainder) nmRemainder"
+						+ " from teb_link where nmProjectId=" + this.stPk + " and nmBaseline=" + this.nmBaseline
+						+ " and nmLinkFlags=1 group by nmToId having format(sum(nmPercent),4) = 100");
 				rs1.last();
 				iMax = rs1.getRow();
 
 				sbReturn.append(stHead + "<td>Requirements to Schedules</td>");
 				if (iMax > 0)
-					sbReturn.append("<td>Schedules Mapped 100% </td><td align=right>"
-							+ iMax + "</td><td style='color:green;'>ok</td>");
+					sbReturn.append("<td>Schedules Mapped 100% </td><td align=right>" + iMax + "</td><td style='color:green;'>ok</td>");
 				else {
 					this.iAnalyzeStatus |= 0x10; // No schedule mapped 100%
-					sbReturn.append("<td style='color:red;'>Requirement Mapping</td><td align=right>"
-							+ iMax + "</td><td style='color:red;'>fail</td>");
-					this.epsUd.makeMessage(prjname, ppm + "," + pm + "," + ba
-							+ "," + sp, "Requirement Mapping",
+					sbReturn.append("<td style='color:red;'>Requirement Mapping</td><td align=right>" + iMax
+							+ "</td><td style='color:red;'>fail</td>");
+					this.epsUd.makeMessage(prjname, ppm + "," + pm + "," + ba + "," + sp, "Requirement Mapping",
 							"Please Assign Tasks to Requirements", dateEnd);
 				}
 				sbReturn.append(this.getElapsed());
 				rs1.close();
 			}
 
-			rs1 = this.ebEnt.dbDyn
-					.ExecuteSql("select"
-							+ " count(*) cnt,nmToId,format(sum(nmPercent),4) nmPercent,sum(nmAmortize) nmAmortize,sum(nmRemainder) nmRemainder"
-							+ " from teb_link where nmProjectId="
-							+ this.stPk
-							+ " and nmBaseline="
-							+ this.nmBaseline
-							+ " and nmLinkFlags=1 group by nmToId having format(sum(nmPercent),4) < 100");
+			rs1 = this.ebEnt.dbDyn.ExecuteSql("select"
+					+ " count(*) cnt,nmToId,format(sum(nmPercent),4) nmPercent,sum(nmAmortize) nmAmortize,sum(nmRemainder) nmRemainder"
+					+ " from teb_link where nmProjectId=" + this.stPk + " and nmBaseline=" + this.nmBaseline
+					+ " and nmLinkFlags=1 group by nmToId having format(sum(nmPercent),4) < 100");
 			rs1.last();
 			iMax = rs1.getRow();
 			if (iMax > 0) {
 				// Process EOB mapping messages #19
-				if (this.ebEnt.ebUd.request.getParameter("stAction").equals(
-						"runeob")) {
-					this.epsUd.makeMessage(prjname, ppm + "," + pm + "," + ba
-							+ "," + sp, "Schedule Mapping",
-							"Schedules Mapped &lt; 100%", dateEnd);
+				if (this.ebEnt.ebUd.request.getParameter("stAction").equals("runeob")) {
+					this.epsUd.makeMessage(prjname, ppm + "," + pm + "," + ba + "," + sp, "Schedule Mapping", "Schedules Mapped &lt; 100%",
+							dateEnd);
 				}
 
-				sbReturn.append(stHead
-						+ "<td>Requirements to Schedules</td><td>Schedules Mapped &lt; 100% <br>");
+				sbReturn.append(stHead + "<td>Requirements to Schedules</td><td>Schedules Mapped &lt; 100% <br>");
 				for (int i = 1; i <= iMax; i++) {
 					rs1.absolute(i);
-					sbReturn.append("<a href='"
-							+ makeScheduleLink(rs1.getInt("nmToId")) + "'>"
-							+ rs1.getString("nmToId") + "</a>&nbsp;");
+					sbReturn.append("<a href='" + makeScheduleLink(rs1.getInt("nmToId")) + "'>" + rs1.getString("nmToId") + "</a>&nbsp;");
 				}
-				sbReturn.append("</td><td valign=top align=right>" + iMax
-						+ "</td>");
+				sbReturn.append("</td><td valign=top align=right>" + iMax + "</td>");
 				sbReturn.append("</td><td valign=top style='color:red;'>fail</td>");
 				this.iAnalyzeStatus |= 0x20;
 				sbReturn.append(this.getElapsed());
 			}
 			rs1.close();
 
-			rs1 = this.ebEnt.dbDyn
-					.ExecuteSql("select"
-							+ " count(*) cnt,nmToId,format(sum(nmPercent),4) nmPercent,sum(nmAmortize) nmAmortize,sum(nmRemainder) nmRemainder"
-							+ " from teb_link where nmProjectId="
-							+ this.stPk
-							+ " and nmBaseline="
-							+ this.nmBaseline
-							+ " and nmLinkFlags=1 group by nmToId having format(sum(nmPercent),4) > 100");
+			rs1 = this.ebEnt.dbDyn.ExecuteSql("select"
+					+ " count(*) cnt,nmToId,format(sum(nmPercent),4) nmPercent,sum(nmAmortize) nmAmortize,sum(nmRemainder) nmRemainder"
+					+ " from teb_link where nmProjectId=" + this.stPk + " and nmBaseline=" + this.nmBaseline
+					+ " and nmLinkFlags=1 group by nmToId having format(sum(nmPercent),4) > 100");
 			rs1.last();
 			iMax = rs1.getRow();
 			if (iMax > 0) {
 				// Process EOB mapping messages #19
-				if (this.ebEnt.ebUd.request.getParameter("stAction").equals(
-						"runeob")) {
-					this.epsUd.makeMessage(prjname, ppm + "," + pm + "," + ba
-							+ "," + sp, "Schedule Mapping",
-							"Schedules Mapped &gt; 100%", dateEnd);
+				if (this.ebEnt.ebUd.request.getParameter("stAction").equals("runeob")) {
+					this.epsUd.makeMessage(prjname, ppm + "," + pm + "," + ba + "," + sp, "Schedule Mapping", "Schedules Mapped &gt; 100%",
+							dateEnd);
 				}
 
-				sbReturn.append(stHead
-						+ "<td>Requirements to Schedules</td><td>Schedules Mapped &gt; 100% <br>");
+				sbReturn.append(stHead + "<td>Requirements to Schedules</td><td>Schedules Mapped &gt; 100% <br>");
 				for (int i = 1; i <= iMax; i++) {
 					rs1.absolute(i);
-					sbReturn.append("<a href='"
-							+ makeScheduleLink(rs1.getInt("nmToId")) + "'>"
-							+ rs1.getString("nmToId") + "</a>&nbsp;");
+					sbReturn.append("<a href='" + makeScheduleLink(rs1.getInt("nmToId")) + "'>" + rs1.getString("nmToId") + "</a>&nbsp;");
 				}
-				sbReturn.append("</td><td valign=top align=right>" + iMax
-						+ "</td>");
+				sbReturn.append("</td><td valign=top align=right>" + iMax + "</td>");
 				sbReturn.append("</td><td valign=top style='color:red;'>fail</td>");
 				this.iAnalyzeStatus |= 0x40;
 				sbReturn.append(this.getElapsed());
@@ -4975,8 +3462,7 @@ class EpsXlsProject // extends EpsUserData
 
 	public String getElapsed() {
 		StringBuilder sbReturn = new StringBuilder(5000);
-		sbReturn.append("<td valign=top>"
-				+ (ebEnt.dbDyn.getSqlCount() - iLastSqlCount) + "</td>");
+		sbReturn.append("<td valign=top>" + (ebEnt.dbDyn.getSqlCount() - iLastSqlCount) + "</td>");
 		long endTime = System.nanoTime();
 		long elapsedTime = endTime - startTime;
 		double seconds = elapsedTime / 1.0E09;
@@ -4991,18 +3477,12 @@ class EpsXlsProject // extends EpsUserData
 		int iFrom = 0;
 		int SchId = 0;
 		try {
-			SchId = this.ebEnt.dbDyn
-					.ExecuteSql1n("select SchId from Schedule where nmProjectId="
-							+ stPk
-							+ " and nmBaseline="
-							+ this.nmBaseline
-							+ " and RecId=" + SchRecId);
-			iFrom = (SchId / this.epsUd.rsMyDiv.getInt("MaxRecords"))
-					* this.epsUd.rsMyDiv.getInt("MaxRecords");
+			SchId = this.ebEnt.dbDyn.ExecuteSql1n("select SchId from Schedule where nmProjectId=" + stPk + " and nmBaseline="
+					+ this.nmBaseline + " and RecId=" + SchRecId);
+			iFrom = (SchId / this.epsUd.rsMyDiv.getInt("MaxRecords")) * this.epsUd.rsMyDiv.getInt("MaxRecords");
 		} catch (Exception e) {
 		}
-		return "./?stAction=projects&t=12&do=xls&pk=" + this.stPk
-				+ "&parent=&child=21&from=" + iFrom + "#row" + SchId;
+		return "./?stAction=projects&t=12&do=xls&pk=" + this.stPk + "&parent=&child=21&from=" + iFrom + "#row" + SchId;
 	}
 
 	public String doMap(String stChild, String stR) {
@@ -5015,10 +3495,8 @@ class EpsXlsProject // extends EpsUserData
 		String stDo2 = this.ebEnt.ebUd.request.getParameter("do2");
 		stTemp = "";
 		// ?stAction=projects&t=12&do=xls&pk=5&parent=&child=21&from=0&a=map&r=12#row12
-		String stLink = "?stAction=projects&t="
-				+ this.ebEnt.ebUd.request.getParameter("t") + "&do=xls&pk="
-				+ stPk + "&parent=" + stTemp + "&child=" + stChild
-				+ "&a=map&r=" + stR;
+		String stLink = "?stAction=projects&t=" + this.ebEnt.ebUd.request.getParameter("t") + "&do=xls&pk=" + stPk + "&parent=" + stTemp
+				+ "&child=" + stChild + "&a=map&r=" + stR;
 		int iFrom = 0;
 		double nmTotalPercent = 0.00;
 		DecimalFormat df = new DecimalFormat("#,###,##0.0");
@@ -5027,8 +3505,7 @@ class EpsXlsProject // extends EpsUserData
 		int iCount = 0;
 		try {
 			int iBlock = this.epsUd.rsMyDiv.getInt("ReqSchRows");
-			this.rsProject = this.ebEnt.dbDyn
-					.ExecuteSql("select * from Projects where RecId=" + stPk);
+			this.rsProject = this.ebEnt.dbDyn.ExecuteSql("select * from Projects where RecId=" + stPk);
 			this.rsProject.absolute(1);
 			nmBaseline = this.rsProject.getInt("CurrentBaseline");
 
@@ -5041,48 +3518,29 @@ class EpsXlsProject // extends EpsUserData
 			if (stChild.equals("21")) {
 				stFrom = this.ebEnt.ebUd.request.getParameter("rid");
 				stToRecId = stR;
-				if (stFrom != null && stFrom.length() > 0
-						&& Integer.parseInt(stFrom) > 0)
-					stFromRecId = ebEnt.dbDyn
-							.ExecuteSql1("SELECT RecId FROM requirements WHERE nmProjectId="
-									+ stPk
-									+ " AND nmBaseline="
-									+ this.nmBaseline + " AND ReqId=" + stFrom);
-				stTo = ebEnt.dbDyn
-						.ExecuteSql1("SELECT SchId FROM schedule WHERE RecId="
-								+ stR);
+				if (stFrom != null && stFrom.length() > 0 && Integer.parseInt(stFrom) > 0)
+					stFromRecId = ebEnt.dbDyn.ExecuteSql1("SELECT RecId FROM requirements WHERE nmProjectId=" + stPk + " AND nmBaseline="
+							+ this.nmBaseline + " AND ReqId=" + stFrom);
+				stTo = ebEnt.dbDyn.ExecuteSql1("SELECT SchId FROM schedule WHERE RecId=" + stR);
 			} else {
 				stTo = this.ebEnt.ebUd.request.getParameter("rid");
 				stFromRecId = stR;
-				if (stTo != null && stTo.length() > 0
-						&& Integer.parseInt(stTo) > 0)
-					stToRecId = ebEnt.dbDyn
-							.ExecuteSql1("SELECT RecId FROM schedule WHERE nmProjectId="
-									+ stPk
-									+ " AND nmBaseline="
-									+ this.nmBaseline + " AND SchId=" + stTo);
-				stFrom = ebEnt.dbDyn
-						.ExecuteSql1("SELECT ReqId FROM requirements WHERE RecId="
-								+ stR);
+				if (stTo != null && stTo.length() > 0 && Integer.parseInt(stTo) > 0)
+					stToRecId = ebEnt.dbDyn.ExecuteSql1("SELECT RecId FROM schedule WHERE nmProjectId=" + stPk + " AND nmBaseline="
+							+ this.nmBaseline + " AND SchId=" + stTo);
+				stFrom = ebEnt.dbDyn.ExecuteSql1("SELECT ReqId FROM requirements WHERE RecId=" + stR);
 			}
 			if (stDo2 != null && stDo2.equals("del")) {
-				this.ebEnt.dbDyn
-						.ExecuteUpdate("delete l.* from teb_link l, Projects p"
-								+ " where l.nmProjectId=p.RecId and l.nmBaseline=p.CurrentBaseline and l.nmLinkFlags=1"
-								+ " and l.nmProjectId=" + stPk
-								+ " and l.nmFromId=" + stFromRecId
-								+ " and l.nmToId=" + stToRecId);
+				this.ebEnt.dbDyn.ExecuteUpdate("delete l.* from teb_link l, Projects p"
+						+ " where l.nmProjectId=p.RecId and l.nmBaseline=p.CurrentBaseline and l.nmLinkFlags=1" + " and l.nmProjectId="
+						+ stPk + " and l.nmFromId=" + stFromRecId + " and l.nmToId=" + stToRecId);
 				analyzeLink();
 				// calculate the requirement cost
 				this.processRequirementCost(Integer.parseInt(stFromRecId));
 			}
-			String s1 = "</form><form method=post name='form" + stChild
-					+ "' id='form" + stChild
-					+ "' onsubmit='return myValidation(this)'>"
-					+ "<input type=hidden name=from value='" + iFrom
-					+ "'><table><tr><td align=center><h2>"
-					+ this.rsProject.getString("ProjectName")
-					+ "</h2></td></tr>";
+			String s1 = "</form><form method=post name='form" + stChild + "' id='form" + stChild
+					+ "' onsubmit='return myValidation(this)'>" + "<input type=hidden name=from value='" + iFrom
+					+ "'><table><tr><td align=center><h2>" + this.rsProject.getString("ProjectName") + "</h2></td></tr>";
 			sbReturn.append(s1);
 			String stFromOrig = "";
 			String stToOrig = "";
@@ -5094,86 +3552,54 @@ class EpsXlsProject // extends EpsUserData
 			if (stDo2 != null && stDo2.equals("edit")) {
 				stTemp = this.ebEnt.ebUd.request.getParameter("Save");
 				if (stTemp != null && stTemp.equals("Save")) {
-					nmRemainder = this.ebEnt.ebUd.request
-							.getParameter("nmRemainder");
-					nmPercent = this.ebEnt.ebUd.request
-							.getParameter("nmPercent");
-					stFromOrig = this.ebEnt.ebUd.request
-							.getParameter("stFromOrig");
+					nmRemainder = this.ebEnt.ebUd.request.getParameter("nmRemainder");
+					nmPercent = this.ebEnt.ebUd.request.getParameter("nmPercent");
+					stFromOrig = this.ebEnt.ebUd.request.getParameter("stFromOrig");
 					stToOrig = this.ebEnt.ebUd.request.getParameter("stToOrig");
 					stFrom = this.ebEnt.ebUd.request.getParameter("stFrom");
 					stTo = this.ebEnt.ebUd.request.getParameter("stTo");
 					if (nmPercent == null || nmPercent.length() <= 0)
 						nmPercent = "0";
 					if (stFrom == null || stFrom.length() <= 0) {
-						this.ebEnt.ebUd
-								.setPopupMessage("Requirement ID cannot be blank");
+						this.ebEnt.ebUd.setPopupMessage("Requirement ID cannot be blank");
 						stFrom = "";
 					} else {
 						try {
-							stFromRecId = ebEnt.dbDyn
-									.ExecuteSql1("SELECT RecId FROM requirements WHERE nmProjectId="
-											+ stPk
-											+ " AND nmBaseline="
-											+ this.nmBaseline
-											+ " AND ReqId="
-											+ stFrom);
+							stFromRecId = ebEnt.dbDyn.ExecuteSql1("SELECT RecId FROM requirements WHERE nmProjectId=" + stPk
+									+ " AND nmBaseline=" + this.nmBaseline + " AND ReqId=" + stFrom);
 							iFromId = Integer.parseInt(stFromRecId);
-							iCount = this.ebEnt.dbDyn
-									.ExecuteSql1n("SELECT count(*) FROM Requirements r, Projects p"
-											+ " where r.nmProjectId=p.RecId and r.nmBaseline=p.CurrentBaseline"
-											+ " and (ReqFlags & 0x10 ) != 0 and r.nmProjectId="
-											+ stPk
-											+ " and r.RecId="
-											+ stFromRecId);
+							iCount = this.ebEnt.dbDyn.ExecuteSql1n("SELECT count(*) FROM Requirements r, Projects p"
+									+ " where r.nmProjectId=p.RecId and r.nmBaseline=p.CurrentBaseline"
+									+ " and (ReqFlags & 0x10 ) != 0 and r.nmProjectId=" + stPk + " and r.RecId=" + stFromRecId);
 							if (iCount <= 0)
-								this.ebEnt.ebUd
-										.setPopupMessage("Invalid low level Requirement ID: "
-												+ stFromRecId);
+								this.ebEnt.ebUd.setPopupMessage("Invalid low level Requirement ID: " + stFromRecId);
 						} catch (Exception e) {
-							this.ebEnt.ebUd
-									.setPopupMessage("Invalid low level Requirement ID: "
-											+ stFromRecId);
+							this.ebEnt.ebUd.setPopupMessage("Invalid low level Requirement ID: " + stFromRecId);
 							stFrom = "";
 						}
 					}
 					if (stTo == null || stTo.length() <= 0) {
-						this.ebEnt.ebUd
-								.setPopupMessage("Task Id cannot be blank");
+						this.ebEnt.ebUd.setPopupMessage("Task Id cannot be blank");
 						stTo = "";
 					} else {
 						try {
-							stToRecId = ebEnt.dbDyn
-									.ExecuteSql1("SELECT RecId FROM schedule WHERE nmProjectId="
-											+ stPk
-											+ " AND nmBaseline="
-											+ this.nmBaseline
-											+ " AND SchId="
-											+ stTo);
+							stToRecId = ebEnt.dbDyn.ExecuteSql1("SELECT RecId FROM schedule WHERE nmProjectId=" + stPk + " AND nmBaseline="
+									+ this.nmBaseline + " AND SchId=" + stTo);
 							iToId = Integer.parseInt(stToRecId);
-							iCount = this.ebEnt.dbDyn
-									.ExecuteSql1n("SELECT count(*) FROM Schedule s, Projects p"
-											+ " where s.nmProjectId=p.RecId and s.nmBaseline=p.CurrentBaseline"
-											+ " and (SchFlags & 0x10 ) != 0 and s.nmProjectId="
-											+ stPk
-											+ " and s.RecId="
-											+ stToRecId);
+							iCount = this.ebEnt.dbDyn.ExecuteSql1n("SELECT count(*) FROM Schedule s, Projects p"
+									+ " where s.nmProjectId=p.RecId and s.nmBaseline=p.CurrentBaseline"
+									+ " and (SchFlags & 0x10 ) != 0 and s.nmProjectId=" + stPk + " and s.RecId=" + stToRecId);
 							if (iCount <= 0)
-								this.ebEnt.ebUd
-										.setPopupMessage("Invalid low level Task Id: "
-												+ stToRecId);
+								this.ebEnt.ebUd.setPopupMessage("Invalid low level Task Id: " + stToRecId);
 						} catch (Exception e) {
-							this.ebEnt.ebUd
-									.setPopupMessage("Invalid low level Task Id: "
-											+ stToRecId);
+							this.ebEnt.ebUd.setPopupMessage("Invalid low level Task Id: " + stToRecId);
 							stTo = "";
 						}
 					}
 					try {
 						dPercent = Double.parseDouble(nmPercent);
 					} catch (Exception e) {
-						this.ebEnt.ebUd.setPopupMessage("Invalid percent: "
-								+ nmPercent);
+						this.ebEnt.ebUd.setPopupMessage("Invalid percent: " + nmPercent);
 						nmPercent = "";
 					}
 
@@ -5182,54 +3608,32 @@ class EpsXlsProject // extends EpsUserData
 						if (stChild.equals("19") && stToOrig.equals("-1")) {
 							// Insert NEW
 							int iRemainder = Integer.parseInt(nmRemainder);
-							linkMap(1, stPk, nmBaseline, stPk, iFromId, stPk,
-									iToId, dPercent, "", 0, iRemainder);
+							linkMap(1, stPk, nmBaseline, stPk, iFromId, stPk, iToId, dPercent, "", 0, iRemainder);
 
 							// calculate the requirement cost
 							this.processRequirementCost(iFromId);
-						} else if (stChild.equals("21")
-								&& stFromOrig.equals("-1")) {
+						} else if (stChild.equals("21") && stFromOrig.equals("-1")) {
 							// Insert NEW
 							int iRemainder = Integer.parseInt(nmRemainder);
-							linkMap(1, stPk, nmBaseline, stPk, iFromId, stPk,
-									iToId, dPercent, "", 0, iRemainder);
+							linkMap(1, stPk, nmBaseline, stPk, iFromId, stPk, iToId, dPercent, "", 0, iRemainder);
 							this.processRequirementCost(iFromId);
 						} else {
 							if (stChild.equals("21")) {
-								stSql = "update teb_link l, Projects p"
-										+ " set l.nmFromId="
-										+ stFromRecId
-										+ ",l.nmToId="
-										+ stToRecId
-										+ ",l.nmPercent="
-										+ nmPercent
-										+ ",l.nmRemainder="
-										+ nmRemainder
+								stSql = "update teb_link l, Projects p" + " set l.nmFromId=" + stFromRecId + ",l.nmToId=" + stToRecId
+										+ ",l.nmPercent=" + nmPercent + ",l.nmRemainder=" + nmRemainder
 										+ " where l.nmProjectId=p.RecId and l.nmBaseline=p.CurrentBaseline and l.nmLinkFlags=1"
-										+ " and l.nmProjectId=" + stPk
-										+ " and l.nmFromId=" + stFromOrig
-										+ " and l.nmToId=" + stToOrig;
+										+ " and l.nmProjectId=" + stPk + " and l.nmFromId=" + stFromOrig + " and l.nmToId=" + stToOrig;
 
 							} else {
-								stSql = "update teb_link l, Projects p"
-										+ " set l.nmFromId="
-										+ stFromRecId
-										+ ",l.nmToId="
-										+ stToRecId
-										+ ",l.nmPercent="
-										+ nmPercent
-										+ ",l.nmRemainder="
-										+ nmRemainder
+								stSql = "update teb_link l, Projects p" + " set l.nmFromId=" + stFromRecId + ",l.nmToId=" + stToRecId
+										+ ",l.nmPercent=" + nmPercent + ",l.nmRemainder=" + nmRemainder
 										+ " where l.nmProjectId=p.RecId and l.nmBaseline=p.CurrentBaseline and l.nmLinkFlags=1"
-										+ " and l.nmProjectId=" + stPk
-										+ " and l.nmFromId=" + stFromOrig
-										+ " and l.nmToId=" + stToOrig;
+										+ " and l.nmProjectId=" + stPk + " and l.nmFromId=" + stFromOrig + " and l.nmToId=" + stToOrig;
 
 								// calculate the requirement cost
 							}
 							this.ebEnt.dbDyn.ExecuteUpdate(stSql);
-							this.processRequirementCost(Integer
-									.parseInt(stFromRecId));
+							this.processRequirementCost(Integer.parseInt(stFromRecId));
 						}
 						analyzeLink();
 						stDo2 = "";
@@ -5238,8 +3642,7 @@ class EpsXlsProject // extends EpsUserData
 					stDo2 = "";
 				}
 			}
-			String nmAmortize = this.ebEnt.ebUd.request
-					.getParameter("nmAmortize");
+			String nmAmortize = this.ebEnt.ebUd.request.getParameter("nmAmortize");
 			if (nmAmortize != null && nmAmortize.length() > 0)
 				stDo2 = "";
 
@@ -5253,12 +3656,9 @@ class EpsXlsProject // extends EpsUserData
 				} else if (stFromOrig.length() <= 0) {
 					stFromOrig = stFromRecId;
 					stToOrig = stToRecId;
-					ResultSet rsValue = this.ebEnt.dbDyn
-							.ExecuteSql("select * from teb_link l, Projects p"
-									+ " where l.nmProjectId=p.RecId and l.nmBaseline=p.CurrentBaseline and l.nmLinkFlags=1"
-									+ " and l.nmProjectId=" + stPk
-									+ " and l.nmFromId=" + stFromRecId
-									+ " and l.nmToId=" + stToRecId);
+					ResultSet rsValue = this.ebEnt.dbDyn.ExecuteSql("select * from teb_link l, Projects p"
+							+ " where l.nmProjectId=p.RecId and l.nmBaseline=p.CurrentBaseline and l.nmLinkFlags=1" + " and l.nmProjectId="
+							+ stPk + " and l.nmFromId=" + stFromRecId + " and l.nmToId=" + stToRecId);
 					rsValue.last();
 					if (rsValue.getRow() > 0) {
 						rsValue.absolute(1);
@@ -5273,23 +3673,18 @@ class EpsXlsProject // extends EpsUserData
 				sbReturn.append(stFrom);
 				sbReturn.append("\"></td></tr><tr><td>Task ID:<td>");
 
-				if (stToRecId == null || "".equals(stToRecId)
-						|| "-1".equals(stToRecId)) {
+				if (stToRecId == null || "".equals(stToRecId) || "-1".equals(stToRecId)) {
 					sbReturn.append("<select name='stTo'>");
-					sbReturn.append(this.ebEnt.ebUd.addOption2(
-							"Select Task id", "-1", stToRecId));
+					sbReturn.append(this.ebEnt.ebUd.addOption2("Select Task id", "-1", stToRecId));
 					ResultSet taskIds = this.ebEnt.dbDyn
-							.ExecuteSql("SELECT * FROM Schedule s where (SchFlags & 0x10 ) != 0 and s.nmProjectId="
-									+ stPk);
+							.ExecuteSql("SELECT * FROM Schedule s where (SchFlags & 0x10 ) != 0 and s.nmProjectId=" + stPk);
 					taskIds.last();
 					int maxIds = taskIds.getRow();
 					for (int i = 1; i <= maxIds; i++) {
 						taskIds.absolute(i);
 						sbReturn.append(this.ebEnt.ebUd.addOption2(
-								Integer.toString(taskIds.getInt("SchId"))
-										+ ": " + taskIds.getString("SchTitle"),
-								Integer.toString(taskIds.getInt("SchId")),
-								stToRecId));
+								Integer.toString(taskIds.getInt("SchId")) + ": " + taskIds.getString("SchTitle"),
+								Integer.toString(taskIds.getInt("SchId")), stToRecId));
 					}
 					sbReturn.append("</select>");
 				} else {
@@ -5301,10 +3696,8 @@ class EpsXlsProject // extends EpsUserData
 				sbReturn.append("</td></tr><tr><td>Map:<td><input type=test style='text-align:right;width:50px;' name=nmPercent value=\"");
 				sbReturn.append(nmPercent);
 				sbReturn.append("\">% <select name=nmRemainder>");
-				sbReturn.append(this.ebEnt.ebUd.addOption2("Map by Percent",
-						"0", nmRemainder));
-				sbReturn.append(this.ebEnt.ebUd.addOption2("Remainder", "1",
-						nmRemainder));
+				sbReturn.append(this.ebEnt.ebUd.addOption2("Map by Percent", "0", nmRemainder));
+				sbReturn.append(this.ebEnt.ebUd.addOption2("Remainder", "1", nmRemainder));
 				sbReturn.append("</select></td></tr>");
 				sbReturn.append("<tr><td colspan=2 align=center><input type=submit name=Save value='Save'> &nbsp;");
 				sbReturn.append("<input type=hidden name=stFromOrig value=\"");
@@ -5319,14 +3712,8 @@ class EpsXlsProject // extends EpsUserData
 				// Requirements Map
 				stSql = "select * from Schedule s, teb_link l, Requirements r where l.nmLinkFlags=1 and "
 						+ " s.nmProjectId=l.nmProjectId and s.nmBaseline=l.nmBaseline and s.RecId=l.nmToId and"
-						+ " r.nmProjectId=s.nmProjectId and r.nmBaseline=s.nmBaseline and r.RecId=l.nmFromId and"
-						+ " r.RecId="
-						+ stR
-						+ " and s.nmProjectId="
-						+ stPk
-						+ " and s.nmBaseline="
-						+ this.nmBaseline
-						+ " order by r.ReqId";
+						+ " r.nmProjectId=s.nmProjectId and r.nmBaseline=s.nmBaseline and r.RecId=l.nmFromId and" + " r.RecId=" + stR
+						+ " and s.nmProjectId=" + stPk + " and s.nmBaseline=" + this.nmBaseline + " order by r.ReqId";
 				ResultSet rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
 				rs.last();
 				int iMax = rs.getRow();
@@ -5337,8 +3724,7 @@ class EpsXlsProject // extends EpsUserData
 					sbReturn.append(" Level:");
 					sbReturn.append(rs.getString("ReqLevel"));
 					sbReturn.append(" Title: </td><td align=left><b>");
-					sbReturn.append(this.epsUd.epsEf.fullReqTitle(rs, stPk,
-							nmBaseline));
+					sbReturn.append(this.epsUd.epsEf.fullReqTitle(rs, stPk, nmBaseline));
 					sbReturn.append("</b></td></tr></table></td></tr><tr><td>");
 					sbReturn.append("<table bgcolor=blue cellpadding=1 cellspacing=1>");
 					sbReturn.append("<tr><th class=l1th>Action</th><th class=l1th>ID</th><th class=l1th>Level</th><th class=l1th>Task Title</th><th class=l1th colspan=2>Map</th></tr>");
@@ -5347,42 +3733,32 @@ class EpsXlsProject // extends EpsUserData
 						rs.absolute(iR);
 						sbReturn.append("<tr>");
 						sbReturn.append("<td bgcolor=white align=center valign=bottom>");
-						sbReturn.append("<a title='Edit' href='" + stLink
-								+ "&do2=edit&rid=" + rs.getString("SchId")
+						sbReturn.append("<a title='Edit' href='" + stLink + "&do2=edit&rid=" + rs.getString("SchId")
 								+ "'><img src='./common/b_edit.png'></a>");
-						sbReturn.append("<a title='Delete' href='"
-								+ stLink
-								+ "&do2=del&rid="
-								+ rs.getString("SchId")
+						sbReturn.append("<a title='Delete' href='" + stLink + "&do2=del&rid=" + rs.getString("SchId")
 								+ "'><img src='./common/b_drop.png'"
-								+ " onClick=\"return myConfirm('Are you sure you want to delete this item?', "
-								+ iR + "," + iMax + " )\"></a></td>");
+								+ " onClick=\"return myConfirm('Are you sure you want to delete this item?', " + iR + "," + iMax
+								+ " )\"></a></td>");
 
-						sbReturn.append("<td bgcolor=white align=right valign=bottom>"
-								+ rs.getString("SchId") + "</td>");
-						sbReturn.append("<td bgcolor=white align=right valign=bottom>"
-								+ rs.getString("SchLevel") + "</td>");
+						sbReturn.append("<td bgcolor=white align=right valign=bottom>" + rs.getString("SchId") + "</td>");
+						sbReturn.append("<td bgcolor=white align=right valign=bottom>" + rs.getString("SchLevel") + "</td>");
 						sbReturn.append("<td bgcolor=white align=left valign=bottom>");
 						if ((iLastSchId + 1) != rs.getInt("SchId")) // Out of
 																	// sync
-							sbReturn.append(this.epsUd.epsEf.fullSchTitle(rs,
-									stPk, nmBaseline));
+							sbReturn.append(this.epsUd.epsEf.fullSchTitle(rs, stPk, nmBaseline));
 						else {
 							for (int i = 0; i < (rs.getInt("SchLevel") * 2); i++)
 								sbReturn.append("&nbsp;");
 							sbReturn.append(rs.getString("SchTitle"));
 						}
 						sbReturn.append("</td>");
-						sbReturn.append("<td bgcolor=white align=right valign=bottom>"
-								+ df.format(rs.getDouble("nmPercent"))
-								+ "</td>");
+						sbReturn.append("<td bgcolor=white align=right valign=bottom>" + df.format(rs.getDouble("nmPercent")) + "</td>");
 
 						nmTotalPercent += rs.getDouble("nmPercent");
 						iCount++;
 						sbReturn.append("<td bgcolor=white valign=bottom>%");
 						if (rs.getInt("nmAmortize") > 0)
-							sbReturn.append("&nbsp;Amortize("
-									+ rs.getInt("nmAmortize") + ")");
+							sbReturn.append("&nbsp;Amortize(" + rs.getInt("nmAmortize") + ")");
 						if (rs.getInt("nmRemainder") > 0)
 							sbReturn.append("&nbsp;Remainder");
 						sbReturn.append("</td>");
@@ -5391,10 +3767,8 @@ class EpsXlsProject // extends EpsUserData
 					}
 					if (stChild.equals("21")) {
 						sbReturn.append("<tr>");
-						sbReturn.append("<td bgcolor=white align=right colspan=4>Total ("
-								+ iCount + "):</td>");
-						sbReturn.append("<td bgcolor=white align=right><b>"
-								+ df.format(nmTotalPercent) + "</b></td>");
+						sbReturn.append("<td bgcolor=white align=right colspan=4>Total (" + iCount + "):</td>");
+						sbReturn.append("<td bgcolor=white align=right><b>" + df.format(nmTotalPercent) + "</b></td>");
 						nmTotalPercent += rs.getDouble("nmPercent");
 						iCount++;
 						sbReturn.append("<td bgcolor=white align=left>%</td>");
@@ -5421,25 +3795,15 @@ class EpsXlsProject // extends EpsUserData
 					 */
 					if (nmAmortize.equals("1")) // YES
 					{
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("update Schedule set SchFlags = ( SchFlags | 0x8000 )"
-										+ " where nmProjectId="
-										+ stPk
-										+ " and nmBaseline="
-										+ this.nmBaseline
-										+ " and RecId=" + stR);
+						this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchFlags = ( SchFlags | 0x8000 )" + " where nmProjectId="
+								+ stPk + " and nmBaseline=" + this.nmBaseline + " and RecId=" + stR);
 						// this.ebEnt.dbDyn.ExecuteUpdate("update teb_link set nmLinkFlags=5 where (nmLinkFlags&0x1) != 0"
 						// + " and nmProjectId="+stPk+" and nmBaseline=" +
 						// this.nmBaseline+" and nmToId="+
 						// stR+" and nmAmortize=" + stR);
 					} else { // No
-						this.ebEnt.dbDyn
-								.ExecuteUpdate("update Schedule set SchFlags = ( SchFlags & ~0x8000 )"
-										+ " where nmProjectId="
-										+ stPk
-										+ " and nmBaseline="
-										+ this.nmBaseline
-										+ " and RecId=" + stR);
+						this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchFlags = ( SchFlags & ~0x8000 )" + " where nmProjectId="
+								+ stPk + " and nmBaseline=" + this.nmBaseline + " and RecId=" + stR);
 						// this.ebEnt.dbDyn.ExecuteUpdate("delete from teb_link where (nmLinkFlags&0x1) != 0"
 						// + " and nmProjectId="+stPk+" and nmBaseline=" +
 						// this.nmBaseline+" and nmToId="+
@@ -5450,25 +3814,17 @@ class EpsXlsProject // extends EpsUserData
 				// Schedule Map
 				stSql = "select * from Schedule s, teb_link l, Requirements r where l.nmLinkFlags in (1,5) and"
 						+ " s.nmProjectId=l.nmProjectId and s.nmBaseline=l.nmBaseline and s.RecId=l.nmToId and"
-						+ " r.nmProjectId=s.nmProjectId and r.nmBaseline=s.nmBaseline and r.RecId=l.nmFromId and"
-						+ " s.RecId="
-						+ stR
-						+ " and s.nmProjectId="
-						+ stPk
-						+ " and s.nmBaseline="
-						+ this.nmBaseline
-						+ " order by r.ReqId";
+						+ " r.nmProjectId=s.nmProjectId and r.nmBaseline=s.nmBaseline and r.RecId=l.nmFromId and" + " s.RecId=" + stR
+						+ " and s.nmProjectId=" + stPk + " and s.nmBaseline=" + this.nmBaseline + " order by r.ReqId";
 				ResultSet rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
 				rs.last();
 				int iMax = rs.getRow();
 				if (iMax > 0) {
 					rs.absolute(1);
-					sbReturn.append("<tr><td align=right valign=bottom><b>Schedule</b> ID: "
-							+ rs.getString("SchId"));
+					sbReturn.append("<tr><td align=right valign=bottom><b>Schedule</b> ID: " + rs.getString("SchId"));
 					sbReturn.append(" Level:" + rs.getString("SchLevel") + "");
 					sbReturn.append(" Title: </td><td align=left><b>"
-							+ this.epsUd.epsEf.fullSchTitle(rs, stPk,
-									nmBaseline)
+							+ this.epsUd.epsEf.fullSchTitle(rs, stPk, nmBaseline)
 							+ "</b></td></tr></table></td></tr><tr><td>"
 							+ "<table bgcolor=blue cellpadding=1 cellspacing=1>"
 							+ "<tr><th class=l1th>Action</th><th class=l1th>ID</th><th class=l1th>Level</th><th class=l1th>Requirement Title</th><th class=l1th colspan=2>Map</th></tr>");
@@ -5476,41 +3832,30 @@ class EpsXlsProject // extends EpsUserData
 					int iRemainder = 0;
 					for (int iR = 1; iR <= iMax; iR++) {
 						rs.absolute(iR);
-						if ((rs.getInt("SchFlags") & 0x8000) != 0
-								&& rs.getInt("nmToId") == rs
-										.getInt("nmAmortize"))
+						if ((rs.getInt("SchFlags") & 0x8000) != 0 && rs.getInt("nmToId") == rs.getInt("nmAmortize"))
 							continue;
 						sbReturn.append("<tr>");
 						sbReturn.append("<td bgcolor=white align=center valign=bottom>");
-						sbReturn.append("<a title='Edit' href='" + stLink
-								+ "&do2=edit&rid=" + rs.getString("ReqId")
+						sbReturn.append("<a title='Edit' href='" + stLink + "&do2=edit&rid=" + rs.getString("ReqId")
 								+ "'><img src='./common/b_edit.png'></a>");
-						sbReturn.append("<a title='Delete' href='"
-								+ stLink
-								+ "&do2=del&rid="
-								+ rs.getString("ReqId")
+						sbReturn.append("<a title='Delete' href='" + stLink + "&do2=del&rid=" + rs.getString("ReqId")
 								+ "'><img src='./common/b_drop.png'"
-								+ " onClick=\"return myConfirm('Are you sure you want to delete this item?', "
-								+ iR + "," + iMax + " )\"></a></td>");
+								+ " onClick=\"return myConfirm('Are you sure you want to delete this item?', " + iR + "," + iMax
+								+ " )\"></a></td>");
 
-						sbReturn.append("<td bgcolor=white align=right valign=bottom>"
-								+ rs.getString("ReqId") + "</td>");
-						sbReturn.append("<td bgcolor=white align=right valign=bottom>"
-								+ rs.getString("ReqLevel") + "</td>");
+						sbReturn.append("<td bgcolor=white align=right valign=bottom>" + rs.getString("ReqId") + "</td>");
+						sbReturn.append("<td bgcolor=white align=right valign=bottom>" + rs.getString("ReqLevel") + "</td>");
 						sbReturn.append("<td bgcolor=white align=left valign=bottom>");
 						if ((iLastReqId + 1) != rs.getInt("ReqId")) // Out of
 																	// sync
-							sbReturn.append(this.epsUd.epsEf.fullReqTitle(rs,
-									stPk, nmBaseline));
+							sbReturn.append(this.epsUd.epsEf.fullReqTitle(rs, stPk, nmBaseline));
 						else {
 							for (int i = 0; i < (rs.getInt("ReqLevel") * 2); i++)
 								sbReturn.append("&nbsp;");
 							sbReturn.append(rs.getString("ReqTitle"));
 						}
 						sbReturn.append("</td>");
-						sbReturn.append("<td bgcolor=white align=right valign=bottom>"
-								+ df.format(rs.getDouble("nmPercent"))
-								+ "</td>");
+						sbReturn.append("<td bgcolor=white align=right valign=bottom>" + df.format(rs.getDouble("nmPercent")) + "</td>");
 
 						nmTotalPercent += rs.getDouble("nmPercent");
 						iCount++;
@@ -5525,20 +3870,14 @@ class EpsXlsProject // extends EpsUserData
 						sbReturn.append("</tr>");
 						iLastReqId = rs.getInt("ReqId");
 					}
-					sbReturn.append("<tr><td bgcolor=white align=right colspan=4>Total ("
-							+ iCount + "):</td>");
-					sbReturn.append("<td bgcolor=white align=right><b>"
-							+ df.format(nmTotalPercent) + "</b></td>");
+					sbReturn.append("<tr><td bgcolor=white align=right colspan=4>Total (" + iCount + "):</td>");
+					sbReturn.append("<td bgcolor=white align=right><b>" + df.format(nmTotalPercent) + "</b></td>");
 					sbReturn.append("<td bgcolor=white align=left>%</td>");
 					sbReturn.append("</tr>");
 
 					sbReturn.append("<tr><td bgcolor=white valign=bottom colspan=4 align=right><b>Amortize remainder of task over rest (");
-					sbReturn.append(df.format(this.ebEnt.dbDyn
-							.ExecuteSql1n("select count(*) from Requirements r where r.nmProjectId="
-									+ stPk
-									+ " and r.nmBaseline="
-									+ nmBaseline
-									+ " and (r.ReqFlags & 0x10) != 0;")
+					sbReturn.append(df.format(this.ebEnt.dbDyn.ExecuteSql1n("select count(*) from Requirements r where r.nmProjectId="
+							+ stPk + " and r.nmBaseline=" + nmBaseline + " and (r.ReqFlags & 0x10) != 0;")
 							- iCount));
 					sbReturn.append(") of Requirements:</b></td><td align=right bgcolor=yellow>");
 					sbReturn.append(df.format(100.0 - nmTotalPercent));
@@ -5555,10 +3894,8 @@ class EpsXlsProject // extends EpsUserData
 						int iValue = 0;
 						if ((iFlags & 0x8000) != 0)
 							iValue = 1;
-						sbReturn.append(this.ebEnt.ebUd.addOption2("No", "0",
-								"" + iValue));
-						sbReturn.append(this.ebEnt.ebUd.addOption2("Yes", "1",
-								"" + iValue));
+						sbReturn.append(this.ebEnt.ebUd.addOption2("No", "0", "" + iValue));
+						sbReturn.append(this.ebEnt.ebUd.addOption2("Yes", "1", "" + iValue));
 						sbReturn.append("</select>");
 					}
 					sbReturn.append("</td><tr>");
@@ -5582,20 +3919,14 @@ class EpsXlsProject // extends EpsUserData
 	public String processCriticalPath() {
 		// http://hspm.sph.sc.edu/courses/j716/cpm/cpm.html
 		int iMaxSchedule = 0;
-		String stHead = "<tr><td align=right valign=top>" + this.stPk
-				+ "</td><th valign=top>Critical Path</th>";
+		String stHead = "<tr><td align=right valign=top>" + this.stPk + "</td><th valign=top>Critical Path</th>";
 		StringBuilder sbReturn = new StringBuilder(5000);
 		try {
 			// Reset CP flags
-			this.ebEnt.dbDyn
-					.ExecuteUpdate("update Schedule set SchFlags = ( SchFlags & ~0xE00) "
-							+ "where  nmProjectId="
-							+ stPk
-							+ " and nmBaseline="
-							+ this.nmBaseline);
+			this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchFlags = ( SchFlags & ~0xE00) " + "where  nmProjectId=" + stPk
+					+ " and nmBaseline=" + this.nmBaseline);
 
-			String stWeekend = this.epsUd.rsMyDiv.getString("stWorkDays")
-					.toLowerCase();
+			String stWeekend = this.epsUd.rsMyDiv.getString("stWorkDays").toLowerCase();
 			String[] stWork = stWeekend.split(",");
 			aWeekend = new int[7 - stWork.length];
 			int iW = 0;
@@ -5627,9 +3958,8 @@ class EpsXlsProject // extends EpsUserData
 
 			// / sbReturn.append( stHead +
 			// "<td valign=top>by Estimated Effort</td><td colspan=3 valign=top>";
-			iMaxRecId = this.ebEnt.dbDyn
-					.ExecuteSql1n("SELECT max(RecId) FROM Schedule where nmProjectId="
-							+ stPk + " and nmBaseline=" + this.nmBaseline);
+			iMaxRecId = this.ebEnt.dbDyn.ExecuteSql1n("SELECT max(RecId) FROM Schedule where nmProjectId=" + stPk + " and nmBaseline="
+					+ this.nmBaseline);
 			iMaxRecId++;
 			aaPath = new int[iMaxRecId][];
 			aCp = new EpsCriticalPath[iMaxRecId];
@@ -5637,13 +3967,8 @@ class EpsXlsProject // extends EpsUserData
 				aCp[i] = null;
 
 			String stSql = "select * from Schedule s left join teb_link l on s.nmProjectId=l.nmProjectId and "
-					+ "s.nmBaseline=l.nmBaseline and l.nmLinkFlags=2 and l.nmFromId=s.RecId "
-					+ "where s.nmProjectId="
-					+ stPk
-					+ " and s.nmBaseline="
-					+ this.nmBaseline
-					+ " and (s.SchFlags & 0x10 ) != 0 "
-					+ "order by RecId, nmToId";
+					+ "s.nmBaseline=l.nmBaseline and l.nmLinkFlags=2 and l.nmFromId=s.RecId " + "where s.nmProjectId=" + stPk
+					+ " and s.nmBaseline=" + this.nmBaseline + " and (s.SchFlags & 0x10 ) != 0 " + "order by RecId, nmToId";
 
 			ResultSet rsAll = this.ebEnt.dbDyn.ExecuteSql(stSql);
 			rsAll.last();
@@ -5657,9 +3982,7 @@ class EpsXlsProject // extends EpsUserData
 					rsAll.absolute(iR);
 					if (aCp[rsAll.getInt("RecId")] == null) {
 						aCp[rsAll.getInt("RecId")] = new EpsCriticalPath();
-						aCp[rsAll.getInt("RecId")].setEpsCriticalPath(
-								iMaxRecId, epsUd, rsProject, rsAll, stHolidays,
-								aWeekend);
+						aCp[rsAll.getInt("RecId")].setEpsCriticalPath(iMaxRecId, epsUd, rsProject, rsAll, stHolidays, aWeekend);
 						aCp[rsAll.getInt("RecId")].addSuccessor(rsAll);
 					} else {
 						aCp[rsAll.getInt("RecId")].addSuccessor(rsAll);
@@ -5670,13 +3993,8 @@ class EpsXlsProject // extends EpsUserData
 					setDependendies(iR);
 
 				stSql = "select * from Schedule s left join teb_link l on s.nmProjectId=l.nmProjectId and "
-						+ "s.nmBaseline=l.nmBaseline and l.nmLinkFlags=2 and l.nmToId=s.RecId "
-						+ "where s.nmProjectId="
-						+ stPk
-						+ " and s.nmBaseline="
-						+ this.nmBaseline
-						+ " and (s.SchFlags & 0x10 ) != 0 "
-						+ "and l.nmFromId is null";
+						+ "s.nmBaseline=l.nmBaseline and l.nmLinkFlags=2 and l.nmToId=s.RecId " + "where s.nmProjectId=" + stPk
+						+ " and s.nmBaseline=" + this.nmBaseline + " and (s.SchFlags & 0x10 ) != 0 " + "and l.nmFromId is null";
 				ResultSet rs = this.ebEnt.dbDyn.ExecuteSql(stSql);
 				rs.last();
 				int iMax = rs.getRow();
@@ -5687,8 +4005,7 @@ class EpsXlsProject // extends EpsUserData
 							aCp[rs.getInt("RecId")].iFLags = 1; // Starting
 																// point.
 						} else {
-							this.stError += "<BR>ERROR Schedule should NOT be in queue "
-									+ rs.getInt("RecId");
+							this.stError += "<BR>ERROR Schedule should NOT be in queue " + rs.getInt("RecId");
 						}
 						this.stError += aCp[rs.getInt("RecId")].getError();
 					}
@@ -5700,19 +4017,16 @@ class EpsXlsProject // extends EpsUserData
 				findPaths(0);
 
 				stCommTrace = this.ebEnt.ebUd.request.getParameter("commtrace");
-				if (stCommTrace != null && stCommTrace.length() > 0
-						&& stCommTrace.equals("t")) // Trace
+				if (stCommTrace != null && stCommTrace.length() > 0 && stCommTrace.equals("t")) // Trace
 				{
 					for (int i = 0; i < aCp.length; i++) {
 						if (aCp[i] != null) {
 							sbReturn.append("<br>" + i + "  S: ");
-							for (int i2 = 0; i2 < aCp[i].aSuccessor.length
-									&& aCp[i].aSuccessor[i2] > 0; i2++) {
+							for (int i2 = 0; i2 < aCp[i].aSuccessor.length && aCp[i].aSuccessor[i2] > 0; i2++) {
 								sbReturn.append(aCp[i].aSuccessor[i2] + ", ");
 							}
 							sbReturn.append("  D: ");
-							for (int i2 = 0; i2 < aCp[i].aDependency.length
-									&& aCp[i].aDependency[i2] > 0; i2++) {
+							for (int i2 = 0; i2 < aCp[i].aDependency.length && aCp[i].aDependency[i2] > 0; i2++) {
 								sbReturn.append(aCp[i].aDependency[i2] + ", ");
 							}
 						}
@@ -5728,16 +4042,13 @@ class EpsXlsProject // extends EpsUserData
 				// First, process Critical path to end, but need to stop at each
 				// Task
 				// with dependenciies
-				String stStartDate = this.rsProject
-						.getString("FixedProjectStartDate");
+				String stStartDate = this.rsProject.getString("FixedProjectStartDate");
 				this.dtProjectStart = null;
 				// First Task in CP
 				if (stStartDate != null && stStartDate.length() > 8) {
 					dtProjectStart = EpsStatic.getCalendar(stStartDate);
 					if (EpsStatic.daysBetween(null, dtProjectStart) < 0) {
-						stError += "<br>ERROR: Invalid start date for project: "
-								+ this.rsProject.getString("ProjectName")
-								+ " "
+						stError += "<br>ERROR: Invalid start date for project: " + this.rsProject.getString("ProjectName") + " "
 								+ stStartDate;
 						dtProjectStart = null; // cant be in future
 					}
@@ -5752,8 +4063,7 @@ class EpsXlsProject // extends EpsUserData
 					int iPrev = 0;
 					for (int iS = 0; iS < iMaxRecId; iS++) {
 						if (this.aaPath[iI][iS] > 0) {
-							dtEnd = calcStartEnd(this.aaPath[iI][iS],
-									dtProjectStart, iPrev);
+							dtEnd = calcStartEnd(this.aaPath[iI][iS], dtProjectStart, iPrev);
 							iPrev = this.aaPath[iI][iS];
 						} else
 							break;
@@ -5764,8 +4074,7 @@ class EpsXlsProject // extends EpsUserData
 				for (int iP = 0; iP < aCp.length; iP++) {
 					if (aCp[iP] != null) {
 						if ((aCp[iP].iFLags & 0x8000) == 0)
-							stError += "<BR>ERROR: Task not processed in CP by END DATE "
-									+ iP;
+							stError += "<BR>ERROR: Task not processed in CP by END DATE " + iP;
 					}
 				}
 
@@ -5786,14 +4095,10 @@ class EpsXlsProject // extends EpsUserData
 							int iWorkDays = 0;
 							aCp[this.aaPath[iC][iS]].iSlack = 0;
 							if (dtEnd2 != null)
-								iWorkDays = aCp[this.aaPath[iC][iS]]
-										.workDaysBetween(
-												dtEnd2,
-												aCp[this.aaPath[iC][iS]].dtStart);
+								iWorkDays = aCp[this.aaPath[iC][iS]].workDaysBetween(dtEnd2, aCp[this.aaPath[iC][iS]].dtStart);
 							if (iWorkDays != 1 && iWorkDays != 0) {
 								if (iWorkDays > 0) {
-									if (iS > 0
-											&& aCp[this.aaPath[iC][iS - 1]] != null)
+									if (iS > 0 && aCp[this.aaPath[iC][iS - 1]] != null)
 										aCp[this.aaPath[iC][iS - 1]].iSlack = iWorkDays;
 									iTotalSlack += iWorkDays;
 								}
@@ -5801,16 +4106,10 @@ class EpsXlsProject // extends EpsUserData
 							} else
 								sbReturn.append("<span>");
 							sbReturn.append(this.aaPath[iC][iS] + " ");
-							sbReturn.append(aCp[this.aaPath[iC][iS]].stTitle
-									+ " ");
-							sbReturn.append(aCp[this.aaPath[iC][iS]]
-									.getStartEnd()
-									+ "/<font color=blue>"
-									+ aCp[this.aaPath[iC][iS]].iWeekend
-									+ "</font>/<font color=red>"
-									+ aCp[this.aaPath[iC][iS]].iHoliday
-									+ "/"
-									+ aCp[this.aaPath[iC][iS]].dLag + "</font>");
+							sbReturn.append(aCp[this.aaPath[iC][iS]].stTitle + " ");
+							sbReturn.append(aCp[this.aaPath[iC][iS]].getStartEnd() + "/<font color=blue>"
+									+ aCp[this.aaPath[iC][iS]].iWeekend + "</font>/<font color=red>" + aCp[this.aaPath[iC][iS]].iHoliday
+									+ "/" + aCp[this.aaPath[iC][iS]].dLag + "</font>");
 							if (iWorkDays != 1 && iWorkDays != 0)
 								sbReturn.append(" [" + iWorkDays + "]");
 							sbReturn.append("</span><br>");
@@ -5818,8 +4117,7 @@ class EpsXlsProject // extends EpsUserData
 						} else
 							break;
 					}
-					sbReturn.append(" Total Slack: " + iTotalSlack + " Idx: "
-							+ iC);
+					sbReturn.append(" Total Slack: " + iTotalSlack + " Idx: " + iC);
 					if (dtCpLongest == null || dtEnd2.after(dtCpLongest)) {
 						dtCpLongest = (Calendar) dtEnd2.clone();
 						iCpIndexByDate = iC;
@@ -5832,14 +4130,11 @@ class EpsXlsProject // extends EpsUserData
 					}
 					sbReturn.append("</td>");
 
-					sbReturn.append("<td " + stBg + " align=right valign=top>"
-							+ aEndDate[iC] + "</td>");
+					sbReturn.append("<td " + stBg + " align=right valign=top>" + aEndDate[iC] + "</td>");
 					if (stBg.length() > 0)
-						sbReturn.append("<td " + stBg
-								+ " align=right valign=top>CRITICAL</td>");
+						sbReturn.append("<td " + stBg + " align=right valign=top>CRITICAL</td>");
 					else
-						sbReturn.append("<td " + stBg
-								+ " align=right valign=top>&nbsp;</td>");
+						sbReturn.append("<td " + stBg + " align=right valign=top>&nbsp;</td>");
 					sbReturn.append("</tr>");
 				}
 				sbReturn.append("</table>");
@@ -5867,21 +4162,13 @@ class EpsXlsProject // extends EpsUserData
 						stCp += this.aaPath[iCpIndexByDate][iS];
 					}
 				}
-				this.ebEnt.dbDyn
-						.ExecuteUpdate("update Schedule set SchFlags = (SchFlags | 0x200) "
-								+ "where RecId in ("
-								+ stCp
-								+ ") and nmProjectId="
-								+ stPk
-								+ " and nmBaseline=" + this.nmBaseline);
+				this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set SchFlags = (SchFlags | 0x200) " + "where RecId in (" + stCp
+						+ ") and nmProjectId=" + stPk + " and nmBaseline=" + this.nmBaseline);
 				for (int iC = 0; iC < aCp.length; iC++) {
 					if (aCp[iC] != null) {
-						stSql = "update Schedule set SchSlack= "
-								+ aCp[iC].iSlack + ",SchStartDate=\""
-								+ aCp[iC].getStart() + "\""
-								+ ",SchFinishDate=\"" + aCp[iC].getEnd() + "\""
-								+ "  where RecId = " + iC + " and nmProjectId="
-								+ stPk + " and nmBaseline=" + this.nmBaseline;
+						stSql = "update Schedule set SchSlack= " + aCp[iC].iSlack + ",SchStartDate=\"" + aCp[iC].getStart() + "\""
+								+ ",SchFinishDate=\"" + aCp[iC].getEnd() + "\"" + "  where RecId = " + iC + " and nmProjectId=" + stPk
+								+ " and nmBaseline=" + this.nmBaseline;
 						this.ebEnt.dbDyn.ExecuteUpdate(stSql);
 					}
 				}
@@ -5889,8 +4176,7 @@ class EpsXlsProject // extends EpsUserData
 				this.iAnalyzeStatus |= 0x100; // No Schedules for Critical path
 			}
 		} catch (Exception e) {
-			this.stError += "<br>ERROR processCriticalPath ProjectId=" + stPk
-					+ " " + e;
+			this.stError += "<br>ERROR processCriticalPath ProjectId=" + stPk + " " + e;
 		}
 		return sbReturn.toString();
 	}
@@ -5908,10 +4194,8 @@ class EpsXlsProject // extends EpsUserData
 		if (aCp[iI] != null) {
 			for (int iD = 0; iD < iMaxRecId; iD++) {
 				if (aCp[iI].aDependency[iD] > 0) {
-					if (iI > 0
-							|| (aCp[aCp[iI].aDependency[iD]].iFLags & 0x8000) != 0) {
-						dtEnd2 = (Calendar) aCp[aCp[iI].aDependency[iD]].dtEnd
-								.clone();
+					if (iI > 0 || (aCp[aCp[iI].aDependency[iD]].iFLags & 0x8000) != 0) {
+						dtEnd2 = (Calendar) aCp[aCp[iI].aDependency[iD]].dtEnd.clone();
 						double dDays = 0; // aCp[aCp[iI].aDependency[iD]].dLag;
 						dDays = aCp[iI].aDependencyLag[iD];
 						if (dDays > 0) {
@@ -5921,8 +4205,7 @@ class EpsXlsProject // extends EpsUserData
 								dtEnd2.add(Calendar.DAY_OF_YEAR, +1);
 								int iLoop = 0;
 								do {
-									iLoop = aCp[aCp[iI].aDependency[iD]]
-											.checkHoliday(dtEnd2);
+									iLoop = aCp[aCp[iI].aDependency[iD]].checkHoliday(dtEnd2);
 									if (iLoop > 0)
 										dtEnd2.add(Calendar.DAY_OF_YEAR, iLoop);
 								} while (iLoop != 0);
@@ -5936,16 +4219,14 @@ class EpsXlsProject // extends EpsUserData
 								int iLoop = 0;
 								int iTemp = 0;
 								do {
-									iLoop = aCp[aCp[iI].aDependency[iD]]
-											.checkHoliday(dtEnd2);
+									iLoop = aCp[aCp[iI].aDependency[iD]].checkHoliday(dtEnd2);
 									if (iLoop > 0)
 										dtEnd2.add(Calendar.DAY_OF_YEAR, -iLoop);
 								} while (iLoop != 0 && iTemp++ < 1000);
 							}
 						}
 					} else {
-						stError += "<BR>ERROR getLatestStart: not all children are set "
-								+ aCp[iI].aDependency[iD];
+						stError += "<BR>ERROR getLatestStart: not all children are set " + aCp[iI].aDependency[iD];
 						dtEnd2 = null; // dont know when it is
 					}
 					if (dtEnd2 != null && dtEnd2.after(dtReturn)) {
@@ -5987,22 +4268,19 @@ class EpsXlsProject // extends EpsUserData
 						// Get Front of Path for start Date
 						aChain[iChain] = iCp;
 						iChain++;
-						while (iCp > 0 && aCp[iCp] != null
-								&& (aCp[iCp].iFLags & 0x8000) == 0) {
+						while (iCp > 0 && aCp[iCp] != null && (aCp[iCp].iFLags & 0x8000) == 0) {
 							aChain[iChain] = aCp[iCp].aDependency[0];
 							iCp = aChain[iChain];
 							iChain++;
 							if (iLoop++ > iMaxRecId) {
-								this.stError += "<BR>ERROR Loop in BackTrack "
-										+ iCp;
+								this.stError += "<BR>ERROR Loop in BackTrack " + iCp;
 								break;
 							}
 						}
 						if (iChain > 1) {
 							iChain--;
 							for (; iChain > 0; iChain--) {
-								if (aChain[iChain] == 0
-										|| (aCp[aChain[iChain]] != null && (aCp[aChain[iChain]].iFLags & 0x100) != 0))
+								if (aChain[iChain] == 0 || (aCp[aChain[iChain]] != null && (aCp[aChain[iChain]].iFLags & 0x100) != 0))
 									dtEnd2 = this.dtProjectStart;
 								else {
 									dtEnd2 = aCp[aChain[iChain]].dtEnd;
@@ -6013,89 +4291,82 @@ class EpsXlsProject // extends EpsUserData
 									dPreviousHours = 0;
 								if (aCp[aChain[iChain - 1]] != null) {
 									if (aCp[iI].aDependency[iD] == aChain[iChain - 1]) {
-										if (aCp[iI].aDependencyType[iD]
-												.equals("ss")) { // Start to
-																	// Start
-											calcStartEnd(aChain[iChain - 1],
-													dtStart, aChain[iChain]); // Set
-																				// dependent
-																				// to
-																				// same
-																				// start
-																				// as
-																				// us
-										} else if (aCp[iI].aDependencyType[iD]
-												.equals("ff")) { // Finish
-																	// to
-																	// Finish
-											dtStart = getLatestStart(iI,
-													dtStart);
+										if (aCp[iI].aDependencyType[iD].equals("ss")) { // Start
+																						// to
+																						// Start
+											calcStartEnd(aChain[iChain - 1], dtStart, aChain[iChain]); // Set
+																										// dependent
+																										// to
+																										// same
+																										// start
+																										// as
+																										// us
+										} else if (aCp[iI].aDependencyType[iD].equals("ff")) { // Finish
+																								// to
+																								// Finish
+											dtStart = getLatestStart(iI, dtStart);
 											aCp[iI].dtStart = dtStart;
 											aCp[iI].calculateEnd(dPreviousHours);
-											aCp[aChain[iChain]].dtEnd = (Calendar) aCp[iI].dtEnd
-													.clone(); // Set My end to
-																// depend end
-											aCp[aChain[iChain]]
-													.calculateStart(); // calculate
-																		// depend
-																		// start
-										} else if (aCp[iI].aDependencyType[iD]
-												.equals("sf")) { // Start
-																	// to
-																	// Finish
-																	// (is
-																	// reverse
-																	// of
-																	// Finish
-																	// to
-																	// Start
-																	// dtEnd2
-																	// =
-																	// calcStartEnd(aChain[iChain
-																	// -
-																	// 1],
-																	// dtStart);
-																	// //
-																	// Start
-																	// dependent
-																	// on
-																	// my
-																	// START
-																	// dtStart
-																	// =
-																	// (Calendar)
-																	// dtEnd2.clone();
-																	// //
-																	// set
-																	// my
-																	// Start
-																	// to
-																	// prev.
-																	// end
-											dtEnd2 = calcStartEnd(
-													aChain[iChain - 1], dtEnd2,
-													aChain[iChain]); // we treat
-																		// SF
-																		// like
-																		// FS
-																		// since
-																		// To/from
-																		// reversed
+											aCp[aChain[iChain]].dtEnd = (Calendar) aCp[iI].dtEnd.clone(); // Set
+																											// My
+																											// end
+																											// to
+																											// depend
+																											// end
+											aCp[aChain[iChain]].calculateStart(); // calculate
+																					// depend
+																					// start
+										} else if (aCp[iI].aDependencyType[iD].equals("sf")) { // Start
+																								// to
+																								// Finish
+																								// (is
+																								// reverse
+																								// of
+																								// Finish
+																								// to
+																								// Start
+																								// dtEnd2
+																								// =
+																								// calcStartEnd(aChain[iChain
+																								// -
+																								// 1],
+																								// dtStart);
+																								// //
+																								// Start
+																								// dependent
+																								// on
+																								// my
+																								// START
+																								// dtStart
+																								// =
+																								// (Calendar)
+																								// dtEnd2.clone();
+																								// //
+																								// set
+																								// my
+																								// Start
+																								// to
+																								// prev.
+																								// end
+											dtEnd2 = calcStartEnd(aChain[iChain - 1], dtEnd2, aChain[iChain]); // we
+																												// treat
+																												// SF
+																												// like
+																												// FS
+																												// since
+																												// To/from
+																												// reversed
 										} else { // Normal Finish to Start
-											dtEnd2 = calcStartEnd(
-													aChain[iChain - 1], dtEnd2,
-													aChain[iChain]);
+											dtEnd2 = calcStartEnd(aChain[iChain - 1], dtEnd2, aChain[iChain]);
 										}
 									} else {
-										dtEnd2 = calcStartEnd(
-												aChain[iChain - 1], dtEnd2,
-												aChain[iChain]); // Not our
-																	// dependent
+										dtEnd2 = calcStartEnd(aChain[iChain - 1], dtEnd2, aChain[iChain]); // Not
+																											// our
+																											// dependent
 									}
 								}
 								if (iLoop++ > iMaxRecId) {
-									this.stError += "<BR>ERROR Loop2 in BackTrack "
-											+ iCp;
+									this.stError += "<BR>ERROR Loop2 in BackTrack " + iCp;
 									break;
 								}
 							}
@@ -6106,21 +4377,18 @@ class EpsXlsProject // extends EpsUserData
 			}
 			if ((aCp[iI].iFLags & 0x8000) == 0) {
 				int iD = 0; // Don't know how to handle multple deps' here
-				if (aCp[iI].aDependency[iD] > 0
-						&& (aCp[aCp[iI].aDependency[iD]].iFLags & 0x8000) != 0) // Special
-																				// case
-																				// of
-																				// dep.
+				if (aCp[iI].aDependency[iD] > 0 && (aCp[aCp[iI].aDependency[iD]].iFLags & 0x8000) != 0) // Special
+																										// case
+																										// of
+																										// dep.
 				{
 					if (aCp[iI].aDependencyType[iD].equals("ss")) { // Start to
 																	// Start
-						dtStart = (Calendar) aCp[aCp[iI].aDependency[iD]].dtStart
-								.clone();
+						dtStart = (Calendar) aCp[aCp[iI].aDependency[iD]].dtStart.clone();
 					} else if (aCp[iI].aDependencyType[iD].equals("ff")) { // Finish
 																			// to
 																			// Finish
-						aCp[iI].dtEnd = (Calendar) aCp[aCp[iI].aDependency[iD]].dtEnd
-								.clone();
+						aCp[iI].dtEnd = (Calendar) aCp[aCp[iI].aDependency[iD]].dtEnd.clone();
 						aCp[iI].calculateStart(); // calculate depend start
 						dtStart = aCp[iI].dtStart;
 					} else if (aCp[iI].aDependencyType[iD].equals("sf")) {
@@ -6251,11 +4519,8 @@ class EpsXlsProject // extends EpsUserData
 	public void setDependendies(int iR) {
 		if (aCp[iR] != null) {
 			for (int i = 0; i < aCp[iR].aSuccessor.length; i++) {
-				if (aCp[iR].aSuccessor[i] > 0
-						&& aCp[aCp[iR].aSuccessor[i]] != null) {
-					aCp[aCp[iR].aSuccessor[i]]
-							.addDpendency(iR, aCp[iR].aSuccessorType[i],
-									aCp[iR].aSuccessorLag[i]);
+				if (aCp[iR].aSuccessor[i] > 0 && aCp[aCp[iR].aSuccessor[i]] != null) {
+					aCp[aCp[iR].aSuccessor[i]].addDpendency(iR, aCp[iR].aSuccessorType[i], aCp[iR].aSuccessorLag[i]);
 				} else
 					break;
 			}
@@ -6264,23 +4529,18 @@ class EpsXlsProject // extends EpsUserData
 
 	public void calcUpdateBaseline() {
 		try {
-			int nmReqt = this.ebEnt.dbDyn
-					.ExecuteSql1n("SELECT count(*) FROM Requirements where nmProjectId="
-							+ stPk + " and nmBaseline=" + nmBaseline);
-			int nmSch = this.ebEnt.dbDyn
-					.ExecuteSql1n("SELECT count(*) FROM Schedule where nmProjectId="
-							+ stPk + " and nmBaseline=" + nmBaseline);
-			double nmEffort = this.ebEnt.dbDyn
-					.ExecuteSql1n("SELECT sum(SchEstimatedEffort) FROM Schedule where (SchFlags & 0x10 ) != 0 and nmProjectId="
-							+ stPk + " and nmBaseline=" + nmBaseline);
-			double nmCost = this.ebEnt.dbDyn
-					.ExecuteSql1n("SELECT sum(SchCost) FROM Schedule where (SchFlags & 0x10 ) != 0 and nmProjectId="
-							+ stPk + " and nmBaseline=" + nmBaseline);
-			this.ebEnt.dbDyn.ExecuteUpdate("update teb_baseline set "
-					+ "nmReqt=" + nmReqt + ",nmSch=" + nmSch + ",nmEffort="
-					+ nmEffort + ",nmCost=" + nmCost + " "
-					+ "where nmProjectId=" + stPk + " and nmBaseline="
+			int nmReqt = this.ebEnt.dbDyn.ExecuteSql1n("SELECT count(*) FROM Requirements where nmProjectId=" + stPk + " and nmBaseline="
 					+ nmBaseline);
+			int nmSch = this.ebEnt.dbDyn.ExecuteSql1n("SELECT count(*) FROM Schedule where nmProjectId=" + stPk + " and nmBaseline="
+					+ nmBaseline);
+			double nmEffort = this.ebEnt.dbDyn
+					.ExecuteSql1n("SELECT sum(SchEstimatedEffort) FROM Schedule where (SchFlags & 0x10 ) != 0 and nmProjectId=" + stPk
+							+ " and nmBaseline=" + nmBaseline);
+			double nmCost = this.ebEnt.dbDyn
+					.ExecuteSql1n("SELECT sum(SchCost) FROM Schedule where (SchFlags & 0x10 ) != 0 and nmProjectId=" + stPk
+							+ " and nmBaseline=" + nmBaseline);
+			this.ebEnt.dbDyn.ExecuteUpdate("update teb_baseline set " + "nmReqt=" + nmReqt + ",nmSch=" + nmSch + ",nmEffort=" + nmEffort
+					+ ",nmCost=" + nmCost + " " + "where nmProjectId=" + stPk + " and nmBaseline=" + nmBaseline);
 		} catch (Exception e) {
 			this.stError += "<br>ERROR followPath " + e;
 		}
@@ -6293,11 +4553,9 @@ class EpsXlsProject // extends EpsUserData
 			stPk = this.ebEnt.ebUd.request.getParameter("pk");
 			stGoBack = "?stAction=projects&t=12";
 			String stTemp = "";
-			String stLink = "?stAction=projects&t="
-					+ this.ebEnt.ebUd.request.getParameter("t") + "&do=xls&pk="
-					+ stPk + "&parent=" + stTemp + "&child=" + stChild;
-			this.rsProject = this.ebEnt.dbDyn
-					.ExecuteSql("select * from Projects where RecId=" + stPk);
+			String stLink = "?stAction=projects&t=" + this.ebEnt.ebUd.request.getParameter("t") + "&do=xls&pk=" + stPk + "&parent="
+					+ stTemp + "&child=" + stChild;
+			this.rsProject = this.ebEnt.dbDyn.ExecuteSql("select * from Projects where RecId=" + stPk);
 			this.rsProject.absolute(1);
 			nmBaseline = this.rsProject.getInt("CurrentBaseline");
 			calcUpdateBaseline();
@@ -6305,35 +4563,21 @@ class EpsXlsProject // extends EpsUserData
 			String stAction = this.ebEnt.ebUd.request.getParameter("submit");
 			String stFrom = this.ebEnt.ebUd.request.getParameter("nmFrom");
 			iMaxFields = 12;
-			if (stAction != null && stAction.length() > 0 && stFrom != null
-					&& stFrom.length() > 0) { // PROCESS ACTIONS
+			if (stAction != null && stAction.length() > 0 && stFrom != null && stFrom.length() > 0) { // PROCESS
+																										// ACTIONS
 				if (stAction.equals("delete")) {
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("delete from teb_baseline where nmProjectId="
-									+ stPk + " and nmBaseline=" + stFrom);
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("delete from Schedule where nmProjectId="
-									+ stPk + " and nmBaseline=" + stFrom);
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("delete from Requirements where nmProjectId="
-									+ stPk + " and nmBaseline=" + stFrom);
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("delete from Test where nmProjectId="
-									+ stPk + " and nmBaseline=" + stFrom);
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("delete from teb_link where nmProjectId="
-									+ stPk + " and nmBaseline=" + stFrom);
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("delete from teb_project where nmProjectId="
-									+ stPk + " and nmBaseline=" + stFrom);
+					this.ebEnt.dbDyn.ExecuteUpdate("delete from teb_baseline where nmProjectId=" + stPk + " and nmBaseline=" + stFrom);
+					this.ebEnt.dbDyn.ExecuteUpdate("delete from Schedule where nmProjectId=" + stPk + " and nmBaseline=" + stFrom);
+					this.ebEnt.dbDyn.ExecuteUpdate("delete from Requirements where nmProjectId=" + stPk + " and nmBaseline=" + stFrom);
+					this.ebEnt.dbDyn.ExecuteUpdate("delete from Test where nmProjectId=" + stPk + " and nmBaseline=" + stFrom);
+					this.ebEnt.dbDyn.ExecuteUpdate("delete from teb_link where nmProjectId=" + stPk + " and nmBaseline=" + stFrom);
+					this.ebEnt.dbDyn.ExecuteUpdate("delete from teb_project where nmProjectId=" + stPk + " and nmBaseline=" + stFrom);
 					stAction = null;
 				} else {
 					int nmMaxBaseline = this.ebEnt.dbDyn
-							.ExecuteSql1n("SELECT max(nmBaseline) FROM teb_baseline where nmProjectId ="
-									+ stPk);
+							.ExecuteSql1n("SELECT max(nmBaseline) FROM teb_baseline where nmProjectId =" + stPk);
 					nmMaxBaseline++;
-					String stType = this.ebEnt.ebUd.request
-							.getParameter("stType");
+					String stType = this.ebEnt.ebUd.request.getParameter("stType");
 					String stAdditional = "";
 					String stType2 = "";
 					if (stType.toLowerCase().equals("interim")) {
@@ -6350,48 +4594,27 @@ class EpsXlsProject // extends EpsUserData
 						stType2 = "3";
 					}
 					this.epsUd.epsEf.addAuditTrail(119, stPk, stType2);
-					this.epsUd.epsEf.addAuditTrail(1025, stPk, ""
-							+ nmMaxBaseline);
+					this.epsUd.epsEf.addAuditTrail(1025, stPk, "" + nmMaxBaseline);
 
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Projects set CurrentBaseline="
-									+ nmMaxBaseline
-									+ stAdditional
-									+ " where RecId="
-									+ stPk
-									+ " and CurrentBaseline=" + nmBaseline);
-					copyRows("teb_baseline", "nmProjectId", stPk, "nmBaseline",
-							stFrom, "" + nmMaxBaseline);
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update teb_baseline set stType="
-									+ this.ebEnt.dbDyn.fmtDbString(stType)
-									+ ",nmUserEntered="
-									+ this.ebEnt.ebUd.getLoginId()
-									+ " where nmProjectId=" + stPk
-									+ " and nmBaseline=" + nmMaxBaseline);
-					copyRows("Schedule", "nmProjectId", stPk, "nmBaseline",
-							stFrom, "" + nmMaxBaseline);
-					copyRows("Requirements", "nmProjectId", stPk, "nmBaseline",
-							stFrom, "" + nmMaxBaseline);
-					copyRows("Test", "nmProjectId", stPk, "nmBaseline", stFrom,
-							"" + nmMaxBaseline);
-					copyRows("teb_link", "nmProjectId", stPk, "nmBaseline",
-							stFrom, "" + nmMaxBaseline);
-					copyRows("teb_project", "nmProjectId", stPk, "nmBaseline",
-							stFrom, "" + nmMaxBaseline);
+					this.ebEnt.dbDyn.ExecuteUpdate("update Projects set CurrentBaseline=" + nmMaxBaseline + stAdditional + " where RecId="
+							+ stPk + " and CurrentBaseline=" + nmBaseline);
+					copyRows("teb_baseline", "nmProjectId", stPk, "nmBaseline", stFrom, "" + nmMaxBaseline);
+					this.ebEnt.dbDyn.ExecuteUpdate("update teb_baseline set stType=" + this.ebEnt.dbDyn.fmtDbString(stType)
+							+ ",nmUserEntered=" + this.ebEnt.ebUd.getLoginId() + " where nmProjectId=" + stPk + " and nmBaseline="
+							+ nmMaxBaseline);
+					copyRows("Schedule", "nmProjectId", stPk, "nmBaseline", stFrom, "" + nmMaxBaseline);
+					copyRows("Requirements", "nmProjectId", stPk, "nmBaseline", stFrom, "" + nmMaxBaseline);
+					copyRows("Test", "nmProjectId", stPk, "nmBaseline", stFrom, "" + nmMaxBaseline);
+					copyRows("teb_link", "nmProjectId", stPk, "nmBaseline", stFrom, "" + nmMaxBaseline);
+					copyRows("teb_project", "nmProjectId", stPk, "nmBaseline", stFrom, "" + nmMaxBaseline);
 					nmBaseline = nmMaxBaseline;
 				}
 			}
-			sbReturn.append("</form><form method=post name='form" + stChild
-					+ "' id='form" + stChild
-					+ "' onsubmit='return myValidation(this)'>"
-					+ "<table class=l1tablenarrow><tr><td class=l1td colspan="
-					+ iMaxFields + " align=center>" + "<h2>"
-					+ this.rsProject.getString("ProjectName")
-					+ "</h2></td></tr>");
+			sbReturn.append("</form><form method=post name='form" + stChild + "' id='form" + stChild
+					+ "' onsubmit='return myValidation(this)'>" + "<table class=l1tablenarrow><tr><td class=l1td colspan=" + iMaxFields
+					+ " align=center>" + "<h2>" + this.rsProject.getString("ProjectName") + "</h2></td></tr>");
 			xlsAnalyze(); // must analyze it
-			stSql = "SELECT * FROM teb_baseline where nmProjectId =" + stPk
-					+ " order by nmBaseline desc";
+			stSql = "SELECT * FROM teb_baseline where nmProjectId =" + stPk + " order by nmBaseline desc";
 			ResultSet rsB = this.ebEnt.dbDyn.ExecuteSql(stSql);
 			rsB.last();
 			int iMaxB = rsB.getRow();
@@ -6406,78 +4629,47 @@ class EpsXlsProject // extends EpsUserData
 				stReturn1 += "<tr>";
 				stReturn1 += "<td class=l1td align=right>";
 				if (rsB.getInt("nmBaseline") != nmBaseline)
-					stReturn1 += "<a title='Delete' href="
-							+ "'"
-							+ stLink
-							+ "&submit=delete&nmFrom="
-							+ rsB.getString("nmBaseline")
-							+ "'>"
+					stReturn1 += "<a title='Delete' href=" + "'" + stLink + "&submit=delete&nmFrom=" + rsB.getString("nmBaseline") + "'>"
 							+ "<img src='./common/b_drop.png' "
-							+ "onClick=\"return myConfirm('Are you sure you want to delete this item?', "
-							+ rsB.getString("nmBaseline") + "," + iMaxB
-							+ " )\"></a></td>";
+							+ "onClick=\"return myConfirm('Are you sure you want to delete this item?', " + rsB.getString("nmBaseline")
+							+ "," + iMaxB + " )\"></a></td>";
 				stReturn1 += "<td class=l1td align=right>";
 				stReturn1 += rsB.getString("nmBaseline") + "</td>";
-				stReturn1 += "<td class=l1td align=right>"
-						+ rsB.getString("stType") + "</td>";
-				stReturn1 += "<td class=l1td align=right>"
-						+ rsB.getInt("nmFromBaseline") + "</td>";
-				stReturn1 += "<td class=l1td>"
-						+ this.epsUd.getUserName(rsB.getInt("nmUserEntered"))
-						+ "</td>";
-				stReturn1 += "<td class=l1td>"
-						+ this.ebEnt.ebUd.fmtDateFromDb(rsB
-								.getString("dtEntered")) + "</td>";
+				stReturn1 += "<td class=l1td align=right>" + rsB.getString("stType") + "</td>";
+				stReturn1 += "<td class=l1td align=right>" + rsB.getInt("nmFromBaseline") + "</td>";
+				stReturn1 += "<td class=l1td>" + this.epsUd.getUserName(rsB.getInt("nmUserEntered")) + "</td>";
+				stReturn1 += "<td class=l1td>" + this.ebEnt.ebUd.fmtDateFromDb(rsB.getString("dtEntered")) + "</td>";
 				stReturn1 += "<td class=l1td>";
 				if (rsB.getInt("nmAnalyzeStatus") != 0)
 					stReturn1 += "<font color=red>Errors</font>";
 				else
 					stReturn1 += "<font color=green>ok</font>";
 				stReturn1 += "</td>";
-				stReturn1 += "<td class=l1td>"
-						+ this.ebEnt.ebUd.fmtDateTimeFromDb(rsB
-								.getString("dtLastAnalyze")) + "</td>";
-				stReturn1 += "<td class=l1td align=right>"
-						+ rsB.getString("nmReqt") + "</td>";
-				stReturn1 += "<td class=l1td align=right>"
-						+ rsB.getString("nmSch") + "</td>";
-				stReturn1 += "<td class=l1td align=right>"
-						+ rsB.getString("nmEffort") + "</td>";
-				String moneySign = this.ebEnt.dbDyn
-						.ExecuteSql1("select stMoneySymbol from teb_division where nmDivision="
-								+ this.rsProject.getInt("nmDivision"));
-				stReturn1 += "<td class=l1td align=right>" + moneySign + " "
-						+ rsB.getString("nmCost") + "</td>";
+				stReturn1 += "<td class=l1td>" + this.ebEnt.ebUd.fmtDateTimeFromDb(rsB.getString("dtLastAnalyze")) + "</td>";
+				stReturn1 += "<td class=l1td align=right>" + rsB.getString("nmReqt") + "</td>";
+				stReturn1 += "<td class=l1td align=right>" + rsB.getString("nmSch") + "</td>";
+				stReturn1 += "<td class=l1td align=right>" + rsB.getString("nmEffort") + "</td>";
+				String moneySign = this.ebEnt.dbDyn.ExecuteSql1("select stMoneySymbol from teb_division where nmDivision="
+						+ this.rsProject.getInt("nmDivision"));
+				stReturn1 += "<td class=l1td align=right>" + moneySign + " " + rsB.getString("nmCost") + "</td>";
 				stReturn1 += "</tr>";
-				stSelect += this.ebEnt.ebUd.addOption(
-						rsB.getString("nmBaseline"),
-						rsB.getString("nmBaseline"),
+				stSelect += this.ebEnt.ebUd.addOption(rsB.getString("nmBaseline"), rsB.getString("nmBaseline"),
 						this.rsProject.getString("CurrentBaseline"));
 			}
 			stSelect += "</select>";
 			if (stAction == null || stFrom == null) {
 				String stType = "<select name=stType>";
-				stType += this.ebEnt.ebUd.addOption4("Interim", "Interim", "",
-						1);
+				stType += this.ebEnt.ebUd.addOption4("Interim", "Interim", "", 1);
 				int iAllowed = 0;
 				if ((this.ebEnt.ebUd.getLoginPersonFlags() & 0x20) != 0) // PPM
 																			// only
 					iAllowed = 1;
-				stType += this.ebEnt.ebUd.addOption4("Approve", "Approve", "",
-						iAllowed);
-				stType += this.ebEnt.ebUd.addOption4("Completed", "Completed",
-						"", iAllowed);
-				stType += this.ebEnt.ebUd.addOption4("Suspended", "Suspended",
-						"", iAllowed);
+				stType += this.ebEnt.ebUd.addOption4("Approve", "Approve", "", iAllowed);
+				stType += this.ebEnt.ebUd.addOption4("Completed", "Completed", "", iAllowed);
+				stType += this.ebEnt.ebUd.addOption4("Suspended", "Suspended", "", iAllowed);
 				stType += "</select>";
-				sbReturn.append("<tr><td class=l1td colspan="
-						+ iMaxFields
-						+ " align=center><br><table bgcolor=yellow><tr>"
-						+ "<td>Create new baseline based on </td><td>"
-						+ stSelect
-						+ "</td><td>"
-						+ stType
-						+ "</td><td> "
+				sbReturn.append("<tr><td class=l1td colspan=" + iMaxFields + " align=center><br><table bgcolor=yellow><tr>"
+						+ "<td>Create new baseline based on </td><td>" + stSelect + "</td><td>" + stType + "</td><td> "
 						+ "<input type=submit name=submit value='Create Baseline'></td></tr></table>"
 						+ "<br>&nbsp;<h2>Baseline History</h2></td></tr>");
 			}
@@ -6486,14 +4678,12 @@ class EpsXlsProject // extends EpsUserData
 			this.stError += "<br>ERROR xlsBaseline " + e;
 		}
 		sbReturn.append("</table>");
-		sbReturn.append("<input type=button onClick=\"parent.location='"
-				+ stGoBack + "&pk=" + stPk
+		sbReturn.append("<input type=button onClick=\"parent.location='" + stGoBack + "&pk=" + stPk
 				+ "&do=edit'\" value='Go Back to Projects'>");
 		return sbReturn.toString();
 	}
 
-	public void copyRows(String stTable, String stPk, String stPkValue,
-			String stPk2, String stPk2Value, String stPk2New) {
+	public void copyRows(String stTable, String stPk, String stPkValue, String stPk2, String stPk2Value, String stPk2New) {
 		try {
 			ResultSet rsF = this.ebEnt.dbDyn.ExecuteSql("explain " + stTable);
 			String stFields = "";
@@ -6519,8 +4709,7 @@ class EpsXlsProject // extends EpsUserData
 
 				stFields += rsF.getString(1);
 			}
-			stSql += " (" + stFields + ") select " + stSelectFrom + " from "
-					+ stTable + " t2 where t2." + stPk + " = " + stPkValue
+			stSql += " (" + stFields + ") select " + stSelectFrom + " from " + stTable + " t2 where t2." + stPk + " = " + stPkValue
 					+ " and t2." + stPk2 + " = " + stPk2Value;
 			this.ebEnt.dbDyn.ExecuteUpdate(stSql);
 		} catch (Exception e) {
@@ -6539,32 +4728,22 @@ class EpsXlsProject // extends EpsUserData
 			if (stSave != null && stSave.length() > 0)
 				giSubmitId = Integer.parseInt(stSave);
 			if (stSave != null && stSave.length() > 0 && stSave.equals("9999")) {
-				ResultSet rsTable = this.ebEnt.dbDyn
-						.ExecuteSql("select * from teb_table where nmTableId="
-								+ stChild);
+				ResultSet rsTable = this.ebEnt.dbDyn.ExecuteSql("select * from teb_table where nmTableId=" + stChild);
 				ResultSet rsF = this.ebEnt.dbDyn
 						.ExecuteSql("select * from teb_fields f, teb_epsfields ef where f.nmForeignId=ef.nmForeignId and f.nmTabId in ("
-								+ rsTable.getString("stTabList")
-								+ ") order by f.nmHeaderOrder, f.nmForeignId ");
+								+ rsTable.getString("stTabList") + ") order by f.nmHeaderOrder, f.nmForeignId ");
 				rsF.last();
 				int iMaxF = rsF.getRow();
-				int iCount = this.epsUd.saveTable(rsTable, rsF, iMaxF, stPk, 0,
-						0);
+				int iCount = this.epsUd.saveTable(rsTable, rsF, iMaxF, stPk, 0, 0);
 			}
 
-			String s1 = "</form><form method=post name='form"
-					+ stChild
-					+ "' id='form"
-					+ stChild
-					+ "' onsubmit='return myValidation(this)'>"
-					+ "<input type=hidden name=giSubmitId id=giSubmitId value=0"
-					+ "<center><table><tr><td valign=middle><h2>"
-					+ this.rsProject.getString("ProjectName")
+			String s1 = "</form><form method=post name='form" + stChild + "' id='form" + stChild
+					+ "' onsubmit='return myValidation(this)'>" + "<input type=hidden name=giSubmitId id=giSubmitId value=0"
+					+ "<center><table><tr><td valign=middle><h2>" + this.rsProject.getString("ProjectName")
 					+ "</h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>";
 			sbReturn.append(s1);
 			sbReturn.append("<td align=left><b>");
-			sbReturn.append(this.epsUd.epsEf
-					.fullSchTitle(stR, stPk, nmBaseline));
+			sbReturn.append(this.epsUd.epsEf.fullSchTitle(stR, stPk, nmBaseline));
 			sbReturn.append("</b><br>&nbsp;</td>");
 			sbReturn.append("</tr></table>");
 			if (giSubmitId <= 0) {
@@ -6585,66 +4764,41 @@ class EpsXlsProject // extends EpsUserData
 			switch (giSubmitId) {
 			case 9994:
 			case 9974:
-				rsField = this.ebEnt.dbDyn
-						.ExecuteSql("select * from teb_fields where nmDataType=44");
+				rsField = this.ebEnt.dbDyn.ExecuteSql("select * from teb_fields where nmDataType=44");
 				rsField.absolute(1);
-				stValue = this.ebEnt.dbDyn
-						.ExecuteSql1("select SchOtherResources from Schedule where nmProjectId="
-								+ stPk
-								+ " "
-								+ "and nmBaseline="
-								+ nmBaseline
-								+ " and SchId=" + stR);
-				sbReturn.append(this.epsUd.epsEf.makeOtherResources(rsField,
-						stValue, 1));
+				stValue = this.ebEnt.dbDyn.ExecuteSql1("select SchOtherResources from Schedule where nmProjectId=" + stPk + " "
+						+ "and nmBaseline=" + nmBaseline + " and SchId=" + stR);
+				sbReturn.append(this.epsUd.epsEf.makeOtherResources(rsField, stValue, 1));
 				break;
 			case 9993:
 			case 9973:
-				rsField = this.ebEnt.dbDyn
-						.ExecuteSql("select * from teb_fields where nmDataType=43");
+				rsField = this.ebEnt.dbDyn.ExecuteSql("select * from teb_fields where nmDataType=43");
 				rsField.absolute(1);
-				stValue = this.ebEnt.dbDyn
-						.ExecuteSql1("select SchInventory from Schedule where nmProjectId="
-								+ stPk
-								+ " "
-								+ "and nmBaseline="
-								+ nmBaseline
-								+ " and SchId=" + stR);
-				sbReturn.append(this.epsUd.epsEf.makeInventory(rsField,
-						stValue, 1));
+				stValue = this.ebEnt.dbDyn.ExecuteSql1("select SchInventory from Schedule where nmProjectId=" + stPk + " "
+						+ "and nmBaseline=" + nmBaseline + " and SchId=" + stR);
+				sbReturn.append(this.epsUd.epsEf.makeInventory(rsField, stValue, 1));
 				break;
 			case 9992:
 			case 9972:
-				rsField = this.ebEnt.dbDyn
-						.ExecuteSql("select * from teb_fields where nmDataType=45");
+				rsField = this.ebEnt.dbDyn.ExecuteSql("select * from teb_fields where nmDataType=45");
 				rsField.absolute(1);
 				stValue = "";
-				sbReturn.append(this.epsUd.epsEf.makeSuccessors(rsField, 1,
-						null, null));
+				sbReturn.append(this.epsUd.epsEf.makeSuccessors(rsField, 1, null, null));
 				break;
 			case 9991:
 			case 9971:
-				rsField = this.ebEnt.dbDyn
-						.ExecuteSql("select * from teb_fields where nmDataType=42");
+				rsField = this.ebEnt.dbDyn.ExecuteSql("select * from teb_fields where nmDataType=42");
 				rsField.absolute(1);
 				stValue = "";
-				sbReturn.append(this.epsUd.epsEf.makeDependencies(rsField, 1,
-						null, null));
+				sbReturn.append(this.epsUd.epsEf.makeDependencies(rsField, 1, null, null));
 				break;
 			case 9990:
 			case 9970:
-				rsField = this.ebEnt.dbDyn
-						.ExecuteSql("select * from teb_fields where nmDataType=41");
+				rsField = this.ebEnt.dbDyn.ExecuteSql("select * from teb_fields where nmDataType=41");
 				rsField.absolute(1);
-				stValue = this.ebEnt.dbDyn
-						.ExecuteSql1("select SchLaborCategories from Schedule where nmProjectId="
-								+ stPk
-								+ " "
-								+ "and nmBaseline="
-								+ nmBaseline
-								+ " and RecId=" + stR);
-				sbReturn.append(this.epsUd.epsEf.makeLaborCategories(rsField,
-						stValue, 1));
+				stValue = this.ebEnt.dbDyn.ExecuteSql1("select SchLaborCategories from Schedule where nmProjectId=" + stPk + " "
+						+ "and nmBaseline=" + nmBaseline + " and RecId=" + stR);
+				sbReturn.append(this.epsUd.epsEf.makeLaborCategories(rsField, stValue, 1));
 				break;
 			default:
 				stError += "<BR> invalid giSubmitId " + giSubmitId;
@@ -6683,8 +4837,7 @@ class EpsXlsProject // extends EpsUserData
 				sbReturn.append(this.ebEnt.ebUd.fmtDateFromDb(stValue));
 				break;
 			case 47: // Indicators
-				sbReturn.append(this.epsUd.epsEf.makeIndicators(rsFields,
-						stValue, 0));
+				sbReturn.append(this.epsUd.epsEf.makeIndicators(rsFields, stValue, 0));
 				break;
 			default:
 				sbReturn.append(stValue);
@@ -6704,12 +4857,8 @@ class EpsXlsProject // extends EpsUserData
 		Double rCost = 0.00;
 		DecimalFormat df = new DecimalFormat("#########0.00");
 
-		ResultSet rsP = this.ebEnt.dbDyn
-				.ExecuteSql("select count(*) cnt, sum(ReqCost) cost from requirements where nmProjectId="
-						+ stPk
-						+ " and nmBaseline="
-						+ this.nmBaseline
-						+ " and ReqParentRecId=" + reqID);
+		ResultSet rsP = this.ebEnt.dbDyn.ExecuteSql("select count(*) cnt, sum(ReqCost) cost from requirements where nmProjectId=" + stPk
+				+ " and nmBaseline=" + this.nmBaseline + " and ReqParentRecId=" + reqID);
 		boolean lowlvl = true;
 		if (rsP.next()) {
 			if (rsP.getInt("cnt") > 0) {
@@ -6722,43 +4871,22 @@ class EpsXlsProject // extends EpsUserData
 			// calculate sum of tasks for each requirement cost
 			ResultSet stResult = this.ebEnt.dbDyn
 					.ExecuteSql("select l.nmPercent, l.nmRemainder, l.nmToId, r.ReqCost from teb_link l left join requirements r on l.nmFromId=r.RecId and l.nmProjectId=r.nmProjectId and l.nmBaseline=r.nmBaseline where l.nmLinkFlags=1 and l.nmProjectId="
-							+ stPk
-							+ " and l.nmBaseline="
-							+ this.nmBaseline
-							+ " and nmFromId=" + reqID);
+							+ stPk + " and l.nmBaseline=" + this.nmBaseline + " and nmFromId=" + reqID);
 
 			while (stResult.next()) {
 				if (stResult.getString("l.nmRemainder").equals("1"))
-					rCost += Double
-							.parseDouble(this.ebEnt.dbDyn
-									.ExecuteSql1("select SchCost from schedule where nmProjectId="
-											+ stPk
-											+ " and nmBaseline="
-											+ this.nmBaseline
-											+ " and RecId="
-											+ stResult.getString("l.nmToId")));
+					rCost += Double.parseDouble(this.ebEnt.dbDyn.ExecuteSql1("select SchCost from schedule where nmProjectId=" + stPk
+							+ " and nmBaseline=" + this.nmBaseline + " and RecId=" + stResult.getString("l.nmToId")));
 				else
-					rCost += Double
-							.parseDouble(this.ebEnt.dbDyn
-									.ExecuteSql1("select SchCost from schedule where nmProjectId="
-											+ stPk
-											+ " and nmBaseline="
-											+ this.nmBaseline
-											+ " and RecId="
-											+ stResult.getString("l.nmToId")))
-							* (Double.parseDouble(stResult
-									.getString("l.nmPercent")) * 0.01);
+					rCost += Double.parseDouble(this.ebEnt.dbDyn.ExecuteSql1("select SchCost from schedule where nmProjectId=" + stPk
+							+ " and nmBaseline=" + this.nmBaseline + " and RecId=" + stResult.getString("l.nmToId")))
+							* (Double.parseDouble(stResult.getString("l.nmPercent")) * 0.01);
 			}
 		}
-		this.ebEnt.dbDyn.ExecuteUpdate("update requirements set ReqCost='"
-				+ df.format(rCost) + "' where nmProjectId=" + stPk
+		this.ebEnt.dbDyn.ExecuteUpdate("update requirements set ReqCost='" + df.format(rCost) + "' where nmProjectId=" + stPk
 				+ " and RecId=" + reqID + " and nmBaseline=" + this.nmBaseline);
-		int nmParentId = this.ebEnt.dbDyn
-				.ExecuteSql1n("select ReqParentRecId from requirements where nmProjectId="
-						+ stPk
-						+ " and nmBaseline="
-						+ this.nmBaseline
-						+ " and RecId=" + reqID);
+		int nmParentId = this.ebEnt.dbDyn.ExecuteSql1n("select ReqParentRecId from requirements where nmProjectId=" + stPk
+				+ " and nmBaseline=" + this.nmBaseline + " and RecId=" + reqID);
 		if (nmParentId > 0)
 			processRequirementCost(nmParentId);
 	}
@@ -6766,8 +4894,7 @@ class EpsXlsProject // extends EpsUserData
 	/*
 	 * Calculate requirement cost for all requirements linked to this schedule
 	 */
-	public void processScheduleRequirementCost(int scheduleID)
-			throws SQLException {
+	public void processScheduleRequirementCost(int scheduleID) throws SQLException {
 		// get requirements we need to calculate
 		Double rCost = 0.00;
 		DecimalFormat df = new DecimalFormat("#########0.00");
@@ -6775,12 +4902,8 @@ class EpsXlsProject // extends EpsUserData
 		int iCount = 0;
 
 		// get all requirements that are linked to this schedule
-		ResultSet stResult = this.ebEnt.dbDyn
-				.ExecuteSql("select nmFromId from teb_link where nmLinkFlags=1 and nmProjectId="
-						+ stPk
-						+ " and nmBaseline="
-						+ this.nmBaseline
-						+ " and nmToId=" + scheduleID);
+		ResultSet stResult = this.ebEnt.dbDyn.ExecuteSql("select nmFromId from teb_link where nmLinkFlags=1 and nmProjectId=" + stPk
+				+ " and nmBaseline=" + this.nmBaseline + " and nmToId=" + scheduleID);
 		stResult.last();
 		if (stResult.getRow() > 0)
 			reqIDs = new int[stResult.getRow()];
@@ -6828,8 +4951,8 @@ class EpsXlsProject // extends EpsUserData
 	public void processAllRequirementCost() {
 		try {
 			ResultSet stResult = this.ebEnt.dbDyn
-					.ExecuteSql("select nmProjectId, nmBaseline, RecId, ReqFlags from requirements where nmProjectId="
-							+ stPk + " order by ReqLevel desc");
+					.ExecuteSql("select nmProjectId, nmBaseline, RecId, ReqFlags from requirements where nmProjectId=" + stPk
+							+ " order by ReqLevel desc");
 			while (stResult.next()) {
 				String reqID = stResult.getString("RecId");
 				String projID = stResult.getString("nmProjectId");
@@ -6843,47 +4966,26 @@ class EpsXlsProject // extends EpsUserData
 				if (lowlvl) {
 					ResultSet rResult = this.ebEnt.dbDyn
 							.ExecuteSql("select l.nmPercent, l.nmRemainder, l.nmToId, r.ReqCost from teb_link l left join requirements r on l.nmFromId=r.RecId and l.nmProjectId=r.nmProjectId and l.nmBaseline=r.nmBaseline where l.nmLinkFlags=1 and l.nmProjectId="
-									+ projID
-									+ " and l.nmBaseline="
-									+ bsline
-									+ " and nmFromId=" + reqID);
+									+ projID + " and l.nmBaseline=" + bsline + " and nmFromId=" + reqID);
 
 					while (rResult.next()) {
-						stCost = this.ebEnt.dbDyn
-								.ExecuteSql1("select SchCost from schedule where nmProjectId="
-										+ projID
-										+ " and nmBaseline="
-										+ bsline
-										+ " and RecId="
-										+ rResult.getString("l.nmToId"));
+						stCost = this.ebEnt.dbDyn.ExecuteSql1("select SchCost from schedule where nmProjectId=" + projID
+								+ " and nmBaseline=" + bsline + " and RecId=" + rResult.getString("l.nmToId"));
 						if (stCost == null || stCost.equals(""))
 							stCost = "0";
 						if (rResult.getString("l.nmRemainder").equals("1"))
 							rCost += Double.parseDouble(stCost);
 						else
-							rCost += Double.parseDouble(stCost)
-									* (Double.parseDouble(rResult
-											.getString("l.nmPercent")) * 0.01);
+							rCost += Double.parseDouble(stCost) * (Double.parseDouble(rResult.getString("l.nmPercent")) * 0.01);
 					}
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update requirements set ReqCost='"
-									+ df.format(rCost) + "' where nmProjectId="
-									+ projID + " and RecId=" + reqID
-									+ " and nmBaseline=" + bsline);
+					this.ebEnt.dbDyn.ExecuteUpdate("update requirements set ReqCost='" + df.format(rCost) + "' where nmProjectId=" + projID
+							+ " and RecId=" + reqID + " and nmBaseline=" + bsline);
 				} else {
-					stCost = ebEnt.dbDyn
-							.ExecuteSql1("select sum(ReqCost) from requirements where nmProjectId="
-									+ projID
-									+ " and ReqParentRecId="
-									+ reqID
-									+ " and nmBaseline=" + bsline);
-					rCost = Double.parseDouble(stCost == null
-							|| "".equals(stCost) ? "0" : stCost);
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update requirements set ReqCost='"
-									+ df.format(rCost) + "' where nmProjectId="
-									+ projID + " and RecId=" + reqID
-									+ " and nmBaseline=" + bsline);
+					stCost = ebEnt.dbDyn.ExecuteSql1("select sum(ReqCost) from requirements where nmProjectId=" + projID
+							+ " and ReqParentRecId=" + reqID + " and nmBaseline=" + bsline);
+					rCost = Double.parseDouble(stCost == null || "".equals(stCost) ? "0" : stCost);
+					this.ebEnt.dbDyn.ExecuteUpdate("update requirements set ReqCost='" + df.format(rCost) + "' where nmProjectId=" + projID
+							+ " and RecId=" + reqID + " and nmBaseline=" + bsline);
 				}
 			}
 		} catch (Exception e) {
@@ -6905,8 +5007,7 @@ class EpsXlsProject // extends EpsUserData
 		String stReturn = "";
 
 		try {
-			if (this.stPk != null && this.stPk.length() > 0 && stChild != null
-					&& stChild.length() > 0) {
+			if (this.stPk != null && this.stPk.length() > 0 && stChild != null && stChild.length() > 0) {
 				stPrj = this.stPk;
 				stChild = "21";
 				stTsk = rs.getInt("RecId") + "";
@@ -6915,13 +5016,9 @@ class EpsXlsProject // extends EpsUserData
 				stChild = this.ebEnt.ebUd.request.getParameter("child");
 				stTsk = rs.getInt("RecId") + "";
 			}
-			String stBaseline = this.ebEnt.dbDyn
-					.ExecuteSql1("select CurrentBaseline from Projects where RecId="
-							+ stPrj);
-			String stSql = "select * from teb_link where nmProjectId=" + stPrj
-					+ " and nmBaseline=" + stBaseline + " and nmLinkFlags=2 "
-					+ "and nmToId=" + stTsk
-					+ " and nmToProject=nmProjectId order by nmFromId";
+			String stBaseline = this.ebEnt.dbDyn.ExecuteSql1("select CurrentBaseline from Projects where RecId=" + stPrj);
+			String stSql = "select * from teb_link where nmProjectId=" + stPrj + " and nmBaseline=" + stBaseline + " and nmLinkFlags=2 "
+					+ "and nmToId=" + stTsk + " and nmToProject=nmProjectId order by nmFromId";
 			ResultSet res = this.ebEnt.dbDyn.ExecuteSql(stSql);
 			res.last();
 			iRecMax = res.getRow();
@@ -6966,22 +5063,15 @@ class EpsXlsProject // extends EpsUserData
 				 * this.ebEnt.ebUd.addOption2(rsPrj.getString("ProjectName"),
 				 * rsPrj.getString("RecId"), stFromProject); }
 				 */
-				stReturn += "<td align=right>" + newtxt
-						+ "<input type=text name=did_" + k + " id=did_" + k
-						+ " value=\"" + stFromId
+				stReturn += "<td align=right>" + newtxt + "<input type=text name=did_" + k + " id=did_" + k + " value=\"" + stFromId
 						+ "\" size=5 style='text-align:right'></td>";
-				stReturn += "<td>"
-						+ this.epsUd.epsEf.ConstraintList("type_" + k, stType,
-								"") + "</td>";
-				stReturn += "<td align=right><input type=text name=lag_" + k
-						+ " id=lag_" + k + " value=\"" + stLag
+				stReturn += "<td>" + this.epsUd.epsEf.ConstraintList("type_" + k, stType, "") + "</td>";
+				stReturn += "<td align=right><input type=text name=lag_" + k + " id=lag_" + k + " value=\"" + stLag
 						+ "\" size=5 style='text-align:right'> (days)</td>";
 				stReturn += "</tr>";
 			}
 
-			stReturn += "</table><br>"
-					+ "<input type=hidden name=dmax id=dmax value='"
-					+ (iRecMax + 1) + "'>";
+			stReturn += "</table><br>" + "<input type=hidden name=dmax id=dmax value='" + (iRecMax + 1) + "'>";
 			// + "<input type=hidden name=giVar id=giVar value='-1'>";
 		} catch (Exception e) {
 			stError += "ERROR makeDependencies: " + e;
@@ -6994,8 +5084,7 @@ class EpsXlsProject // extends EpsUserData
 	 */
 	private void analyzeLowLevelTasks() {
 		try {
-			String stSql = "SELECT * FROM Schedule where nmProjectId=" + stPk
-					+ " and nmBaseline=" + nmBaseline + " order by SchId desc";
+			String stSql = "SELECT * FROM Schedule where nmProjectId=" + stPk + " and nmBaseline=" + nmBaseline + " order by SchId desc";
 			ResultSet rs1 = this.ebEnt.dbDyn.ExecuteSql(stSql);
 			rs1.last();
 			int iSch = rs1.getRow();
@@ -7019,11 +5108,8 @@ class EpsXlsProject // extends EpsUserData
 					SchFlags = 1;
 
 				if (rs1.getInt("lowlvl") != SchFlags)
-					this.ebEnt.dbDyn
-							.ExecuteUpdate("update Schedule set lowlvl = "
-									+ SchFlags + " where nmProjectId=" + stPk
-									+ " and nmBaseline=" + nmBaseline
-									+ " and RecId =" + rs1.getInt("RecId"));
+					this.ebEnt.dbDyn.ExecuteUpdate("update Schedule set lowlvl = " + SchFlags + " where nmProjectId=" + stPk
+							+ " and nmBaseline=" + nmBaseline + " and RecId =" + rs1.getInt("RecId"));
 				iLastLevel = rs1.getInt("Schlevel");
 			}
 		} catch (SQLException e) {
