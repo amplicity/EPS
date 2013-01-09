@@ -2141,7 +2141,7 @@ public class EpsUserData {
 							+ " and nmBaseline=" + iIniticalBaseline + " and SchEfforttoDate>0 and SchStatus!='Not Started' and lowlvl=1");
 					double SPIExpended = 0;
 					while (rsSchedule.next()) {
-						String stValue = rs.getString("SchLaborCategories");
+						String stValue = rsSchedule.getString("SchLaborCategories");
 						if (stValue != null && stValue.length() > 0) {
 							String[] aRecords = stValue.split("\\|", -1);
 							String[] aFields = aRecords[0].split("~", -1);
