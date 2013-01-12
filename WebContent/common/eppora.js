@@ -8,7 +8,7 @@ function updateCPISPIlines() {
 }
 
 function winReady(tabId) {
-	if (tabId == null) tabId = 0;
+//	if (tabId == null) tabId = false;
 	$('#home-accordion').accordion({
 		active: tabId,
 		autoHeight: false,
@@ -19,6 +19,13 @@ function winReady(tabId) {
 	});
 	initWorkflowEditButtons();
 	updateCPISPIlines();
+	$('#topNavItems').menubar({
+		autoExpand: true,
+		position: {
+			my: "left top",
+			at: "left bottom-2"
+		}
+	});
 }
 
 function initWorkflowEditButtons() {

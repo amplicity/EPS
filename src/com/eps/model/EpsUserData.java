@@ -2098,35 +2098,19 @@ public class EpsUserData {
 					// + " and nmBaseline < " + iFirstApprove);
 					int iIniticalBaseline = rs.getInt("CurrentBaseline");
 
-					double InitialEstimatedCost = this.ebEnt.dbDyn.ExecuteSql1n("select sum(SchCost) from Schedule" + " where nmProjectId="
-							+ rs.getInt("RecId") + " and nmBaseline=" + iIniticalBaseline + " and SchLevel=0");
-					double CurrentEstimatedCost = this.ebEnt.dbDyn.ExecuteSql1n("select sum(SchCost) from Schedule" + " where nmProjectId="
-							+ rs.getInt("RecId") + " and nmBaseline=" + rs.getInt("CurrentBaseline") + " and SchLevel=0");
-
 					Date fixedStartDate = rs.getDate("FixedProjectStartDate");
 					Date fixedEndDate = rs.getDate("FixedProjectEndDate");
-
-					stReturn += "<tr>";
-					stReturn += "<td class=l1td> <a title='Edit' class='edit-button' href='.?stAction=projects&t=12&pk="
-							+ rs.getString("RecId") + "&do=edit'><img src='./common/b_edit.png'></a>" + rs.getString("ProjectName")
-							+ "</td>";
-					stReturn += "<td class=l1td>" + (fixedStartDate != null ? dateFormatter.format(fixedStartDate) : "") + "</td>";
-					stReturn += "<td class=l1td>" + (fixedEndDate != null ? dateFormatter.format(fixedEndDate) : "") + "</td>";
-					stReturn += "<td class=l1td align=right>" + rs.getString("ProjectEstimatedHours") + "</td>";
-					stReturn += "<td class=l1td align=right>" + rs.getString("ProjectEstimatedHours") + "</td>";
-					stReturn += "<td class=l1td align=right>&#36; " + InitialEstimatedCost + "</td>";
-					stReturn += "<td class=l1td align=right>&#36; " + CurrentEstimatedCost + "</td>";
 
 					double CPI = 0;
 					double SPI = 0;
 
 					String stTemp = this.ebEnt.dbDyn.ExecuteSql1("select sum(nmExpenditureToDate) from Schedule" + " where nmProjectId="
 							+ rs.getInt("RecId") + " and nmBaseline=" + iIniticalBaseline
-							+ " and SchEfforttoDate>0 and SchStatus!='Not Started' and SchStatus!='In Progress' and lowlvl=1");
+							+ " and SchStatus!='Not Started' and SchStatus!='In Progress' and lowlvl=1");
 
 					double CPIExpended = (stTemp != null && "".equals(stTemp.trim())) ? Double.parseDouble(stTemp) : 0;
 					stTemp = this.ebEnt.dbDyn.ExecuteSql1("select sum(SchCost) from Schedule" + " where nmProjectId=" + rs.getInt("RecId")
-							+ " and nmBaseline=" + iIniticalBaseline + " and SchEfforttoDate>0 and SchStatus!='Not Started' and SchStatus!='In Progress' and lowlvl=1");
+							+ " and nmBaseline=" + iIniticalBaseline + " and SchStatus!='Not Started' and SchStatus!='In Progress' and lowlvl=1");
 					double CPIEstimated = (stTemp != null && "".equals(stTemp.trim())) ? Double.parseDouble(stTemp) : 0;
 					if (CPIExpended != 0) {
 						CPI = 1.0 * Math.round(CPIEstimated * 100 / CPIExpended) / 100;
@@ -2138,7 +2122,7 @@ public class EpsUserData {
 //					double SPIExpended = (stTemp != null && "".equals(stTemp.trim())) ? Double.parseDouble(stTemp) : 0;
 					
 					ResultSet rsSchedule = this.ebEnt.dbDyn.ExecuteSql("select * from Schedule where nmProjectId=" + rs.getInt("RecId")
-							+ " and nmBaseline=" + iIniticalBaseline + " and SchEfforttoDate>0 and SchStatus!='Not Started' and lowlvl=1");
+							+ " and nmBaseline=" + iIniticalBaseline + " and SchStatus!='Not Started' and lowlvl=1");
 					double SPIExpended = 0;
 					while (rsSchedule.next()) {
 						String stValue = rsSchedule.getString("SchLaborCategories");
@@ -2153,7 +2137,7 @@ public class EpsUserData {
 						}
 					}
 					stTemp = this.ebEnt.dbDyn.ExecuteSql1("select sum(SchCost) from Schedule" + " where nmProjectId=" + rs.getInt("RecId")
-							+ " and nmBaseline=" + iIniticalBaseline + " and SchEfforttoDate>0 and SchStatus!='Not Started' and lowlvl=1");
+							+ " and nmBaseline=" + iIniticalBaseline + " and SchStatus!='Not Started' and lowlvl=1");
 					double SPIEstimated = (stTemp != null && "".equals(stTemp.trim())) ? Double.parseDouble(stTemp) : 0;
 
 					if (SPIExpended != 0) {
@@ -2163,6 +2147,16 @@ public class EpsUserData {
 					System.out.println("Project ID " + rs.getInt("RecId") + " Baseline: " + iIniticalBaseline + " CPIPV: " + CPIEstimated
 							+ " CPIAV: " + CPIExpended + " SPIPV: " + SPIEstimated + " SPIAV: " + SPIExpended + " ====> CPI:" + CPI + " SPI: " + SPI);
 
+					stReturn += "<tr>";
+					stReturn += "<td class=l1td> <a title='Edit' class='edit-button' href='.?stAction=projects&t=12&pk="
+							+ rs.getString("RecId") + "&do=edit'><img src='./common/b_edit.png'></a>" + rs.getString("ProjectName")
+							+ "</td>";
+					stReturn += "<td class=l1td>" + (fixedStartDate != null ? dateFormatter.format(fixedStartDate) : "") + "</td>";
+					stReturn += "<td class=l1td>" + (fixedEndDate != null ? dateFormatter.format(fixedEndDate) : "") + "</td>";
+					stReturn += "<td class=l1td align=right>" + rs.getString("ProjectEstimatedHours") + "</td>";
+					stReturn += "<td class=l1td align=right>" + rs.getString("ProjectEstimatedHours") + "</td>";
+					stReturn += "<td class=l1td align=right>&#36; " + SPIEstimated + "</td>";
+					stReturn += "<td class=l1td align=right>&#36; " + SPIExpended + "</td>";
 					stReturn += "<td class='l1td spi-content'>" + "<table><tr class=spibg><td colspan=4><div class=spiline data-val='"
 							+ SPI + "'/></td></tr>" + "<tr class=spinumber><td>0</td><td>1</td><td>2</td><td>3</td></tr></table>" + "</td>";
 					stReturn += "<td class='l1td spi-content'>" + "<table><tr class=spibg><td colspan=4><div class=spiline data-val='"
@@ -2182,8 +2176,8 @@ public class EpsUserData {
 			stError += "<br>ERROR makeHomePage " + e;
 		}
 		String stPart = this.ebEnt.ebUd.request.getParameter("part");
-		if (stPart == null || stPart.isEmpty())
-			stPart = "0";
+//		if (stPart == null || stPart.isEmpty())
+//			stPart = "0";
 		stReturn += "</div></form>" + "<script>$(document).ready(winReady(" + stPart + "));</script>";
 		return stReturn;
 	}
