@@ -346,13 +346,13 @@ public class EpsClient {
 					while (rsR.next()) {
 						stRun += "<li><a href='" + stRunLink + "&customreport=" + rsR.getString("RecId") + "'>"
 								+ rsR.getString("stReportName") + "</a></li>";
-						stCustom += "<li><a href='" + stCustomLink + "&customreport=" + rsR.getString("RecId") + "'>"
-								+ rsR.getString("stReportName") + "</a></li>";
+						if (stCustom.length() == 0 && rsR.getInt("nmDefaultReport") > 0)
+							stCustom += stCustomLink + "&customreport=" + rsR.getString("RecId");
 					}
 					stReport += "<li><a class='collapsed' href='" + stLink + "'>" + rs.getString("stTableName") + "</a>" + "<ul>"
-							+ "<li><a class='collapsed' href='javascript:void(0);'>Custom Report Designer</a><ul>" + stCustom
-							+ "</ul></li>" + "<li><a class='collapsed' href='javascript:void(0);'>Run/Execute Report</a><ul>" + stRun
-							+ "</ul></li>" + "<li><a href='" + stViewLink + "'>View Saved Reports</a></li>" + "</ul>" + "</li>";
+							+ "<li><a href='" + stCustom + "'>Custom Report Designer</a></li>"
+							+ "<li><a class='collapsed' href='javascript:void(0);'>Run/Execute Report</a><ul>" + stRun + "</ul></li>"
+							+ "<li><a href='" + stViewLink + "'>View Saved Reports</a></li>" + "</ul>" + "</li>";
 				}
 				if ((rs.getInt("nmAccessPriv") & nmPrivUser) != 0) {
 					if (stAdmin.length() <= 0 && (nmPrivUser & 0x220) != 0) // Ex
@@ -374,13 +374,16 @@ public class EpsClient {
 				}
 			}
 			if (stReport.length() > 0)
-				stReturn += "<li class='top-nav nav-reports'><a class='topnav' href='javascript:void(0);'>Reports</a><ul>" + stReport + "</ul></li>";
+				stReturn += "<li class='top-nav nav-reports'><a class='topnav' href='javascript:void(0);'>Reports</a><ul>" + stReport
+						+ "</ul></li>";
 
 			if (stProject.length() > 0)
-				stReturn += "<li class='top-nav nav-projects'><a class='topnav' href='javascript:void(0);'>Project</a><ul>" + stProject + "</ul></li>";
+				stReturn += "<li class='top-nav nav-projects'><a class='topnav' href='javascript:void(0);'>Project</a><ul>" + stProject
+						+ "</ul></li>";
 
 			if (stAdmin.length() > 0)
-				stReturn += "<li class='top-nav nav-admin'><a class='topnav' href='javascript:void(0);'>Administration</a><ul>" + stAdmin + "</ul></li>";
+				stReturn += "<li class='top-nav nav-admin'><a class='topnav' href='javascript:void(0);'>Administration</a><ul>" + stAdmin
+						+ "</ul></li>";
 			stReturn += "<li class='top-nav nav-edit'><a class='topnav' href='javascript:void(0);'>Edit</a><ul id='edit-menu'>edit-menu-content</ul></li>";
 
 			stReturn += "<li class='top-nav nav-help'><a class='topnav' href='javascript:void(0);'>Help</a><ul>";
