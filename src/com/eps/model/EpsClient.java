@@ -350,7 +350,7 @@ public class EpsClient {
 							stCustom += stCustomLink + "&customreport=" + rsR.getString("RecId");
 					}
 					stReport += "<li><a class='collapsed' href='" + stLink + "'>" + rs.getString("stTableName") + "</a>" + "<ul>"
-							+ "<li><a href='" + stCustom + "'>Custom Report Designer</a></li>"
+							+ "<li><a href='" + stCustom + "&canedit=1'>Custom Report Designer</a></li>"
 							+ "<li><a class='collapsed' href='javascript:void(0);'>Run/Execute Report</a><ul>" + stRun + "</ul></li>"
 							+ "<li><a href='" + stViewLink + "'>View Saved Reports</a></li>" + "</ul>" + "</li>";
 				}
