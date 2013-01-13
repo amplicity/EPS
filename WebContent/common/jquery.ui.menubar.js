@@ -95,7 +95,7 @@ $.widget( "ui.menubar", {
 					if ( event.type === "focus" && !event.originalEvent ) {
 						return;
 					}
-					event.preventDefault();
+					if ($(this).attr('href') == '') event.preventDefault();
 					// TODO can we simplify or extractthis check? especially the last two expressions
 					// there's a similar active[0] == menu[0] check in _open
 					if ( event.type === "click" && menu.is( ":visible" ) && that.active && that.active[0] === menu[0] ) {

@@ -539,6 +539,7 @@ body { /*font-family: HelveticaNeueLT;*/
 	height: 32px;
 	line-height: 32px;
 	white-space: nowrap;
+	outline: none;
 }
 
 #topNavItems .ui-menu-item a, #topNavItems .ui-menu-item a:active, #topNavItems .ui-menu-item a:visited {
