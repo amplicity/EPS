@@ -47,7 +47,7 @@ public class EbMail {
 	}
 
 	public void setEbEmail(String stHost, String stAuth, String stFromName,
-	    String stFromEmail, String stEmailLoginUser, String stEMailPassword) {
+			String stFromEmail, String stEmailLoginUser, String stEMailPassword) {
 		this.stHost = stHost;
 		this.stAuth = stAuth;
 		this.stFromName = stFromName;
@@ -69,7 +69,7 @@ public class EbMail {
 	}
 
 	public int sendMail(String stTo, String stToName, String stSubject,
-	    String stBodyIn, int nmCampaignId) {
+			String stBodyIn, int nmCampaignId) {
 		int iPos = 0;
 		int iDnc = 1;
 		this.stBody = stBodyIn;
@@ -77,10 +77,11 @@ public class EbMail {
 			iPos = stTo.indexOf("@");
 			if (iPos > 0) {
 				iDnc = this.ebEnt.dbEnterprise
-				    .ExecuteSql1n("select count(*) from X25DoNotCall where (stValue= "
-				        + this.ebEnt.dbEnterprise.fmtDbString(stTo) + " or stValue = "
-				        + this.ebEnt.dbEnterprise.fmtDbString(stTo.substring(iPos))
-				        + ")");
+						.ExecuteSql1n("select count(*) from X25DoNotCall where (stValue= "
+								+ this.ebEnt.dbEnterprise.fmtDbString(stTo)
+								+ " or stValue = "
+								+ this.ebEnt.dbEnterprise.fmtDbString(stTo
+										.substring(iPos)) + ")");
 			}
 			if ((iPos > 0) && (iDnc == 0)) {
 				if (this.inProduction <= 0) {
@@ -99,14 +100,16 @@ public class EbMail {
 				props.put("mail.smtp.host", this.stHost);
 
 				props.put("mail.smtp.auth", this.stAuth);
-				Authenticator auth = new SMTPAuthenticator(this.stEmailLoginUser,
-				    this.stEMailPassword);
+				Authenticator auth = new SMTPAuthenticator(
+						this.stEmailLoginUser, this.stEMailPassword);
 				Session session = Session.getInstance(props, auth);
 
 				Message msg = new MyMessage(session);
 
-				msg.setFrom(new InternetAddress(this.stFromEmail, this.stFromName));
-				Address addrTo = new InternetAddress(stTo.trim(), stToName.trim());
+				msg.setFrom(new InternetAddress(this.stFromEmail,
+						this.stFromName));
+				Address addrTo = new InternetAddress(stTo.trim(),
+						stToName.trim());
 				msg.setRecipient(Message.RecipientType.TO, addrTo);
 				msg.setSubject(stSubject);
 
@@ -120,12 +123,14 @@ public class EbMail {
 						parser.parse(in);
 						in.close();
 						BodyPart bp1 = new MimeBodyPart();
-						bp1.setContent(parser.getText(), "text/plain; charset=UTF-8");
+						bp1.setContent(parser.getText(),
+								"text/plain; charset=UTF-8");
 						mp.addBodyPart(bp1);
 					} catch (Exception e) {
 					}
 					BodyPart bp2 = new MimeBodyPart();
-					bp2.setContent(this.stBody.toString(), "text/html; charset=UTF-8");
+					bp2.setContent(this.stBody.toString(),
+							"text/html; charset=UTF-8");
 					mp.addBodyPart(bp2);
 					msg.setContent(mp);
 				}
@@ -135,21 +140,23 @@ public class EbMail {
 				int iMaxComm = 0;
 				if (nmCampaignId <= 0) {
 					iMaxComm = this.ebEnt.dbEnterprise
-					    .ExecuteSql1n("select max(RecId) from X25Communications");
+							.ExecuteSql1n("select max(RecId) from X25Communications");
 					iMaxComm++;
 					this.ebEnt.dbEnterprise
-					    .ExecuteUpdate("insert into X25Communications (RecId,nmRefType,nmRefId,nmFlags,dtDate,nmOrigSize,stTitle,stContent) values("
-					        + iMaxComm
-					        + ",42,"
-					        + nmUserId
-					        + ",1,"
-					        + this.ebEnt.dbEnterprise.getNowString()
-					        + ","
-					        + this.stBody.length()
-					        + ","
-					        + this.ebEnt.dbEnterprise.fmtDbString(stSubject)
-					        + ","
-					        + this.ebEnt.dbEnterprise.fmtDbString(this.stBody) + ")");
+							.ExecuteUpdate("insert into X25Communications (RecId,nmRefType,nmRefId,nmFlags,dtDate,nmOrigSize,stTitle,stContent) values("
+									+ iMaxComm
+									+ ",42,"
+									+ nmUserId
+									+ ",1,"
+									+ this.ebEnt.dbEnterprise.getNowString()
+									+ ","
+									+ this.stBody.length()
+									+ ","
+									+ this.ebEnt.dbEnterprise
+											.fmtDbString(stSubject)
+									+ ","
+									+ this.ebEnt.dbEnterprise
+											.fmtDbString(this.stBody) + ")");
 				} else {
 					iMaxComm = 1;
 				}
@@ -166,7 +173,7 @@ public class EbMail {
 	}
 
 	public int sendMailCL(String stTo, String stToName, String stSubject,
-	    String stBodyIn, int nmCampaignId) {
+			String stBodyIn, int nmCampaignId) {
 		int iPos = 0;
 		int iDnc = 1;
 		int iCL = 0;
@@ -179,21 +186,22 @@ public class EbMail {
 			iPos = stTo.indexOf("@");
 			if (iPos > 0) {
 				iDnc = this.ebEnt.dbEnterprise
-				    .ExecuteSql1n("select count(*) from X25DoNotCall where (stValue= "
-				        + this.ebEnt.dbEnterprise.fmtDbString(stTo) + " or stValue = "
-				        + this.ebEnt.dbEnterprise.fmtDbString(stTo.substring(iPos))
-				        + ")");
+						.ExecuteSql1n("select count(*) from X25DoNotCall where (stValue= "
+								+ this.ebEnt.dbEnterprise.fmtDbString(stTo)
+								+ " or stValue = "
+								+ this.ebEnt.dbEnterprise.fmtDbString(stTo
+										.substring(iPos)) + ")");
 			}
 			if (this.inProduction <= 0) {
 				stTo = this.stTestEmail;
 			}
 			iCL = this.ebEnt.dbEnterprise
-			    .ExecuteSql1n("select nmApproveUserId from X25User where stEMail = \""
-			        + stTo.trim() + "\" ");
+					.ExecuteSql1n("select nmApproveUserId from X25User where stEMail = \""
+							+ stTo.trim() + "\" ");
 
 			if ((iPos > 0) && (iDnc == 0) && (iCL < 4)) {
 				this.astUser = this.ebEnt.gastEmails[(this.ebEnt.giEmailIx++)]
-				    .split("\\|");
+						.split("\\|");
 				if (this.ebEnt.giEmailIx >= this.ebEnt.gastEmails.length) {
 					this.ebEnt.giEmailIx = 0;
 				}
@@ -215,14 +223,16 @@ public class EbMail {
 					stTemp = this.astUser[0].trim();
 				}
 				Authenticator auth = new SMTPAuthenticator(stTemp,
-				    this.astUser[1].trim());
+						this.astUser[1].trim());
 
 				Session session = Session.getInstance(props, auth);
 
 				Message msg = new MyMessage(session);
 
-				msg.setFrom(new InternetAddress(this.astUser[0].trim(), "Robert Eder"));
-				Address addrTo = new InternetAddress(stTo.trim(), stToName.trim());
+				msg.setFrom(new InternetAddress(this.astUser[0].trim(),
+						"Robert Eder"));
+				Address addrTo = new InternetAddress(stTo.trim(),
+						stToName.trim());
 				msg.setRecipient(Message.RecipientType.TO, addrTo);
 				msg.setSubject(stSubject.trim());
 				if (this.stBody.toLowerCase().indexOf("<html>") < 0) {
@@ -235,12 +245,13 @@ public class EbMail {
 					parser.parse(in);
 					in.close();
 					BodyPart bp1 = new MimeBodyPart();
-					bp1.setContent(parser.getText().trim(), "text/plain; charset=UTF-8");
+					bp1.setContent(parser.getText().trim(),
+							"text/plain; charset=UTF-8");
 					mp.addBodyPart(bp1);
 
 					BodyPart bp2 = new MimeBodyPart();
 					bp2.setContent(this.stBody.toString().trim(),
-					    "text/html; charset=UTF-8");
+							"text/html; charset=UTF-8");
 					mp.addBodyPart(bp2);
 					msg.setContent(mp);
 				}
@@ -248,26 +259,28 @@ public class EbMail {
 				msg.setSentDate(new Date());
 				Transport.send(msg);
 				this.ebEnt.dbEnterprise
-				    .ExecuteUpdate("update X25User set nmApproveUserId = (nmApproveUserId+1) where stEMail = \""
-				        + stTo.trim() + "\" ");
+						.ExecuteUpdate("update X25User set nmApproveUserId = (nmApproveUserId+1) where stEMail = \""
+								+ stTo.trim() + "\" ");
 				int iMaxComm = 0;
 				if (nmCampaignId <= 0) {
 					iMaxComm = this.ebEnt.dbEnterprise
-					    .ExecuteSql1n("select max(RecId) from X25Communications");
+							.ExecuteSql1n("select max(RecId) from X25Communications");
 					iMaxComm++;
 					this.ebEnt.dbEnterprise
-					    .ExecuteUpdate("insert into X25Communications (RecId,nmRefType,nmRefId,nmFlags,dtDate,nmOrigSize,stTitle,stContent) values("
-					        + iMaxComm
-					        + ",42,"
-					        + nmUserId
-					        + ",1,"
-					        + this.ebEnt.dbEnterprise.getNowString()
-					        + ","
-					        + this.stBody.length()
-					        + ","
-					        + this.ebEnt.dbEnterprise.fmtDbString(stSubject)
-					        + ","
-					        + this.ebEnt.dbEnterprise.fmtDbString(this.stBody) + ")");
+							.ExecuteUpdate("insert into X25Communications (RecId,nmRefType,nmRefId,nmFlags,dtDate,nmOrigSize,stTitle,stContent) values("
+									+ iMaxComm
+									+ ",42,"
+									+ nmUserId
+									+ ",1,"
+									+ this.ebEnt.dbEnterprise.getNowString()
+									+ ","
+									+ this.stBody.length()
+									+ ","
+									+ this.ebEnt.dbEnterprise
+											.fmtDbString(stSubject)
+									+ ","
+									+ this.ebEnt.dbEnterprise
+											.fmtDbString(this.stBody) + ")");
 				} else {
 					iMaxComm = 1;
 				}
@@ -308,7 +321,7 @@ public class EbMail {
 			Folder inbox = aFolder[iF];
 			inbox.open(2);
 			int iMaxComm = this.ebEnt.dbEnterprise
-			    .ExecuteSql1n("select max(RecId) from X25Communications");
+					.ExecuteSql1n("select max(RecId) from X25Communications");
 			String[] aMessage = null;
 			String stForeignRefId = "";
 			String stTo = "";
@@ -319,19 +332,23 @@ public class EbMail {
 					message = messages[iM];
 					Address[] aaFrom = message.getFrom();
 					for (int iA = 0; iA < aaFrom.length; iA++) {
-						String[] astFrom = EbStatic.parseEmail(aaFrom[iA].toString());
+						String[] astFrom = EbStatic.parseEmail(aaFrom[iA]
+								.toString());
 						aMessage = getMessage(message);
 						String stHeader = "";
 						stForeignRefId = "";
-						for (Enumeration e = message.getAllHeaders(); e.hasMoreElements();) {
+						for (Enumeration e = message.getAllHeaders(); e
+								.hasMoreElements();) {
 							Object o = e.nextElement();
 							if ((o instanceof Header)) {
 								Header h = (Header) o;
-								stHeader = stHeader + h.getName() + ":\t " + h.getValue()
-								    + "\n";
-								if (h.getName().trim().toLowerCase().equals("message-id")) {
+								stHeader = stHeader + h.getName() + ":\t "
+										+ h.getValue() + "\n";
+								if (h.getName().trim().toLowerCase()
+										.equals("message-id")) {
 									stForeignRefId = h.getValue();
-								} else if (h.getName().trim().toLowerCase().equals("to")) {
+								} else if (h.getName().trim().toLowerCase()
+										.equals("to")) {
 									stTo = h.getValue();
 								}
 							}
@@ -345,7 +362,8 @@ public class EbMail {
 								nmFlags |= 1024;
 							}
 						}
-						nmUserId = this.ebEnt.ebNorm.getEmailId(astFrom[0], astFrom[1]);
+						nmUserId = this.ebEnt.ebNorm.getEmailId(astFrom[0],
+								astFrom[1]);
 						if (nmUserId > 0) {
 							iMaxComm++;
 							String stSubject = message.getSubject();
@@ -353,32 +371,39 @@ public class EbMail {
 								stSubject = "";
 							}
 							this.ebEnt.dbEnterprise
-							    .ExecuteUpdate("insert into X25Communications (RecId,nmRefType,nmRefId,nmFlags,dtDate,nmOrigSize,stTitle,stContent,stHeader,stForeignRefId,stHtml) values("
-							        + iMaxComm
-							        + ",42,"
-							        + nmUserId
-							        + ","
-							        + nmFlags
-							        + ",now(),"
-							        + message.getSize()
-							        + ","
-							        + this.ebEnt.dbEnterprise.fmtDbString(stSubject)
-							        + ","
-							        + this.ebEnt.dbEnterprise.fmtDbString(aMessage[0])
-							        + ","
-							        + this.ebEnt.dbEnterprise.fmtDbString(stHeader)
-							        + ","
-							        + this.ebEnt.dbEnterprise.fmtDbString(stForeignRefId)
-							        + ","
-							        + this.ebEnt.dbEnterprise.fmtDbString(aMessage[1])
-							        + ")");
+									.ExecuteUpdate("insert into X25Communications (RecId,nmRefType,nmRefId,nmFlags,dtDate,nmOrigSize,stTitle,stContent,stHeader,stForeignRefId,stHtml) values("
+											+ iMaxComm
+											+ ",42,"
+											+ nmUserId
+											+ ","
+											+ nmFlags
+											+ ",now(),"
+											+ message.getSize()
+											+ ","
+											+ this.ebEnt.dbEnterprise
+													.fmtDbString(stSubject)
+											+ ","
+											+ this.ebEnt.dbEnterprise
+													.fmtDbString(aMessage[0])
+											+ ","
+											+ this.ebEnt.dbEnterprise
+													.fmtDbString(stHeader)
+											+ ","
+											+ this.ebEnt.dbEnterprise
+													.fmtDbString(stForeignRefId)
+											+ ","
+											+ this.ebEnt.dbEnterprise
+													.fmtDbString(aMessage[1])
+											+ ")");
 						} else {
-							this.stError = (this.stError + "<br>ERROR readEmail: cannot add " + astFrom[0]);
+							this.stError = (this.stError
+									+ "<br>ERROR readEmail: cannot add " + astFrom[0]);
 						}
 					}
 					iReturn++;
 				} catch (Exception e) {
-					this.stError = (this.stError + "<BR>ERROR : readEmail [" + iM + "] " + e);
+					this.stError = (this.stError + "<BR>ERROR : readEmail ["
+							+ iM + "] " + e);
 				}
 				messages[iM].setFlag(Flags.Flag.DELETED, true);
 			}
@@ -435,39 +460,42 @@ public class EbMail {
 					continue;
 				MimeBodyPart mbp = (MimeBodyPart) bp;
 				if ((mbp.getContent() instanceof Multipart)) {
-					aReturn = parseMultipart((Multipart) mbp.getContent(), aReturn);
+					aReturn = parseMultipart((Multipart) mbp.getContent(),
+							aReturn);
 				} else if (mbp.isMimeType("text/plain")) {
 					int tmp79_78 = 0;
 					String[] tmp79_77 = aReturn;
-					tmp79_77[tmp79_78] = (tmp79_77[tmp79_78] + (String) mbp.getContent());
+					tmp79_77[tmp79_78] = (tmp79_77[tmp79_78] + (String) mbp
+							.getContent());
 				} else {
 					if (!mbp.isMimeType("text/html"))
 						continue;
 					int tmp121_120 = 1;
 					String[] tmp121_119 = aReturn;
 					tmp121_119[tmp121_120] = (tmp121_119[tmp121_120] + (String) mbp
-					    .getContent());
+							.getContent());
 				}
 			}
 
 		} catch (MessagingException me) {
 			this.stError = (this.stError
-			    + "<br>ERROR parseMultipart MessagingException " + me);
+					+ "<br>ERROR parseMultipart MessagingException " + me);
 			me.printStackTrace();
 		} catch (IOException io) {
-			this.stError = (this.stError + "<br>ERROR parseMultipart IOException " + io);
+			this.stError = (this.stError
+					+ "<br>ERROR parseMultipart IOException " + io);
 			io.printStackTrace();
 		}
 		return aReturn;
 	}
 
 	private void listSubFolders(Folder folder, boolean recurse)
-	    throws MessagingException {
+			throws MessagingException {
 		System.out.println("Folder " + folder.getFullName() + " type is "
-		    + folder.getType());
+				+ folder.getType());
 		if ((folder.getType() & 0x2) == 0) {
 			System.out.println("Folder " + folder.getFullName()
-			    + " cannot contain subfolders.");
+					+ " cannot contain subfolders.");
 			return;
 		}
 		System.out.println("Listing sub folders of " + folder.getFullName());
@@ -476,7 +504,7 @@ public class EbMail {
 	}
 
 	private void listFolders(Folder[] array, boolean recurse)
-	    throws MessagingException {
+			throws MessagingException {
 		for (int i = 0; i < array.length; i++) {
 			Folder folder = array[i];
 			System.out.println("Found folder " + folder.getFullName());
@@ -486,8 +514,8 @@ public class EbMail {
 		}
 	}
 
-	public int sendMail(ResultSet rsUser, String stCampaignId, String stSubject,
-	    String stBodyIn) {
+	public int sendMail(ResultSet rsUser, String stCampaignId,
+			String stSubject, String stBodyIn) {
 		int iReturn = -1;
 
 		String stTo = "";
@@ -519,7 +547,8 @@ public class EbMail {
 				if (stMiddleName.equals("")) {
 					stToName = stFirstName + " " + stLastName;
 				} else {
-					stToName = stFirstName + " " + stMiddleName + " " + stLastName;
+					stToName = stFirstName + " " + stMiddleName + " "
+							+ stLastName;
 				}
 				if (stToName.trim().equals("")) {
 					int iPos = stTo.indexOf('@');
@@ -530,21 +559,25 @@ public class EbMail {
 					}
 					stToName = stFirstName;
 				}
-				this.stBody = this.stBody.replace("~~stFirstName", stFirstName.trim());
-				this.stBody = this.stBody
-				    .replace("~~stMiddleName", stMiddleName.trim());
-				this.stBody = this.stBody.replace("~~stLastName", stLastName.trim());
+				this.stBody = this.stBody.replace("~~stFirstName",
+						stFirstName.trim());
+				this.stBody = this.stBody.replace("~~stMiddleName",
+						stMiddleName.trim());
+				this.stBody = this.stBody.replace("~~stLastName",
+						stLastName.trim());
 				this.stBody = this.stBody.replace("~~stEMailEncode",
-				    URLEncoder.encode(this.ebEnt.EBEncrypt(stTo), "UTF-8"));
+						URLEncoder.encode(this.ebEnt.EBEncrypt(stTo), "UTF-8"));
 				this.stBody = this.stBody.replace("~~stEMail", stTo);
 				this.stBody = this.stBody.replace("~~stFullName", stToName);
-				this.stBody = this.stBody.replace("~~stCampaignId", stCampaignId);
+				this.stBody = this.stBody.replace("~~stCampaignId",
+						stCampaignId);
 				if (rsUser.getInt("nmPriviledge") > 0) {
-					iReturn = sendMail(stTo, stToName, stSubject, "<html><body>"
-					    + this.stBody + "</body></html>", Integer.parseInt(stCampaignId));
+					iReturn = sendMail(stTo, stToName, stSubject,
+							"<html><body>" + this.stBody + "</body></html>",
+							Integer.parseInt(stCampaignId));
 				} else
 					this.stError = (this.stError
-					    + "<BR>ERROR sendMail: NOT AN ACTIVE USER " + stTo);
+							+ "<BR>ERROR sendMail: NOT AN ACTIVE USER " + stTo);
 			} else {
 				this.stError += "<BR>ERROR sendMail: NO EMAIL ";
 			}

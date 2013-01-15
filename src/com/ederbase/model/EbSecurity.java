@@ -50,10 +50,10 @@ public class EbSecurity {
 							if (this.rsUser != null)
 								continue;
 							this.rsUser = this.ebEnt.dbEnterprise
-							    .ExecuteSql("select u.*,p.* from X25User u left join X25RefUser ru on ru.nmUserId="
-							        + this.ebEnt.ebUd.getLoginId()
-							        + " and ru.nmRefType=1 left join X25Person p on ru.nmPersonId=p.RecId where u.RecId = "
-							        + this.ebEnt.ebUd.getLoginId());
+									.ExecuteSql("select u.*,p.* from X25User u left join X25RefUser ru on ru.nmUserId="
+											+ this.ebEnt.ebUd.getLoginId()
+											+ " and ru.nmRefType=1 left join X25Person p on ru.nmPersonId=p.RecId where u.RecId = "
+											+ this.ebEnt.ebUd.getLoginId());
 						}
 					}
 				}

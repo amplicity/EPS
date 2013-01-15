@@ -213,3 +213,45 @@ INSERT INTO `teb_epsfields` (`nmForeignId`, `nmOrderDisplay`, `stValidationFlags
  UPDATE `teb_choices` SET `nmOrder`=nmOrder + 10 WHERE `nmFieldId`=1097 and `nmOrder` >=30;
  INSERT INTO `teb_choices` (`RecId`, `UniqIdChoice`, `nmParentId`, `UniqIdField`, `stChoiceValue`, `nmOrder`, `stReference`, `stWPText`, `nmFieldId`, `nmPrivUserReadFlags`, `nmPrivRecordFlags`, `stChoiceCustomer`, `stChoiceValueShort`, `stChoiceValueAllow`, `stChoiceDependancy`) VALUES (NULL, 'Done', '0', NULL, 'Done', '30', '', '', '1097', '0', '0', '', '', '', '');
  
+ 
+ --1/8/2012
+ UPDATE `ebeps01`.`x25refcontent` SET `stContent` = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+    <head>
+        <title>EPPORA</title>
+        <meta content="by MyInfo.com Robert Eder" name="GENERATOR" />
+<style>
+#content,#footer,#header .pagetitle,#header-content,#header .hbar, #header-wrap {
+width: ~PageWidthPx~px;
+}
+
+</style>
+
+<link rel="stylesheet" href="./common/calendar.css" />
+
+<link rel="stylesheet" href="./common/eppora.css" />
+<script language="JavaScript" src="./common/jquery-1.8.3.min.js"></script>
+<script language="JavaScript" src="./common/jquery-ui-1.9.2.custom.min.js"></script>
+<script language="JavaScript" src="./common/jquery.ui.menubar.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="./common/ebmain.js"></SCRIPT>
+<script language="JavaScript" src="./common/calendar_us.js"></script>
+<script language="JavaScript" src="./common/jQueryRotate.2.2.js"></script>
+<script language="JavaScript" src="./common/eppora.js"></script>
+</head>
+<body id="ebbody" onLoad="EpsLoad();" class="~BodyStyleClass~">
+<layer name="nsviewer" bgcolor="#cccccc" width=0 height=0 style="border-width:thin;z-index:1"></layer>
+<script language="JavaScript1.2">
+if (iens6)
+{
+ document.write("<div id=''viewer'' name=''viewer'' style=''background-color:#ccc;marginleft:0;visibility:hidden;position:absolute;width:2;height:2;zindex:1;overflow:hidden''></div>");
+}
+if (ns4)
+{
+ hideobj = eval("document.nsviewer");
+ hideobj.visibility="hidden";
+}
+</script>' WHERE `x25refcontent`.`nmContentId` = 1;
+
+--1/15/2013
+delete from f, ef using teb_fields f inner join teb_epsfields ef where f.nmForeignId=ef.nmForeignId and f.nmTabId=9 and (stDbFieldName='CostEffectiveness' or stDbFieldName='ProductivityFactor')

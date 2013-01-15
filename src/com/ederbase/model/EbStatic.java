@@ -25,8 +25,8 @@ public class EbStatic {
 	public static String makePhone(String stPhone) {
 		String stReturn = "";
 		stPhone = stripPhone(stPhone);
-		stReturn = "(" + stPhone.substring(0, 3) + ")" + stPhone.substring(3, 6)
-		    + "-" + stPhone.substring(6);
+		stReturn = "(" + stPhone.substring(0, 3) + ")"
+				+ stPhone.substring(3, 6) + "-" + stPhone.substring(6);
 		return stReturn;
 	}
 
@@ -37,7 +37,8 @@ public class EbStatic {
 			int iAt = stEmail.indexOf('@');
 			int iAt2 = stEmail.lastIndexOf('@');
 			int iLastDot = stEmail.lastIndexOf('.');
-			if ((iAt > 0) && (iLastDot > 0) && (iAt < iLastDot) && (iAt == iAt2))
+			if ((iAt > 0) && (iLastDot > 0) && (iAt < iLastDot)
+					&& (iAt == iAt2))
 				bReturn = true;
 		}
 		return bReturn;
@@ -47,7 +48,7 @@ public class EbStatic {
 		boolean bReturn = false;
 
 		if ((stWeb != null) && (stWeb.length() > 10)
-		    && (stWeb.substring(0, 7).equals("http://"))) {
+				&& (stWeb.substring(0, 7).equals("http://"))) {
 			int iParam = stWeb.indexOf('?');
 			if (iParam <= 0) {
 				bReturn = true;

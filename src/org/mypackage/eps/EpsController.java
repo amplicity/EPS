@@ -24,7 +24,7 @@ import com.eps.model.EpsReport;
 public class EpsController extends HttpServlet {
 
 	protected void processRequest(HttpServletRequest request,
-	    HttpServletResponse response) throws ServletException, IOException {
+			HttpServletResponse response) throws ServletException, IOException {
 		long startTime = System.nanoTime();
 		long dbTime = 0;
 		int iSqlCount = 0;
@@ -39,12 +39,13 @@ public class EpsController extends HttpServlet {
 				// SkinId=1, Language=26 English
 				// figure out the db
 				String stDb = request.getRequestURI().replace("index.jsp", "")
-				    .replace("/", "");
+						.replace("/", "");
 				// stDb="eps";
 				if (stDb.length() == 3)
 					stDb += "01";
 
-				ebEnt = new EbEnterprise(1, 26, "ederbase", "eb" + stDb, "common");
+				ebEnt = new EbEnterprise(1, 26, "ederbase", "eb" + stDb,
+						"common");
 				if (ebEnt.ebDyn == null) {
 					ebEnt.ebDyn = new EbDynamic(ebEnt);
 				}
@@ -67,9 +68,11 @@ public class EpsController extends HttpServlet {
 					stReportId = request.getParameter("reportid");
 					if (stReportId != null && stReportId.length() > 0) {
 						EpsReport epsReport = new EpsReport();
-						stHTML = epsReport.epsFormatSavedReports(stReportId, ebEnt);
+						stHTML = epsReport.epsFormatSavedReports(stReportId,
+								ebEnt);
 						if (epsReport.getError().length() > 0)
-							stHTML += "<hr><font color=red>" + epsReport.getError();
+							stHTML += "<hr><font color=red>"
+									+ epsReport.getError();
 						response.reset();
 					} else {
 						stHTML = epsClient.getEpsPage();
@@ -93,8 +96,8 @@ public class EpsController extends HttpServlet {
 		} finally {
 			if (stHTML != null && stHTML.length() > 6) {
 				if (stHTML.substring(0, 2).equals("~~")) {
-					response
-					    .sendRedirect(response.encodeRedirectURL(stHTML.substring(2)));
+					response.sendRedirect(response.encodeRedirectURL(stHTML
+							.substring(2)));
 					return;
 				}
 			}
@@ -122,9 +125,12 @@ public class EpsController extends HttpServlet {
 								stRedir = stRedir.substring(0, iPos);
 							stRedir += (stRedir.indexOf("?") >= 0 ? "" : "?");
 							stRedir += "&popupmessage="
-							    + URLEncoder.encode(ebEnt.ebUd.getPopupMessage(), "UTF-8");
+									+ URLEncoder.encode(
+											ebEnt.ebUd.getPopupMessage(),
+											"UTF-8");
 						}
-						response.sendRedirect(response.encodeRedirectURL(stRedir));
+						response.sendRedirect(response
+								.encodeRedirectURL(stRedir));
 						return;
 					}
 				}
@@ -152,9 +158,10 @@ public class EpsController extends HttpServlet {
 			}
 			response.setContentType(stContentType);
 			if (stFileName.length() > 0) {
-				response.setHeader("Content-Length", String.valueOf(stHTML.length()));
-				response.setHeader("Content-Disposition", "attachment; filename= \""
-				    + stFileName + "\"");
+				response.setHeader("Content-Length",
+						String.valueOf(stHTML.length()));
+				response.setHeader("Content-Disposition",
+						"attachment; filename= \"" + stFileName + "\"");
 			}
 			PrintWriter out = response.getWriter();
 			out.println(stHTML);
@@ -166,13 +173,14 @@ public class EpsController extends HttpServlet {
 			}
 			String stTemp = request.getParameter("commtrace");
 			if (iDebugLevel > 0
-			    || (stTemp != null && stTemp.length() > 0 && (stTemp.equals("d")
-			        || stTemp.equals("t") || stTemp.equals("i")))) {
+					|| (stTemp != null && stTemp.length() > 0 && (stTemp
+							.equals("d") || stTemp.equals("t") || stTemp
+								.equals("i")))) {
 				long endTime = System.nanoTime();
 				long elapsedTime = endTime - startTime;
 				double seconds = elapsedTime / 1.0E09;
 				out.println((dbTime / 1.0E09) + "/" + iSqlCount + " " + seconds
-				    + " sec");
+						+ " sec");
 			}
 			out.close();
 			ebEnt.ebClose();
@@ -183,17 +191,17 @@ public class EpsController extends HttpServlet {
 	 * Handles the HTTP <code>GET</code> method.
 	 * 
 	 * @param request
-	 *          servlet request
+	 *            servlet request
 	 * @param response
-	 *          servlet response
+	 *            servlet response
 	 * @throws ServletException
-	 *           if a servlet-specific error occurs
+	 *             if a servlet-specific error occurs
 	 * @throws IOException
-	 *           if an I/O error occurs
+	 *             if an I/O error occurs
 	 */
 	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException {
+	protected void doGet(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
 		processRequest(request, response);
 	}
 
@@ -201,17 +209,17 @@ public class EpsController extends HttpServlet {
 	 * Handles the HTTP <code>POST</code> method.
 	 * 
 	 * @param request
-	 *          servlet request
+	 *            servlet request
 	 * @param response
-	 *          servlet response
+	 *            servlet response
 	 * @throws ServletException
-	 *           if a servlet-specific error occurs
+	 *             if a servlet-specific error occurs
 	 * @throws IOException
-	 *           if an I/O error occurs
+	 *             if an I/O error occurs
 	 */
 	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
 		processRequest(request, response);
 	}
 

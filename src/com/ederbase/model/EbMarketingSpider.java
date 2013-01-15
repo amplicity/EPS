@@ -40,9 +40,9 @@ public class EbMarketingSpider {
 			switch (iType) {
 			case 1:
 				stReturn = stReturn
-				    + "<br><form method=post><table><tr><td>Type: </td><td><select name=iType><option value=3>Agents</option><option value=2>Yellowpages</option></td></tr><tr><td>Enter Zip: </td><td><textarea name=zip rows=10 cols=80>91306</textarea></td></tr><tr><td>Start Page: </td><td><input type=text name=startpage value='1'></td></tr><tr><td colspan=2 align=center><input type=hidden name=a value='"
-				    + stA
-				    + "'><input type=submit name=submit value='Start'></form></td></tr></table>";
+						+ "<br><form method=post><table><tr><td>Type: </td><td><select name=iType><option value=3>Agents</option><option value=2>Yellowpages</option></td></tr><tr><td>Enter Zip: </td><td><textarea name=zip rows=10 cols=80>91306</textarea></td></tr><tr><td>Start Page: </td><td><input type=text name=startpage value='1'></td></tr><tr><td colspan=2 align=center><input type=hidden name=a value='"
+						+ stA
+						+ "'><input type=submit name=submit value='Start'></form></td></tr></table>";
 
 				break;
 			case 2:
@@ -50,7 +50,7 @@ public class EbMarketingSpider {
 				break;
 			default:
 				stReturn = stReturn + "<br>ERROR: doSpider Type: " + iType
-				    + " not yet implemented ";
+						+ " not yet implemented ";
 			}
 
 			int iLoop = 1;
@@ -62,14 +62,15 @@ public class EbMarketingSpider {
 						switch (iType) {
 						case 3:
 							stUrl = "http://www.socalmls.com/Public/AgentSearch/Results.aspx?SearchType=agent&FirstName=&LastName=&OfficeName=&Address=&City=&State=ca&Zip="
-							    + aZip[iZ1].trim()
-							    + "&Languages=&Titles=&Specialties=&Accreditations=&rpp=50&page="
-							    + stStart + "&SortOrder=";
+									+ aZip[iZ1].trim()
+									+ "&Languages=&Titles=&Specialties=&Accreditations=&rpp=50&page="
+									+ stStart + "&SortOrder=";
 							break;
 						case 2:
-							stUrl = "http://www.yellowpages.com/" + aZip[iZ1].trim()
-							    + "/Real-Estate-Agents?page=" + stStart
-							    + "&search_terms=real-estate";
+							stUrl = "http://www.yellowpages.com/"
+									+ aZip[iZ1].trim()
+									+ "/Real-Estate-Agents?page=" + stStart
+									+ "&search_terms=real-estate";
 						}
 
 					}
@@ -78,13 +79,15 @@ public class EbMarketingSpider {
 						Calendar calb = Calendar.getInstance();
 						long lTime1b = calb.getTimeInMillis();
 						int iCount = this.ebEnt.dbEnterprise
-						    .ExecuteSql1n("select count(*) from X25WebSpider where stUrl = \""
-						        + stUrl + "\" ");
-						stReturn = stReturn + "<hr>[" + iZ1 + "] Starting " + stUrl
-						    + " count: " + iCount + " Time: " + (lTime1b - lTime1);
+								.ExecuteSql1n("select count(*) from X25WebSpider where stUrl = \""
+										+ stUrl + "\" ");
+						stReturn = stReturn + "<hr>[" + iZ1 + "] Starting "
+								+ stUrl + " count: " + iCount + " Time: "
+								+ (lTime1b - lTime1);
 						if (iCount == 0) {
-							String[] aReturn = eb.doParse(this.ebEnt.dbEnterprise,
-							    this.ebEnt.getMainCompanyId(), stUrl);
+							String[] aReturn = eb.doParse(
+									this.ebEnt.dbEnterprise,
+									this.ebEnt.getMainCompanyId(), stUrl);
 							stUrl = "";
 							switch (iType) {
 							case 2:
@@ -94,8 +97,9 @@ public class EbMarketingSpider {
 								if (stUrl.length() < 0)
 									break;
 								stUrl = "http://www.yellowpages.com" + stUrl;
-								stReturn = stReturn + "<br>&nbsp;<br><a href=\"" + stUrl
-								    + "\">" + stUrl + "</a><br>&nbsp;";
+								stReturn = stReturn
+										+ "<br>&nbsp;<br><a href=\"" + stUrl
+										+ "\">" + stUrl + "</a><br>&nbsp;";
 								break;
 							case 3:
 								stReturn = stReturn + aReturn[0];
@@ -103,11 +107,13 @@ public class EbMarketingSpider {
 								if (stUrl.length() > 0) {
 									this.iPageId += 1;
 									stUrl = "http://www.socalmls.com/Public/AgentSearch/Results.aspx?SearchType=agent&FirstName=&LastName=&OfficeName=&Address=&City=&State=ca&Zip="
-									    + aZip[iZ1].trim()
-									    + "&Languages=&Titles=&Specialties=&Accreditations=&rpp=50&page="
-									    + this.iPageId + "&SortOrder=";
-									stReturn = stReturn + "<br>&nbsp;<br><a href=\"" + stUrl
-									    + "\">" + stUrl + "</a><br>&nbsp;";
+											+ aZip[iZ1].trim()
+											+ "&Languages=&Titles=&Specialties=&Accreditations=&rpp=50&page="
+											+ this.iPageId + "&SortOrder=";
+									stReturn = stReturn
+											+ "<br>&nbsp;<br><a href=\""
+											+ stUrl + "\">" + stUrl
+											+ "</a><br>&nbsp;";
 								} else {
 									stUrl = "";
 								}
@@ -143,12 +149,13 @@ public class EbMarketingSpider {
 					rsWs.absolute(iW);
 					stUrl = rsWs.getString("stUrl");
 					String[] aReturn = eb.doParse(this.ebEnt.dbEnterprise,
-					    rsWs.getInt("nmCompanyId"), stUrl);
+							rsWs.getInt("nmCompanyId"), stUrl);
 					stReturn = stReturn + aReturn[0];
 					String[] aL1 = aReturn[1].split("\n");
 					String stDomain = getDomain(stUrl);
 					for (int iL1 = 0; iL1 < aL1.length; iL1++) {
-						parsePage(1, stDomain, stUrl, rsWs.getInt("nmCompanyId"), aL1[iL1]);
+						parsePage(1, stDomain, stUrl,
+								rsWs.getInt("nmCompanyId"), aL1[iL1]);
 					}
 				}
 			}
@@ -181,23 +188,24 @@ public class EbMarketingSpider {
 	}
 
 	private void parsePage(int iLevel, String stDomain, String stUrl,
-	    int nmCompanyId, String stLine) {
+			int nmCompanyId, String stLine) {
 		EbHtmlParser1 eb = new EbHtmlParser1();
 		try {
 			if ((stUrl != null) && (stUrl.length() > 10) && (stLine != null)
-			    && (stLine.length() > 0)) {
+					&& (stLine.length() > 0)) {
 				if (stLine.toLowerCase().indexOf("javascript") <= 0) {
 					if (stLine.toLowerCase().indexOf("mailto:") > 0) {
 						addCompanyEmail(nmCompanyId, stLine);
 					} else {
 						String stUrl1 = makeUrl1(stDomain, stUrl, stLine);
 						if (!stUrl1.equals("")) {
-							String[] aR = eb.doParse(this.ebEnt.dbEnterprise, nmCompanyId,
-							    stUrl1);
+							String[] aR = eb.doParse(this.ebEnt.dbEnterprise,
+									nmCompanyId, stUrl1);
 							if (iLevel < 3) {
 								String[] aL = aR[1].split("\n");
 								for (int iL = 0; iL < aL.length; iL++) {
-									parsePage(iLevel + 1, stDomain, stUrl, nmCompanyId, aL[iL]);
+									parsePage(iLevel + 1, stDomain, stUrl,
+											nmCompanyId, aL[iL]);
 								}
 							}
 						}
@@ -221,8 +229,8 @@ public class EbMarketingSpider {
 				if (nmEmailId > 0)
 					ebNorm.addUserRef(nmEmailId, 2, nmCompanyId);
 			} catch (Exception e) {
-				this.stError = (this.stError + "<BR>ERROR addCompanyEmail: " + stEmail
-				    + " : " + e);
+				this.stError = (this.stError + "<BR>ERROR addCompanyEmail: "
+						+ stEmail + " : " + e);
 			}
 		}
 		return stReturn;
@@ -232,18 +240,19 @@ public class EbMarketingSpider {
 		String stReturn = "";
 		String stTemp = "";
 		String[] aTemp = stLine.split("\t");
-		if ((aTemp != null) && (aTemp.length > 0) && (!aTemp[1].trim().equals(""))) {
+		if ((aTemp != null) && (aTemp.length > 0)
+				&& (!aTemp[1].trim().equals(""))) {
 			stTemp = aTemp[1].trim();
 			if ((stTemp.length() > 7)
-			    && ((stTemp.substring(0, 7).equals("http://")) || (stTemp.substring(
-			        0, 8).equals("https://")))) {
+					&& ((stTemp.substring(0, 7).equals("http://")) || (stTemp
+							.substring(0, 8).equals("https://")))) {
 				stReturn = stTemp;
 			}
 			if (stReturn.equals("")) {
 				if ((!stUrl.equals("")) && (!aTemp[1].trim().equals(""))) {
 					stTemp = aTemp[1].trim();
 					if ((stUrl.lastIndexOf('/') == stUrl.length())
-					    || (stTemp.substring(0, 1).equals("/")))
+							|| (stTemp.substring(0, 1).equals("/")))
 						stReturn = stUrl + stTemp;
 					else
 						stReturn = stUrl + "/" + stTemp;
@@ -251,7 +260,8 @@ public class EbMarketingSpider {
 			}
 		}
 		if ((!stReturn.equals(""))
-		    && ((stReturn.lastIndexOf('?') > 0) || (stReturn.lastIndexOf('#') > 0))) {
+				&& ((stReturn.lastIndexOf('?') > 0) || (stReturn
+						.lastIndexOf('#') > 0))) {
 			stReturn = "";
 		}
 		if (stReturn.length() > stDomain.length()) {
@@ -296,7 +306,8 @@ public class EbMarketingSpider {
 						ebComp.setPhone(astFields[1].trim());
 				} else if (astFields[0].equals("EMAIL")) {
 					if ((astFields[1].length() >= 10)
-					    && (astFields[1].trim().substring(0, 7).equals("mailto:")))
+							&& (astFields[1].trim().substring(0, 7)
+									.equals("mailto:")))
 						ebComp.setEmail(astFields[1].trim().substring(7));
 				} else if (astFields[0].equals("WEB")) {
 					if (astFields[1].length() >= 4)
@@ -332,7 +343,7 @@ public class EbMarketingSpider {
 				} else if (astFields[0].equals("OFFICE")) {
 					ebComp.setCompany(astFields[1].trim());
 					if ((astFields.length > 2)
-					    && (astFields[2].trim().startsWith("http://")))
+							&& (astFields[2].trim().startsWith("http://")))
 						ebComp.setWeb(astFields[2].trim());
 				} else if (astFields[0].equals("NEXT")) {
 					stNext = astFields[1].trim();
@@ -340,7 +351,8 @@ public class EbMarketingSpider {
 					ebComp.setAddress(astFields[1].trim());
 				} else if (astFields[0].equals("EMAIL")) {
 					if ((astFields[1].length() >= 10)
-					    && (astFields[1].trim().substring(0, 7).equals("mailto:")))
+							&& (astFields[1].trim().substring(0, 7)
+									.equals("mailto:")))
 						ebPerson.setEmail(astFields[1].trim().substring(7));
 					else
 						ebPerson.setEmail(astFields[1].trim());

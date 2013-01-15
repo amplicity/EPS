@@ -22,24 +22,26 @@ public class Main {
 				listPath(files[i]);
 			} else {
 				stSql = "select nmFileId from MyFiles where stPath="
-				    + ebEnt.dbEnterprise.fmtDbString(files[i].getParent())
-				    + " and stFile="
-				    + ebEnt.dbEnterprise.fmtDbString(files[i].getName());
+						+ ebEnt.dbEnterprise.fmtDbString(files[i].getParent())
+						+ " and stFile="
+						+ ebEnt.dbEnterprise.fmtDbString(files[i].getName());
 
 				nmFileId = ebEnt.dbEnterprise.ExecuteSql1n(stSql);
 				if (nmFileId > 0)
 					continue;
 				nmFileId = ebEnt.dbEnterprise
-				    .ExecuteSql1n("select max(nmFileId) from MyFiles ");
+						.ExecuteSql1n("select max(nmFileId) from MyFiles ");
 				nmFileId++;
 				stSql = "insert into MyFiles (nmFileId,stPath,stFile,nmLastModified,nmSize) values("
-				    + nmFileId
-				    + ","
-				    + ebEnt.dbEnterprise.fmtDbString(files[i].getParent())
-				    + ","
-				    + ebEnt.dbEnterprise.fmtDbString(files[i].getName())
-				    + ","
-				    + files[i].lastModified() + "," + files[i].length() + ")";
+						+ nmFileId
+						+ ","
+						+ ebEnt.dbEnterprise.fmtDbString(files[i].getParent())
+						+ ","
+						+ ebEnt.dbEnterprise.fmtDbString(files[i].getName())
+						+ ","
+						+ files[i].lastModified()
+						+ ","
+						+ files[i].length() + ")";
 
 				ebEnt.dbEnterprise.ExecuteUpdate(stSql);
 			}
@@ -54,7 +56,8 @@ public class Main {
 		long lTime1 = cal1.getTimeInMillis();
 		try {
 			System.out.println("EderBaseModel Application starting: ");
-			ebEnt = new EbEnterprise(1, 26, "ederbase", "ebenterprise", "common");
+			ebEnt = new EbEnterprise(1, 26, "ederbase", "ebenterprise",
+					"common");
 			EbCraigsList ebCl = new EbCraigsList(ebEnt);
 			for (int iA = 0; iA < args.length; iA++) {
 				stHTML = stHTML + "\nargs[" + iA + "]: " + args[iA];
@@ -73,9 +76,11 @@ public class Main {
 					stHTML = stHTML + "\n" + ebCl.setEmail();
 					stHTML = stHTML + ebCl.getError();
 				} else if (args[iA].equals("f")) {
-					EbCampaignManager ebCamp = new EbCampaignManager(ebEnt, null);
+					EbCampaignManager ebCamp = new EbCampaignManager(ebEnt,
+							null);
 					stHTML = stHTML
-					    + ebCamp.emailCampaignBlast(5, 2000, "zzzz", 100, 120000);
+							+ ebCamp.emailCampaignBlast(5, 2000, "zzzz", 100,
+									120000);
 				} else if (args[iA].equals("g")) {
 					iA++;
 					listPath(new File(args[iA]));
@@ -101,6 +106,6 @@ public class Main {
 		Calendar cal2 = Calendar.getInstance();
 		long lTime2 = cal2.getTimeInMillis();
 		System.out.println("EderBaseModel - EXITING -  Duration (ms): "
-		    + (lTime2 - lTime1));
+				+ (lTime2 - lTime1));
 	}
 }

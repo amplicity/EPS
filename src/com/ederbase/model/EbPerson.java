@@ -91,15 +91,17 @@ public class EbPerson {
 		if (ebComp != null) {
 			this.nmCompanyId = ebComp.save();
 		}
-		int nmPhoneId = this.ebEnt.ebNorm.getPhoneId(this.stPhone, this.stCountry);
+		int nmPhoneId = this.ebEnt.ebNorm.getPhoneId(this.stPhone,
+				this.stCountry);
 		int nmEmailId = this.ebEnt.ebNorm.getEmailId(this.stEmail);
 
 		if ((nmPhoneId > 0) || (nmEmailId > 0)) {
 			this.nmPersonId = this.ebEnt.ebNorm.getPersonId(this.stFirstName,
-			    this.stMiddleName, this.stLastName, nmPhoneId, nmEmailId);
+					this.stMiddleName, this.stLastName, nmPhoneId, nmEmailId);
 		}
 		if ((this.nmPersonId > 0) && (this.nmCompanyId > 0)) {
-			this.ebEnt.ebNorm.addCompanyRef(this.nmCompanyId, 1, this.nmPersonId);
+			this.ebEnt.ebNorm.addCompanyRef(this.nmCompanyId, 1,
+					this.nmPersonId);
 		}
 		return this.nmPersonId;
 	}

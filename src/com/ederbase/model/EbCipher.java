@@ -31,12 +31,14 @@ public class EbCipher {
 			this.ecipher.init(1, key);
 			this.dcipher.init(2, key);
 		} catch (NoSuchPaddingException e) {
-			this.stError = (this.stError + "<br>EXCEPTION: NoSuchPaddingException: " + e);
+			this.stError = (this.stError
+					+ "<br>EXCEPTION: NoSuchPaddingException: " + e);
 		} catch (NoSuchAlgorithmException e) {
 			this.stError = (this.stError
-			    + "<br>EXCEPTION: NoSuchAlgorithmException: " + e);
+					+ "<br>EXCEPTION: NoSuchAlgorithmException: " + e);
 		} catch (InvalidKeyException e) {
-			this.stError = (this.stError + "<br>EXCEPTION: InvalidKeyException: " + e);
+			this.stError = (this.stError
+					+ "<br>EXCEPTION: InvalidKeyException: " + e);
 		}
 	}
 
@@ -46,30 +48,33 @@ public class EbCipher {
 		int iterationCount = 19;
 		try {
 			KeySpec keySpec = new PBEKeySpec(passPhrase.toCharArray(), salt,
-			    iterationCount);
+					iterationCount);
 			SecretKey key = SecretKeyFactory.getInstance("PBEWithMD5AndDES")
-			    .generateSecret(keySpec);
+					.generateSecret(keySpec);
 
 			this.ecipher = Cipher.getInstance(key.getAlgorithm());
 			this.dcipher = Cipher.getInstance(key.getAlgorithm());
 
 			AlgorithmParameterSpec paramSpec = new PBEParameterSpec(salt,
-			    iterationCount);
+					iterationCount);
 
 			this.ecipher.init(1, key, paramSpec);
 			this.dcipher.init(2, key, paramSpec);
 		} catch (InvalidAlgorithmParameterException e) {
 			this.stError = (this.stError
-			    + "<br>EXCEPTION: InvalidAlgorithmParameterException: " + e);
+					+ "<br>EXCEPTION: InvalidAlgorithmParameterException: " + e);
 		} catch (InvalidKeySpecException e) {
-			this.stError = (this.stError + "<br>EXCEPTION: InvalidKeySpecException: " + e);
+			this.stError = (this.stError
+					+ "<br>EXCEPTION: InvalidKeySpecException: " + e);
 		} catch (NoSuchPaddingException e) {
-			this.stError = (this.stError + "<br>EXCEPTION: NoSuchPaddingException: " + e);
+			this.stError = (this.stError
+					+ "<br>EXCEPTION: NoSuchPaddingException: " + e);
 		} catch (NoSuchAlgorithmException e) {
 			this.stError = (this.stError
-			    + "<br>EXCEPTION: NoSuchAlgorithmException: " + e);
+					+ "<br>EXCEPTION: NoSuchAlgorithmException: " + e);
 		} catch (InvalidKeyException e) {
-			this.stError = (this.stError + "<br>EXCEPTION: InvalidKeyException: " + e);
+			this.stError = (this.stError
+					+ "<br>EXCEPTION: InvalidKeyException: " + e);
 		}
 	}
 

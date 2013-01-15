@@ -18,7 +18,7 @@ public class EbMenuBar {
 	private String[] astM2 = new String[300];
 
 	public EbMenuBar(String stCompany, String stLogo, String stTitle,
-	    String stLoginName, ResultSet rsA) {
+			String stLoginName, ResultSet rsA) {
 		try {
 			this.stCompany = stCompany;
 			this.stLogo = stLogo;
@@ -32,38 +32,40 @@ public class EbMenuBar {
 			}
 		} catch (Exception e) {
 			this.stError = (this.stError + "<BR>ERROR EbMenuBar: " + stCompany
-			    + " stLogo " + stLogo + " stTitle: " + stTitle + " stLoginName: "
-			    + stLoginName + " Exception: " + e);
+					+ " stLogo " + stLogo + " stTitle: " + stTitle
+					+ " stLoginName: " + stLoginName + " Exception: " + e);
 		}
 	}
 
 	public String makeMenuBar(String stMb) {
 		String stReturn = "";
 		stReturn = stReturn
-		    + "\n<tr><td valign='top' align='left' rowspan='2'><img src=\""
-		    + this.stLogo
-		    + "\" title=\""
-		    + this.stCompany
-		    + "\" alt=\""
-		    + this.stCompany
-		    + "\" border='0'></td><td valign='top' align='left' width='100%'><table width='100%'><tr><td rowspan='2' align='center' valign='middle'><h1>"
-		    + this.stCompany + "</h1></td><td align='right' valign='middle'>";
+				+ "\n<tr><td valign='top' align='left' rowspan='2'><img src=\""
+				+ this.stLogo
+				+ "\" title=\""
+				+ this.stCompany
+				+ "\" alt=\""
+				+ this.stCompany
+				+ "\" border='0'></td><td valign='top' align='left' width='100%'><table width='100%'><tr><td rowspan='2' align='center' valign='middle'><h1>"
+				+ this.stCompany
+				+ "</h1></td><td align='right' valign='middle'>";
 		stReturn = stReturn + this.stL;
-		stReturn = stReturn + "</td></tr>\n<tr><td align='right' valign='middle'>";
+		stReturn = stReturn
+				+ "</td></tr>\n<tr><td align='right' valign='middle'>";
 		if (!this.stLoginName.trim().equals(""))
-			stReturn = stReturn + "<font size='1'>Welcome <b>" + this.stLoginName
-			    + "</b> &nbsp;</font>";
+			stReturn = stReturn + "<font size='1'>Welcome <b>"
+					+ this.stLoginName + "</b> &nbsp;</font>";
 		else
 			stReturn = stReturn + "&nbsp;";
 		stReturn = stReturn + "</td></tr></table></td></tr>";
 		stReturn = stReturn
-		    + "<tr><td valign='bottom' align='left' width='100%'><table id='menu' cellspacing='0'><tr><td>&nbsp;&nbsp;</td><td><div id='menu1Wrap'>";
+				+ "<tr><td valign='bottom' align='left' width='100%'><table id='menu' cellspacing='0'><tr><td>&nbsp;&nbsp;</td><td><div id='menu1Wrap'>";
 		stReturn = stReturn + this.stM1;
 		stReturn = stReturn
-		    + "</div></td></tr></table></td></tr>\n<tr><td colspan='2 'valign='top' align=left width='100%'><table id='menu2' cellspacing='0'><tr><td><div id='menu2Wrap'>";
+				+ "</div></td></tr></table></td></tr>\n<tr><td colspan='2 'valign='top' align=left width='100%'><table id='menu2' cellspacing='0'><tr><td><div id='menu2Wrap'>";
 		stReturn = stReturn + this.astM2[this.iL1Set];
 		stReturn = stReturn
-		    + "</div></td></tr></table></td></tr>\n<tr><td colspan='2' width='100%' valign='top' align='left' id='tdbody'>";
+				+ "</div></td></tr></table></td></tr>\n<tr><td colspan='2' width='100%' valign='top' align='left' id='tdbody'>";
 
 		return stReturn;
 	}
@@ -81,12 +83,13 @@ public class EbMenuBar {
 					this.iL1Set = rsA.getInt("nmAppId");
 
 					stReturn = stReturn + "<a href='" + stUrl + "' title=\""
-					    + rsA.getString("stTitle") + "\" class='selectedTab'>"
-					    + rsA.getString("stTitle") + "</a>";
+							+ rsA.getString("stTitle")
+							+ "\" class='selectedTab'>"
+							+ rsA.getString("stTitle") + "</a>";
 				} else {
 					stReturn = stReturn + "<a href='" + stUrl + "' title=\""
-					    + rsA.getString("stTitle") + "\">" + rsA.getString("stTitle")
-					    + "</a>";
+							+ rsA.getString("stTitle") + "\">"
+							+ rsA.getString("stTitle") + "</a>";
 				}
 				this.stM1 += stReturn;
 				break;
@@ -96,12 +99,13 @@ public class EbMenuBar {
 					this.iL2Set = rsA.getInt("nmAppId");
 					this.iL1Set = rsA.getInt("nmAppParent");
 					stReturn = stReturn + "<a href='" + stUrl + "' title=\""
-					    + rsA.getString("stTitle") + "\" class='selectedTab' >"
-					    + rsA.getString("stTitle") + "</a>";
+							+ rsA.getString("stTitle")
+							+ "\" class='selectedTab' >"
+							+ rsA.getString("stTitle") + "</a>";
 				} else {
 					stReturn = stReturn + "<a href='" + stUrl + "' title=\""
-					    + rsA.getString("stTitle") + "\">" + rsA.getString("stTitle")
-					    + "</a>";
+							+ rsA.getString("stTitle") + "\">"
+							+ rsA.getString("stTitle") + "</a>";
 				}
 				int tmp472_467 = rsA.getInt("nmAppParent");
 				String[] tmp472_461 = this.astM2;
@@ -126,8 +130,8 @@ public class EbMenuBar {
 			if (rsA.getInt("nmAppType2") == 1)
 				stExtra = stExtra + " target=_blank ";
 			stReturn = stReturn + "<a " + stExtra + " href=\"" + stUrl
-			    + "\" title=\"" + rsA.getString("stTitle") + "\">"
-			    + rsA.getString("stTitle") + "</a>";
+					+ "\" title=\"" + rsA.getString("stTitle") + "\">"
+					+ rsA.getString("stTitle") + "</a>";
 		} catch (Exception e) {
 			this.stError = (this.stError + "<br>ERROR: addLink: " + e);
 		}

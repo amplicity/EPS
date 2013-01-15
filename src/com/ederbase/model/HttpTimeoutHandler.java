@@ -16,7 +16,8 @@ public class HttpTimeoutHandler extends Handler {
 
 	@Override
 	protected URLConnection openConnection(URL u) throws IOException {
-		return this.fHUCT = new HttpURLConnectionTimeout(u, this, this.fiTimeoutVal);
+		return this.fHUCT = new HttpURLConnectionTimeout(u, this,
+				this.fiTimeoutVal);
 	}
 
 	String GetProxy() {

@@ -33,15 +33,17 @@ public class EbDatabase {
 			this.iDebugLevel = ebEnt.iDebugLevel;
 			this.stConnectString = "";
 			this.stDbName = stDbName;
-			// this.ebConnect = new EbConnect(this.iDbType, this.stHost, this.stUser,
+			// this.ebConnect = new EbConnect(this.iDbType, this.stHost,
+			// this.stUser,
 			// this.stPassword, this.stDbName, this.stConnectString);
 			this.ebConnect = new EbConnect(0, "localhost", "eps", "eps",
-			    this.stDbName, this.stConnectString);
+					this.stDbName, this.stConnectString);
 			if (this.ebConnect != null)
 				this.stError += this.ebConnect.getError();
 		} catch (Exception e) {
-			this.stError = (this.stError + "<br>EbDatabase: " + this.stHost + " "
-			    + this.stUser + " type: " + this.iDbType + " Exception: " + e);
+			this.stError = (this.stError + "<br>EbDatabase: " + this.stHost
+					+ " " + this.stUser + " type: " + this.iDbType
+					+ " Exception: " + e);
 		}
 	}
 
@@ -58,7 +60,7 @@ public class EbDatabase {
 	}
 
 	public EbDatabase(int iDbType, String stHost, String stUser,
-	    String stPassword, String stDbName, String stConnectString) {
+			String stPassword, String stDbName, String stConnectString) {
 		try {
 			this.iDbType = iDbType;
 			this.stHost = stHost;
@@ -66,13 +68,14 @@ public class EbDatabase {
 			this.stPassword = stPassword;
 			this.stDbName = stDbName;
 			this.stConnectString = stConnectString;
-			this.ebConnect = new EbConnect(this.iDbType, this.stHost, this.stUser,
-			    this.stPassword, this.stDbName, this.stConnectString);
+			this.ebConnect = new EbConnect(this.iDbType, this.stHost,
+					this.stUser, this.stPassword, this.stDbName,
+					this.stConnectString);
 			if (this.ebConnect != null)
 				this.stError += this.ebConnect.getError();
 		} catch (Exception e) {
-			this.stError = (this.stError + "<br>EbDatabase: " + stHost + " " + stUser
-			    + " type: " + iDbType + " Exception: " + e);
+			this.stError = (this.stError + "<br>EbDatabase: " + stHost + " "
+					+ stUser + " type: " + iDbType + " Exception: " + e);
 		}
 	}
 
@@ -100,7 +103,7 @@ public class EbDatabase {
 			stmt.close();
 		} catch (Exception e) {
 			this.stError = (this.stError + "<br>ExecuteSql: " + stSql
-			    + " Exception: " + e);
+					+ " Exception: " + e);
 		}
 		fmtTrace(startTime, stSql);
 		return iReturn;
@@ -114,15 +117,16 @@ public class EbDatabase {
 		if (this.iDebugLevel > 0) {
 			try {
 				if (val >= 0.1D)
-					this.stDebugTrace = (this.stDebugTrace + "<tr><td align=right>"
-					    + this.iSqlCount + "</td><td align=left bgcolor=pink>"
-					    + this.decFmt.format(val) + "</td><td style='font-size:9px;'>"
-					    + stSql + "</td></tr>");
+					this.stDebugTrace = (this.stDebugTrace
+							+ "<tr><td align=right>" + this.iSqlCount
+							+ "</td><td align=left bgcolor=pink>"
+							+ this.decFmt.format(val)
+							+ "</td><td style='font-size:9px;'>" + stSql + "</td></tr>");
 				else
-					this.stDebugTrace = (this.stDebugTrace + "<tr><td align=right>"
-					    + this.iSqlCount + "</td><td align=left>"
-					    + this.decFmt.format(val) + "</td><td style='font-size:9px;'>"
-					    + stSql + "</td></tr>");
+					this.stDebugTrace = (this.stDebugTrace
+							+ "<tr><td align=right>" + this.iSqlCount
+							+ "</td><td align=left>" + this.decFmt.format(val)
+							+ "</td><td style='font-size:9px;'>" + stSql + "</td></tr>");
 			} catch (Exception e) {
 			}
 		}
@@ -139,7 +143,7 @@ public class EbDatabase {
 			ebRs.iRows = ebRs.rs.getRow();
 		} catch (Exception e) {
 			this.stError = (this.stError + "<br>ExecuteSql: " + stSql
-			    + " Exception: " + e);
+					+ " Exception: " + e);
 		}
 		fmtTrace(startTime, stSql);
 		return ebRs;
@@ -156,10 +160,10 @@ public class EbDatabase {
 			this.iMaxStatement = ((this.iMaxStatement + 1) % 20);
 			this.aStmt[this.iMaxStatement] = dbConn.createStatement(1004, 1007);
 			this.aRs[this.iMaxStatement] = this.aStmt[this.iMaxStatement]
-			    .executeQuery(stSql);
+					.executeQuery(stSql);
 		} catch (Exception e) {
 			this.stError = (this.stError + "<br>ExecuteSql: " + stSql
-			    + " iMaxStatement = " + this.iMaxStatement + " Exception: " + e);
+					+ " iMaxStatement = " + this.iMaxStatement + " Exception: " + e);
 		}
 		fmtTrace(startTime, stSql);
 		return this.aRs[this.iMaxStatement];
@@ -177,7 +181,8 @@ public class EbDatabase {
 				this.stError += rs.ebClose();
 			}
 		} catch (Exception e) {
-			this.stError = (this.stError + "<br>ExecuteSql1 ex: [" + stSql + "] " + e);
+			this.stError = (this.stError + "<br>ExecuteSql1 ex: [" + stSql
+					+ "] " + e);
 		}
 		return stReturn;
 	}
@@ -206,13 +211,14 @@ public class EbDatabase {
 				this.stError += rs.ebClose();
 			}
 		} catch (Exception e) {
-			this.stError = (this.stError + "<br>ExecuteSql1n ex: [" + stSql + "] " + e);
+			this.stError = (this.stError + "<br>ExecuteSql1n ex: [" + stSql
+					+ "] " + e);
 		}
 		return iReturn;
 	}
 
 	public String fmtInput(int iType, ResultSet rsF, String stValue,
-	    String stPkValue) {
+			String stPkValue) {
 		String stReturn = "";
 		if (iType == 1)
 			stReturn = stReturn + "<td align=left valign=top>";
@@ -237,41 +243,46 @@ public class EbDatabase {
 					iSize = iMax;
 				iSize++;
 				stReturn = stReturn + "<input type=text name='g"
-				    + rsF.getInt("nmFieldId") + "|" + stPkValue + "' value=\""
-				    + stValue + "\" MAXLENGTH=" + iMax + " SIZE=" + iSize + " >";
+						+ rsF.getInt("nmFieldId") + "|" + stPkValue
+						+ "' value=\"" + stValue + "\" MAXLENGTH=" + iMax
+						+ " SIZE=" + iSize + " >";
 				break;
 			case 31:
 				iMax = iSize = 22;
 				iSize++;
 				stReturn = stReturn + "<input type=text name='g"
-				    + rsF.getInt("nmFieldId") + "|" + stPkValue + "' value=\""
-				    + stValue + "\" MAXLENGTH=" + iMax + " SIZE=" + iSize + " >";
+						+ rsF.getInt("nmFieldId") + "|" + stPkValue
+						+ "' value=\"" + stValue + "\" MAXLENGTH=" + iMax
+						+ " SIZE=" + iSize + " >";
 				break;
 			case 8:
 				iMax = iSize = 22;
 				iSize++;
 				stReturn = stReturn + "<input type=text name='g"
-				    + rsF.getInt("nmFieldId") + "|" + stPkValue + "' value=\""
-				    + stValue + "\" MAXLENGTH=" + iMax + " SIZE=" + iSize + " >";
+						+ rsF.getInt("nmFieldId") + "|" + stPkValue
+						+ "' value=\"" + stValue + "\" MAXLENGTH=" + iMax
+						+ " SIZE=" + iSize + " >";
 				break;
 			case 20:
 				iMax = iSize = 10;
 				iSize++;
 				stReturn = stReturn + "<input type=text name='g"
-				    + rsF.getInt("nmFieldId") + "|" + stPkValue + "' value=\""
-				    + stValue + "\" MAXLENGTH=" + iMax + " SIZE=" + iSize + " >";
+						+ rsF.getInt("nmFieldId") + "|" + stPkValue
+						+ "' value=\"" + stValue + "\" MAXLENGTH=" + iMax
+						+ " SIZE=" + iSize + " >";
 				break;
 			case 21:
 				iMax = iSize = 12;
 				iSize++;
 				stReturn = stReturn + "<input type=text name='g"
-				    + rsF.getInt("nmFieldId") + "|" + stPkValue + "' value=\""
-				    + stValue + "\" MAXLENGTH=" + iMax + " SIZE=" + iSize + " >";
+						+ rsF.getInt("nmFieldId") + "|" + stPkValue
+						+ "' value=\"" + stValue + "\" MAXLENGTH=" + iMax
+						+ " SIZE=" + iSize + " >";
 				break;
 			case 4:
 				stReturn = stReturn + "<textarea rows=20 cols=150 name='g"
-				    + rsF.getInt("nmFieldId") + "|" + stPkValue + "'>" + stValue
-				    + "</textarea>";
+						+ rsF.getInt("nmFieldId") + "|" + stPkValue + "'>"
+						+ stValue + "</textarea>";
 			}
 		} catch (Exception e) {
 			this.stError = (this.stError + "<br>ERROR fmtInput: " + e);
@@ -296,7 +307,7 @@ public class EbDatabase {
 					if (getiDbType() == 1) {
 						if (stSql.trim().toLowerCase().startsWith("select "))
 							stReturn = "select top " + iLimit + " "
-							    + stSql.trim().substring(7);
+									+ stSql.trim().substring(7);
 					} else {
 						stReturn = stSql + " limit " + iLimit;
 					}
@@ -322,7 +333,7 @@ public class EbDatabase {
 		String stReturn = "";
 
 		stReturn = stData.substring(5, 7) + "/" + stData.substring(8, 10) + "/"
-		    + stData.substring(0, 4);
+				+ stData.substring(0, 4);
 		if (iFmtType == 2) {
 			int iH = Integer.parseInt(stData.substring(11, 13));
 			String stAPM = "";
@@ -338,8 +349,8 @@ public class EbDatabase {
 				stHr = "0" + iH;
 			else
 				stHr = "" + iH;
-			stReturn = stReturn + " " + stHr + ":" + stData.substring(14, 16) + " "
-			    + stAPM;
+			stReturn = stReturn + " " + stHr + ":" + stData.substring(14, 16)
+					+ " " + stAPM;
 		}
 
 		return stReturn;
@@ -396,12 +407,12 @@ public class EbDatabase {
 			stOut = "0";
 		return stOut;
 	}
-	
+
 	public class EbResultSet {
 		public ResultSet rs = null;
 		public Statement stmt = null;
 		public int iRows = 0;
-		
+
 		public String ebClose() {
 			String stError = "";
 			try {

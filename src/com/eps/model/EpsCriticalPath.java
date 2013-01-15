@@ -46,8 +46,8 @@ public class EpsCriticalPath {
 	}
 
 	public void setEpsCriticalPath(int iMaxRec, EpsUserData epsUd,
-	    ResultSet rsProject, ResultSet rsSchedule, String stHolidays,
-	    int[] aWeekend) {
+			ResultSet rsProject, ResultSet rsSchedule, String stHolidays,
+			int[] aWeekend) {
 		this.epsUd = epsUd;
 		this.rsProject = rsProject;
 		this.iMaxRecId = iMaxRec;
@@ -121,10 +121,10 @@ public class EpsCriticalPath {
 		try {
 			SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yy");
 			stReturn += "{" + this.dEffortHours + "/" + this.dHoursStart + "/"
-			    + this.dHoursEnd + "} ";
+					+ this.dHoursEnd + "} ";
 			stReturn += formatter.format(dtStart.getTime()) + " - ";
 			stReturn += formatter.format(dtEnd.getTime()) + " ("
-			    + EpsStatic.daysBetween(dtStart, dtEnd) + ")";
+					+ EpsStatic.daysBetween(dtStart, dtEnd) + ")";
 		} catch (Exception e) {
 			this.stError += "<BR> ERRROR getStartEnd " + e;
 		}
@@ -171,8 +171,8 @@ public class EpsCriticalPath {
 			dtEnd = (Calendar) dtStart.clone();
 			if (dPreviousHours < this.epsUd.rsMyDiv.getDouble("nmHoursPerDay")) {
 				this.dHoursStart = dPreviousHours;
-				double dTodayMax = this.epsUd.rsMyDiv.getDouble("nmHoursPerDay")
-				    - dPreviousHours;
+				double dTodayMax = this.epsUd.rsMyDiv
+						.getDouble("nmHoursPerDay") - dPreviousHours;
 				if (dTodayMax > dEffort) {
 					dTodayMax = dEffort;
 				}
@@ -182,7 +182,8 @@ public class EpsCriticalPath {
 			// Start Date and Hour is now known.
 			dEffort = getMaxEffort(dEffort, stLc);
 			if (dEffort > 0) { // Do all WHOLE Days
-				double dDays = dEffort / this.epsUd.rsMyDiv.getDouble("nmHoursPerDay");
+				double dDays = dEffort
+						/ this.epsUd.rsMyDiv.getDouble("nmHoursPerDay");
 				for (int i = 0; i < (int) dDays; i++) {
 					dEffort -= this.epsUd.rsMyDiv.getDouble("nmHoursPerDay");
 					dEnd = this.epsUd.rsMyDiv.getDouble("nmHoursPerDay");
@@ -208,7 +209,8 @@ public class EpsCriticalPath {
 					}
 				}
 			}
-			if (dEnd > 0 && dEnd <= this.epsUd.rsMyDiv.getDouble("nmHoursPerDay"))
+			if (dEnd > 0
+					&& dEnd <= this.epsUd.rsMyDiv.getDouble("nmHoursPerDay"))
 				this.dHoursEnd = dEnd;
 		} catch (Exception e) {
 			this.stError += "<BR> ERRROR calculateEnd " + e;
@@ -220,7 +222,7 @@ public class EpsCriticalPath {
 		try {
 			dtStart = (Calendar) dtEnd.clone();
 			double dDays = dEffortHours
-			    / this.epsUd.rsMyDiv.getDouble("nmHoursPerDay");
+					/ this.epsUd.rsMyDiv.getDouble("nmHoursPerDay");
 			for (int i = 0; i < dDays; i++) {
 				dtStart.add(Calendar.DAY_OF_YEAR, -1);
 				do {
@@ -333,7 +335,8 @@ public class EpsCriticalPath {
 				iRecMax = 0;
 			}
 			for (int iR = 0; iR < iRecMax; iR++) {
-				aFields = aRecords[iR].split("~", -1); // LcId, MaxEmployess, Effort,
+				aFields = aRecords[iR].split("~", -1); // LcId, MaxEmployess,
+														// Effort,
 				try {
 					int iMaxEmp = Integer.parseInt(aFields[1]);
 					double dMaxEffort = Double.parseDouble(aFields[2]);

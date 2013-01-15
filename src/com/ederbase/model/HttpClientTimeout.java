@@ -9,7 +9,7 @@ import sun.net.www.http.KeepAliveCache;
 
 public class HttpClientTimeout extends HttpClient {
 	public HttpClientTimeout(URL url, String proxy, int proxyPort)
-	    throws IOException {
+			throws IOException {
 		super(url, proxy, proxyPort);
 	}
 

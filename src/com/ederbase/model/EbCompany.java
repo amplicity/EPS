@@ -84,16 +84,18 @@ public class EbCompany {
 
 	public int save() {
 		this.nmCompanyId = 0;
-		int nmPhoneId = this.ebEnt.ebNorm.getPhoneId(this.stPhone, this.stCountry);
+		int nmPhoneId = this.ebEnt.ebNorm.getPhoneId(this.stPhone,
+				this.stCountry);
 		int nmEmailId = this.ebEnt.ebNorm.getEmailId(this.stEmail);
 		int nmWebId = this.ebEnt.ebNorm.getWebId(this.stWeb);
 
 		int nmAddressId = this.ebEnt.ebNorm.getAddressId(this.stAddress,
-		    this.stAddress2, this.stZip, this.stCity, this.stState, this.stCountry);
+				this.stAddress2, this.stZip, this.stCity, this.stState,
+				this.stCountry);
 		if ((nmPhoneId > 0) || (nmEmailId > 0) || (nmWebId > 0)
-		    || (nmAddressId > 0)) {
+				|| (nmAddressId > 0)) {
 			this.nmCompanyId = this.ebEnt.ebNorm.getCompanyId(this.stCompany,
-			    nmAddressId, nmPhoneId, nmEmailId, nmWebId);
+					nmAddressId, nmPhoneId, nmEmailId, nmWebId);
 		}
 		return this.nmCompanyId;
 	}

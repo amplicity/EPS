@@ -24,16 +24,16 @@ public class EbDynamic {
 	}
 
 	public String getValitation(int giNrValidation2, String stValidation2,
-	    String stMultiSel) {
+			String stMultiSel) {
 		String stReturn = "";
 		stReturn = stReturn
-		    + "\n<SCRIPT LANGUAGE='JavaScript'>\n var gaValidation = new Array(\n";
+				+ "\n<SCRIPT LANGUAGE='JavaScript'>\n var gaValidation = new Array(\n";
 		stReturn = stReturn + stValidation2;
 		stReturn = stReturn + "\n);\n var giNrValidation2=" + giNrValidation2
-		    + ";\n" + " var giSubmitId=0;\n var stPopupMessage=\""
-		    + this.stPopupMessage + "\";\n " + " var gstMultiSel=\"" + stMultiSel
-		    + "\"; \n" + " var giUser=" + this.ebEnt.ebUd.getLoginId()
-		    + "; \n</SCRIPT>\n";
+				+ ";\n" + " var giSubmitId=0;\n var stPopupMessage=\""
+				+ this.stPopupMessage + "\";\n " + " var gstMultiSel=\""
+				+ stMultiSel + "\"; \n" + " var giUser="
+				+ this.ebEnt.ebUd.getLoginId() + "; \n</SCRIPT>\n";
 
 		return stReturn;
 	}
@@ -62,17 +62,17 @@ public class EbDynamic {
 			rsTabs.last();
 			int iTables = rsTabs.getRow();
 			stReturn = stReturn
-			    + "\n<SCRIPT language='javascript'>\nvar gaData = new Array( giFieldMax );\n";
+					+ "\n<SCRIPT language='javascript'>\nvar gaData = new Array( giFieldMax );\n";
 			for (iT = 1; iT <= iTables; iT++) {
 				rsTabs.absolute(iT);
 
-				stSql = "select * from " + rsTabs.getString(1) + " where RecId="
-				    + iRecId + " and nmSeqNr=" + iSeqNr;
+				stSql = "select * from " + rsTabs.getString(1)
+						+ " where RecId=" + iRecId + " and nmSeqNr=" + iSeqNr;
 				rsData = this.ebEnt.dbDyn.ExecuteSql(stSql);
 				rsData.absolute(1);
 
 				stSql = "select * from teb_fields where stTabName = '"
-				    + rsTabs.getString(1) + "' ";
+						+ rsTabs.getString(1) + "' ";
 				rsFields = this.ebEnt.dbDyn.ExecuteSql(stSql);
 				rsFields.last();
 				iFieldCount = rsFields.getRow();
@@ -81,11 +81,12 @@ public class EbDynamic {
 					rsFields.absolute(iF);
 					String stData = "";
 					if ((rsFields.getInt("nmDataType") == 9)
-					    && ((rsFields.getInt("nmFlags") & 0x80) != 0)) {
+							&& ((rsFields.getInt("nmFlags") & 0x80) != 0)) {
 						continue;
 					}
 
-					iColumn = rsData.findColumn(rsFields.getString("stDbFieldName"));
+					iColumn = rsData.findColumn(rsFields
+							.getString("stDbFieldName"));
 					stData = rsData.getString(iColumn);
 					if (stData == null) {
 						stData = "";
@@ -100,14 +101,15 @@ public class EbDynamic {
 						break;
 					}
 
-					stReturn = stReturn + "\n gaData[" + rsFields.getInt("nmOrder2")
-					    + "] = \"" + EbDatabase.addSlashes(stData) + "\";";
+					stReturn = stReturn + "\n gaData["
+							+ rsFields.getInt("nmOrder2") + "] = \""
+							+ EbDatabase.addSlashes(stData) + "\";";
 				}
 
 			}
 
 			stSql = "select mc.nmFieldId,mc.nmChoiceId,f.nmOrder2 from teb_multichoices mc, teb_fields f where f.nmForeignId=mc.nmFieldId and nmRecId="
-			    + iRecId + " and nmSeqNr=" + iSeqNr + " order by nmFieldId";
+					+ iRecId + " and nmSeqNr=" + iSeqNr + " order by nmFieldId";
 			ResultSet rsMC = this.ebEnt.dbDyn.ExecuteSql(stSql);
 			rsMC.last();
 			int iMax = rsMC.getRow();
@@ -117,8 +119,9 @@ public class EbDynamic {
 				rsMC.absolute(iMC);
 				if (iLastFieldId != rsMC.getInt("nmFieldId")) {
 					if (iLastFieldId > 0) {
-						stReturn = stReturn + "\n gaData[" + rsMC.getInt("nmOrder2")
-						    + "] = \"" + EbDatabase.addSlashes(stData) + "\";";
+						stReturn = stReturn + "\n gaData["
+								+ rsMC.getInt("nmOrder2") + "] = \""
+								+ EbDatabase.addSlashes(stData) + "\";";
 					}
 
 					stData = "";
@@ -133,8 +136,9 @@ public class EbDynamic {
 			}
 
 		} catch (Exception e) {
-			this.stError = (this.stError + "<br>ERROR ebDyn: : getDynData RecId="
-			    + iRecId + " and nmSeqNr=" + iSeqNr + ": " + e);
+			this.stError = (this.stError
+					+ "<br>ERROR ebDyn: : getDynData RecId=" + iRecId
+					+ " and nmSeqNr=" + iSeqNr + ": " + e);
 		}
 
 		stReturn = stReturn + "\n</script>";
@@ -155,8 +159,10 @@ public class EbDynamic {
 				String[] stSearch = makeTebSql(rsFields2);
 
 				stSql = "SELECT * FROM t_dynamic where nmOrder <= 7 and nmDynId="
-				    + this.nmDynId + " and nmSkinId=" + this.nmSkinId
-				    + " order by nmOrder";
+						+ this.nmDynId
+						+ " and nmSkinId="
+						+ this.nmSkinId
+						+ " order by nmOrder";
 				ResultSet rs = this.ebEnt.dbEb.ExecuteSql(stSql);
 				rs.last();
 				int iRowMax = rs.getRow();
@@ -180,13 +186,14 @@ public class EbDynamic {
 						int iRowMax2 = rs2.getRow();
 
 						stReturn = stReturn
-						    + "<SCRIPT language='javascript'>\nvar giFieldMax=0;\nvar gaF = new Array(1);\n \n</script><table bgcolor=blue cellspacing=1 cellpadding=3>";
+								+ "<SCRIPT language='javascript'>\nvar giFieldMax=0;\nvar gaF = new Array(1);\n \n</script><table bgcolor=blue cellspacing=1 cellpadding=3>";
 
 						stReturn = stReturn + "<tr>";
 
 						for (int i = 1; i <= v.length; i++) {
-							stReturn = stReturn + "<td bgcolor=skyblue align=left><b>"
-							    + v[(i - 1)] + "</b></td>";
+							stReturn = stReturn
+									+ "<td bgcolor=skyblue align=left><b>"
+									+ v[(i - 1)] + "</b></td>";
 						}
 
 						stReturn = stReturn + "</tr>";
@@ -203,9 +210,11 @@ public class EbDynamic {
 
 							for (int i = 1; i <= v.length; i++) {
 								stReturn = stReturn + "<td " + stBg
-								    + "><a href='./index.jsp?a=20&iRecId="
-								    + rs2.getInt("RecId") + "&iSeqNr=" + rs2.getInt("nmSeqNr")
-								    + "&stHTML=uu'>" + rs2.getString(i) + "</td>";
+										+ "><a href='./index.jsp?a=20&iRecId="
+										+ rs2.getInt("RecId") + "&iSeqNr="
+										+ rs2.getInt("nmSeqNr")
+										+ "&stHTML=uu'>" + rs2.getString(i)
+										+ "</td>";
 							}
 
 							stReturn = stReturn + "</tr>";
@@ -216,7 +225,7 @@ public class EbDynamic {
 				}
 			} else {
 				this.stError = (this.stError + "<BR>ERROR getTOC: db " + iDbId
-				    + " not found: " + iAssert);
+						+ " not found: " + iAssert);
 			}
 		} catch (Exception e) {
 			this.stError = (this.stError + "<BR>ERROR getTOC: " + e);
@@ -254,19 +263,20 @@ public class EbDynamic {
 				}
 
 				stHeader = stHeader
-				    + rsFields.getString("stDbFieldName").replace("_", " ");
+						+ rsFields.getString("stDbFieldName").replace("_", " ");
 
 				if (rsFields.getInt("nmDataType") == 9) {
-					stSelect = stSelect + " c" + iChoice + ".stChoiceValueShort as "
-					    + rsFields.getString("stDbFieldName");
+					stSelect = stSelect + " c" + iChoice
+							+ ".stChoiceValueShort as "
+							+ rsFields.getString("stDbFieldName");
 					if (!stFrom.equals("")) {
 						stFrom = stFrom + ",";
 						stJoin = stJoin + " and ";
 					}
 
 					stFrom = stFrom + " teb_choices c" + iChoice;
-					stJoin = stJoin + rsFields.getString("stDbFieldName") + " = c"
-					    + iChoice + ".RecId ";
+					stJoin = stJoin + rsFields.getString("stDbFieldName")
+							+ " = c" + iChoice + ".RecId ";
 					iChoice++;
 				} else {
 					stSelect = stSelect + rsFields.getString("stDbFieldName");
@@ -286,9 +296,9 @@ public class EbDynamic {
 
 					stFrom = stFrom + rsFields.getString("stTabName");
 					stJoin = stJoin + stMain + ".RecId="
-					    + rsFields.getString("stTabName") + ".RecId and ";
+							+ rsFields.getString("stTabName") + ".RecId and ";
 					stJoin = stJoin + stMain + ".nmSeqNr="
-					    + rsFields.getString("stTabName") + ".nmSeqNr ";
+							+ rsFields.getString("stTabName") + ".nmSeqNr ";
 				}
 			}
 
@@ -297,7 +307,7 @@ public class EbDynamic {
 		}
 
 		stReturn[0] = (stSelect + "," + stMain + ".RecId," + stMain
-		    + ".nmSeqNr  from " + stMain + "," + stFrom + " where " + stJoin);
+				+ ".nmSeqNr  from " + stMain + "," + stFrom + " where " + stJoin);
 		stReturn[1] = stHeader;
 		return stReturn;
 	}
@@ -315,12 +325,13 @@ public class EbDynamic {
 		try {
 			String[] astF = stDbName.split("\\|");
 			String stTemp = this.ebEnt.dbEb
-			    .ExecuteSql1("select nmDbId from t_databases where nmServerId = "
-			        + astF[0] + " and stDbName = \"" + astF[1] + "\" ");
+					.ExecuteSql1("select nmDbId from t_databases where nmServerId = "
+							+ astF[0] + " and stDbName = \"" + astF[1] + "\" ");
 
 			iDbId = Integer.parseInt(stTemp);
 		} catch (Exception e) {
-			this.stError = (this.stError + "<BR>ERROR: resetEbDyn " + stDbName + ": " + e);
+			this.stError = (this.stError + "<BR>ERROR: resetEbDyn " + stDbName
+					+ ": " + e);
 		}
 		return assertDb(iDbId);
 	}
@@ -335,7 +346,7 @@ public class EbDynamic {
 				}
 
 				stSql = "SELECT * FROM t_databases d, t_server s where d.nmServerId=s.nmServerId and d.nmDbId="
-				    + iDbId;
+						+ iDbId;
 				ResultSet rs = this.ebEnt.dbEb.ExecuteSql(stSql);
 				if (rs != null) {
 					iReturn = 0;
@@ -344,10 +355,12 @@ public class EbDynamic {
 						rs.absolute(1);
 						this.stDynDbName = rs.getString("stDbName");
 						this.iDynDbId = iDbId;
-						this.ebEnt.dbDyn = new EbDatabase(rs.getInt("nmDbType"),
-						    rs.getString("stServerIp"), rs.getString("stUser"),
-						    rs.getString("stPassword"), this.stDynDbName,
-						    rs.getString("stConnectString"));
+						this.ebEnt.dbDyn = new EbDatabase(
+								rs.getInt("nmDbType"),
+								rs.getString("stServerIp"),
+								rs.getString("stUser"),
+								rs.getString("stPassword"), this.stDynDbName,
+								rs.getString("stConnectString"));
 						iReturn = 1;
 					}
 				}

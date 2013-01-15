@@ -17,12 +17,12 @@ class UDPServer {
 		while (true) {
 
 			DatagramPacket receive_packet = new DatagramPacket(receive_data,
-			    receive_data.length);
+					receive_data.length);
 
 			server_socket.receive(receive_packet);
 
 			String data = new String(receive_packet.getData(), 0, 0,
-			    receive_packet.getLength());
+					receive_packet.getLength());
 
 			InetAddress IPAddress = receive_packet.getAddress();
 
@@ -31,8 +31,8 @@ class UDPServer {
 			if (data.equals("q") || data.equals("Q"))
 				break;
 			else
-				System.out.println("( " + IPAddress + " , " + recv_port + " ) said :"
-				    + data);
+				System.out.println("( " + IPAddress + " , " + recv_port
+						+ " ) said :" + data);
 
 		}
 	}

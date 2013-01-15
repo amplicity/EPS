@@ -75,7 +75,8 @@ public class EbCraigsList {
 					stReturn += "<BR><b>" + stTitle + "</b><br>";
 					String[] astEMail = new String[100];
 					int iECount = 0;
-					while (iAt < stTemp.length() && (iAt = stTemp.indexOf("@", iAt)) > 30) {
+					while (iAt < stTemp.length()
+							&& (iAt = stTemp.indexOf("@", iAt)) > 30) {
 						iDot = stTemp.indexOf(".", iAt);
 						if (iDot > iAt && (iDot - iAt) < 25) {
 							iBeg = 0;
@@ -110,8 +111,9 @@ public class EbCraigsList {
 								}
 							}
 							iEnd = 0;
-							for (int i = 0; i < 10 && (iDot + i) < stTemp.length()
-							    && iEnd == 0; i++) {
+							for (int i = 0; i < 10
+									&& (iDot + i) < stTemp.length()
+									&& iEnd == 0; i++) {
 								char ch = stTemp.charAt(iDot + i);
 								switch (ch) {
 								case '\n':
@@ -142,11 +144,17 @@ public class EbCraigsList {
 								}
 							}
 							if (iBeg > 0 && iEnd > iBeg) {
-								astEMail[iECount] = stTemp.substring(iBeg, iEnd);
-								if (astEMail[iECount].charAt(astEMail[iECount].length() - 1) == '.'
-								    || astEMail[iECount].charAt(astEMail[iECount].length() - 1) == ',') {
-									astEMail[iECount] = astEMail[iECount].substring(0,
-									    astEMail[iECount].length() - 1);
+								astEMail[iECount] = stTemp
+										.substring(iBeg, iEnd);
+								if (astEMail[iECount].charAt(astEMail[iECount]
+										.length() - 1) == '.'
+										|| astEMail[iECount]
+												.charAt(astEMail[iECount]
+														.length() - 1) == ',') {
+									astEMail[iECount] = astEMail[iECount]
+											.substring(
+													0,
+													astEMail[iECount].length() - 1);
 								}
 								stReturn += "<BR>" + astEMail[iECount];
 								iECount++;
@@ -155,8 +163,10 @@ public class EbCraigsList {
 						iAt += 10; // need a min distance
 					}
 
-					stReturn += "</td><td>" + rs.getString("nmLength") + "</td>";
-					// stReturn += "<td>" + rs.getString("stWebContent") + "</td>";
+					stReturn += "</td><td>" + rs.getString("nmLength")
+							+ "</td>";
+					// stReturn += "<td>" + rs.getString("stWebContent") +
+					// "</td>";
 
 					// Sending email
 					String stEMail = "";
@@ -167,14 +177,18 @@ public class EbCraigsList {
 					}
 					if (stEMail.equals("") && iECount > 0)
 						stEMail = astEMail[0];
-					stReturn += "<td bgcolor=skyblue valign=top>" + stEMail + "</td>";
+					stReturn += "<td bgcolor=skyblue valign=top>" + stEMail
+							+ "</td>";
 					this.ebEnt.dbEnterprise
-					    .ExecuteUpdate("update X25WebSpider set nmAnalyzeCount=nmAnalyzeCount+1, "
-					        + "stEmails="
-					        + this.ebEnt.dbEnterprise.fmtDbString(stEMail)
-					        + ", stDescription = "
-					        + this.ebEnt.dbEnterprise.fmtDbString(stTitle)
-					        + " where nmSpiderId=" + rs.getString("nmSpiderId"));
+							.ExecuteUpdate("update X25WebSpider set nmAnalyzeCount=nmAnalyzeCount+1, "
+									+ "stEmails="
+									+ this.ebEnt.dbEnterprise
+											.fmtDbString(stEMail)
+									+ ", stDescription = "
+									+ this.ebEnt.dbEnterprise
+											.fmtDbString(stTitle)
+									+ " where nmSpiderId="
+									+ rs.getString("nmSpiderId"));
 					stReturn += "</tr>";
 				}
 				stReturn += "</table>";
@@ -212,12 +226,12 @@ public class EbCraigsList {
 			}
 		} else {
 			stReturn = "<center><h1>CraigsList Marketing Home Page</h1><table border=1>"
-			    + "<tr><td valign=top>TODO";
+					+ "<tr><td valign=top>TODO";
 
 			stReturn += "</td><td valign=top><h1>Available Processes</h1><ul><br>";
 			stReturn += "<li> <a href='./?"
-			    + this.ebEnt.ebUd.request.getQueryString()
-			    + "&pid=1'>Read all Gigs</a>";
+					+ this.ebEnt.ebUd.request.getQueryString()
+					+ "&pid=1'>Read all Gigs</a>";
 			stReturn += "</ul></td></tr></table>";
 		}
 		return stReturn;
@@ -226,19 +240,20 @@ public class EbCraigsList {
 	public String readCL(int iType) {
 		String stReturn = "";
 		String[] astGigs = {
-		    // "/ccc/", "/hhh/", "/sss/", "/bbb/", "/jjj/", "/ggg/"
-		    "/jjj/", "/ggg/" };
+				// "/ccc/", "/hhh/", "/sss/", "/bbb/", "/jjj/", "/ggg/"
+				"/jjj/", "/ggg/" };
 
 		try {
 			if (iType == 1) // Read ALL
 			{
-				String[] astValues = doParse("http://losangeles.craigslist.org/", 0); // From
-																																							// the
-																																							// ROOT
-																																							// -
-																																							// get
-																																							// US
-																																							// CITIES
+				String[] astValues = doParse(
+						"http://losangeles.craigslist.org/", 0); // From
+																	// the
+																	// ROOT
+																	// -
+																	// get
+																	// US
+																	// CITIES
 				stReturn += astValues[0];
 				String[] astUs = astValues[1].split("\n");
 				stReturn += "<table><tr><th>#</th><th>City</th><th>Gigs</th><th>Jobs</th></tr>";
@@ -246,9 +261,10 @@ public class EbCraigsList {
 					String[] astUrl = astUs[iC].split("\t");
 					if (astUrl != null && astUrl.length > 1) {
 						stReturn += "<tr>";
-						stReturn += "<td valign=top align=right>" + iC + "</td>";
+						stReturn += "<td valign=top align=right>" + iC
+								+ "</td>";
 						stReturn += "<td valign=top align=left>" + astUrl[2]
-						    + "</td><td valign=top align=left>";
+								+ "</td><td valign=top align=left>";
 
 						astValues = doParse(astUrl[1], 0);
 						// here is where we should loop for all other cities
@@ -257,38 +273,68 @@ public class EbCraigsList {
 							String[] astUrlOther = astOther[iO].split("\t");
 							if (astUrlOther != null && astUrlOther.length > 1) {
 								stReturn += "<tr>";
-								stReturn += "<td valign=top align=right>" + iC + "</td>";
-								stReturn += "<td valign=top align=right>" + iO + "</td>";
-								stReturn += "<td valign=top align=left>" + astUrlOther[2]
-								    + "</td><td valign=top align=left>";
+								stReturn += "<td valign=top align=right>" + iC
+										+ "</td>";
+								stReturn += "<td valign=top align=right>" + iO
+										+ "</td>";
+								stReturn += "<td valign=top align=left>"
+										+ astUrlOther[2]
+										+ "</td><td valign=top align=left>";
 
-								for (int iG = 0; astGigs != null && iG < astGigs.length; iG++) {
-									stReturn += "<br>" + astUrlOther[2] + astGigs[iG];
-									String[] astValues2 = doParse(astUrlOther[1].trim()
-									    + astGigs[iG], 0);
-									String[] astList1 = astValues2[5].split("\n");
+								for (int iG = 0; astGigs != null
+										&& iG < astGigs.length; iG++) {
+									stReturn += "<br>" + astUrlOther[2]
+											+ astGigs[iG];
+									String[] astValues2 = doParse(
+											astUrlOther[1].trim() + astGigs[iG],
+											0);
+									String[] astList1 = astValues2[5]
+											.split("\n");
 									for (int iL = 0; iL < astList1.length; iL++) {
-										String[] astU1 = astList1[iL].split("\t");
+										String[] astU1 = astList1[iL]
+												.split("\t");
 										if (astU1 != null && astU1.length > 1) {
 											String[] astValues3 = null;
-											if (astU1[1].trim().substring(0, 7).equals("http://"))
-												astValues3 = doParse(astU1[1].trim(), 1);
+											if (astU1[1].trim().substring(0, 7)
+													.equals("http://"))
+												astValues3 = doParse(
+														astU1[1].trim(), 1);
 											else {
-												if (astU1[1].trim().substring(0, 1).equals("/"))
+												if (astU1[1].trim()
+														.substring(0, 1)
+														.equals("/"))
 													astValues3 = doParse(
-													    astUrlOther[1].trim() + astU1[1].trim(), 1);
+															astUrlOther[1]
+																	.trim()
+																	+ astU1[1]
+																			.trim(),
+															1);
 												else
-													astValues3 = doParse(astUrlOther[1].trim() + "/"
-													    + astU1[1].trim(), 1);
+													astValues3 = doParse(
+															astUrlOther[1]
+																	.trim()
+																	+ "/"
+																	+ astU1[1]
+																			.trim(),
+															1);
 											}
-											if (astValues3[6].indexOf("already") < 0) {
-												stReturn += "<br>&nbsp;&nbsp;(" + iL + ") "
-												    + astUrl[1].trim() + astU1[1].trim();
-												stReturn += " &nbsp;: " + astValues3[6];
+											if (astValues3[6]
+													.indexOf("already") < 0) {
+												stReturn += "<br>&nbsp;&nbsp;("
+														+ iL + ") "
+														+ astUrl[1].trim()
+														+ astU1[1].trim();
+												stReturn += " &nbsp;: "
+														+ astValues3[6];
 											} else {
-												iL = astList1.length + 10; // indicate end. wont allow
-																									 // break; ????
-												break; // first already found, let's stop
+												iL = astList1.length + 10; // indicate
+																			// end.
+																			// wont
+																			// allow
+																			// break;
+																			// ????
+												break; // first already found,
+														// let's stop
 											}
 										}
 									}
@@ -317,8 +363,8 @@ public class EbCraigsList {
 		try {
 			if (iType == 1)
 				iCount = this.ebEnt.dbEnterprise
-				    .ExecuteSql1n("select count(*) as cnt from X25WebSpider where stUrl = \""
-				        + stUrl + "\" ");
+						.ExecuteSql1n("select count(*) as cnt from X25WebSpider where stUrl = \""
+								+ stUrl + "\" ");
 			if (iCount == 0) {
 				ParserGetter kit = new ParserGetter();
 				HTMLEditorKit.Parser parser = kit.getParser();
@@ -327,10 +373,11 @@ public class EbCraigsList {
 				// URL url = new URL(stUrl);
 				//
 				HttpTimeoutHandler xHTH = new HttpTimeoutHandler(15000); // timeout
-																																 // value in
-																																 // milliseconds
+																			// value
+																			// in
+																			// milliseconds
 				URL url = new URL((URL) null, stUrl, xHTH); // timeout value in
-																										// milliseconds
+															// milliseconds
 
 				// the next step is optional
 				// //CRASHES url.setURLStreamHandlerFactory(new
@@ -356,8 +403,8 @@ public class EbCraigsList {
 				aReturn[0] += "<hr>DONE parsing ";
 				aReturn[0] += "<hr><font size=1>" + cbOut.getString();
 				if (iType == 1) {
-					BufferedReader in1 = new BufferedReader(new InputStreamReader(
-					    theURLconn.getInputStream()));
+					BufferedReader in1 = new BufferedReader(
+							new InputStreamReader(theURLconn.getInputStream()));
 					String stContent = "";
 					String stLine = "";
 					while ((stLine = in1.readLine()) != null) {
@@ -366,15 +413,17 @@ public class EbCraigsList {
 					in1.close();
 					int nmStatus = 0;
 
-					if (stUrl.indexOf("cpg/") >= 0 || stUrl.indexOf("eng/") >= 0 ||
-					// stUrl.indexOf("mar/") >= 0 || // removed 2/10/2010 .. too many bad
-					// calls
-					    stUrl.indexOf("web/") >= 0)
+					if (stUrl.indexOf("cpg/") >= 0
+							|| stUrl.indexOf("eng/") >= 0 ||
+							// stUrl.indexOf("mar/") >= 0 || // removed
+							// 2/10/2010 .. too many bad
+							// calls
+							stUrl.indexOf("web/") >= 0)
 						nmStatus = 1;
 					else
 						nmStatus = 4;
-					logWebSpider(this.ebEnt.dbEnterprise, nmCompanyId, nmStatus, "cl",
-					    stContent, stContent.length());
+					logWebSpider(this.ebEnt.dbEnterprise, nmCompanyId,
+							nmStatus, "cl", stContent, stContent.length());
 					aReturn[6] = "" + stContent.length();
 				}
 			} else {
@@ -384,17 +433,20 @@ public class EbCraigsList {
 		} catch (InterruptedIOException e) {
 			System.out.println("<br>ERROR: doParse: timeout " + e);
 			aReturn[0] += "<br>ERROR: doParse: timeout " + e;
-			logWebSpider(this.ebEnt.dbEnterprise, nmCompanyId, 2, e.toString(), "", 0);
+			logWebSpider(this.ebEnt.dbEnterprise, nmCompanyId, 2, e.toString(),
+					"", 0);
 		} catch (IOException e) {
 			System.out.println("<br>ERROR: doParse: " + e);
 			aReturn[0] += "<br>ERROR: doParse: " + e;
 			aReturn[5] = cbOut.getHrefList();
-			logWebSpider(this.ebEnt.dbEnterprise, nmCompanyId, 2, e.toString(), "", 0);
+			logWebSpider(this.ebEnt.dbEnterprise, nmCompanyId, 2, e.toString(),
+					"", 0);
 		} catch (Exception e) {
 			System.out.println("<br>ERROR: doParse: " + e);
 			aReturn[0] += "<br>ERROR: doParse: " + e;
 			aReturn[5] = cbOut.getHrefList();
-			logWebSpider(this.ebEnt.dbEnterprise, nmCompanyId, 2, e.toString(), "", 0);
+			logWebSpider(this.ebEnt.dbEnterprise, nmCompanyId, 2, e.toString(),
+					"", 0);
 		}
 		return aReturn;
 	}
@@ -412,40 +464,40 @@ public class EbCraigsList {
 	}
 
 	public String logWebSpider(EbDatabase dbEnterprise, int nmCompanyId,
-	    int nmStatus, String stError, String stContent, int iLen) {
+			int nmStatus, String stError, String stContent, int iLen) {
 		String stReturn = "";
 		String stSql = "";
 
 		int nmSpiderId = dbEnterprise
-		    .ExecuteSql1n("select max(nmSpiderId) from X25WebSpider where stUrl=\""
-		        + this.stUrl + "\" ");
+				.ExecuteSql1n("select max(nmSpiderId) from X25WebSpider where stUrl=\""
+						+ this.stUrl + "\" ");
 		if (nmSpiderId <= 0) {
 			nmSpiderId = dbEnterprise
-			    .ExecuteSql1n("select max(nmSpiderId) from X25WebSpider ");
+					.ExecuteSql1n("select max(nmSpiderId) from X25WebSpider ");
 			nmSpiderId++;
 			stSql = "insert into X25WebSpider (nmSpiderId,nmStatus,stURL,nmLength,dtFirst,dtLast,nmCompanyId,stHrefList,stError,stWebContent) values"
-			    + "("
-			    + nmSpiderId
-			    + ","
-			    + nmStatus
-			    + ",\""
-			    + stUrl
-			    + "\","
-			    + iLen
-			    + ",now(),now(),"
-			    + nmCompanyId
-			    + ", "
-			    + dbEnterprise.fmtDbString(this.cbOut.getHrefList())
-			    + ", "
-			    + dbEnterprise.fmtDbString(stError)
-			    + ","
-			    + dbEnterprise.fmtDbString(stContent) + ") ";
+					+ "("
+					+ nmSpiderId
+					+ ","
+					+ nmStatus
+					+ ",\""
+					+ stUrl
+					+ "\","
+					+ iLen
+					+ ",now(),now(),"
+					+ nmCompanyId
+					+ ", "
+					+ dbEnterprise.fmtDbString(this.cbOut.getHrefList())
+					+ ", "
+					+ dbEnterprise.fmtDbString(stError)
+					+ ","
+					+ dbEnterprise.fmtDbString(stContent) + ") ";
 		} else {
 			stSql = "update X25WebSpider set dtLast=now(),nmStatus=" + nmStatus
-			    + ",nmLength= " + cbOut.getLength() + " ,nmCompanyId=" + nmCompanyId
-			    + ",stHrefList= "
-			    + dbEnterprise.fmtDbString(this.cbOut.getHrefList())
-			    + " where nmSpiderId= " + nmSpiderId;
+					+ ",nmLength= " + cbOut.getLength() + " ,nmCompanyId="
+					+ nmCompanyId + ",stHrefList= "
+					+ dbEnterprise.fmtDbString(this.cbOut.getHrefList())
+					+ " where nmSpiderId= " + nmSpiderId;
 		}
 		dbEnterprise.ExecuteUpdate(stSql);
 		return stReturn;
@@ -465,7 +517,7 @@ class Outliner2 extends HTMLEditorKit.ParserCallback {
 	private String stAll = "";
 	private String stLastHref = "";
 	private static String lineSeparator = System.getProperty("line.separator",
-	    "\r\n");
+			"\r\n");
 	private int iInHref = 0;
 	private int inH5 = 0;
 	private int inOtherCities = 0;
@@ -480,7 +532,7 @@ class Outliner2 extends HTMLEditorKit.ParserCallback {
 
 	@Override
 	public void handleStartTag(HTML.Tag tag, MutableAttributeSet attributes,
-	    int position) {
+			int position) {
 		if (tag == HTML.Tag.H5 || tag == HTML.Tag.H4)
 			inH5 = 1;
 
@@ -616,8 +668,8 @@ class OutString2 {
 		 * stAdd.indexOf("mar/") >= 0 || stAdd.indexOf("web/") >= 0 )
 		 */
 		if (stAdd.indexOf("ccc/") >= 0 || stAdd.indexOf("hhh/") >= 0
-		    || stAdd.indexOf("sss/") >= 0 || stAdd.indexOf("bbb/") >= 0
-		    || stAdd.indexOf("jjj/") >= 0 || stAdd.indexOf("ggg/") >= 0)
+				|| stAdd.indexOf("sss/") >= 0 || stAdd.indexOf("bbb/") >= 0
+				|| stAdd.indexOf("jjj/") >= 0 || stAdd.indexOf("ggg/") >= 0)
 			stGigsHrefList += stAdd;
 	}
 

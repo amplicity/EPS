@@ -15,7 +15,7 @@ class UDPClient {
 		send_data = stSend.getBytes();
 
 		DatagramPacket send_packet = new DatagramPacket(send_data,
-		    send_data.length, IPAddress, iPort);
+				send_data.length, IPAddress, iPort);
 
 		client_socket.send(send_packet);
 

@@ -42,12 +42,12 @@ public class EbReport {
 	}
 
 	public String getReport(HttpServletRequest request,
-	    HttpServletResponse response) {
+			HttpServletResponse response) {
 		String stReturn = "";
 		String stName = "report1.jrxml";
 		try {
 			ResultSet rs = ebEnt.dbEnterprise
-			    .ExecuteSql("select * from X25Person limit 10");
+					.ExecuteSql("select * from X25Person limit 10");
 			Map fillParams = new HashMap();
 			jasperReport(stName, "text/html", rs, fillParams, request, response);
 		} catch (Exception e) {
@@ -58,32 +58,33 @@ public class EbReport {
 
 	/**
 	 * <p>
-	 * Generate the specified report, in the specified output format, based on the
-	 * specified data.
+	 * Generate the specified report, in the specified output format, based on
+	 * the specified data.
 	 * </p>
 	 * 
 	 * @param name
-	 *          Report name to be rendered
+	 *            Report name to be rendered
 	 * @param type
-	 *          Content type of the requested report ("application/pdf" or
-	 *          "text/html")
+	 *            Content type of the requested report ("application/pdf" or
+	 *            "text/html")
 	 * @param data
-	 *          <code>ResultSet</code> containing the data to report
+	 *            <code>ResultSet</code> containing the data to report
 	 * @param params
-	 *          <code>Map</code> of additional report parameters
+	 *            <code>Map</code> of additional report parameters
 	 * 
 	 * @exception IllegalArgumentException
-	 *              if the specified content type is not recognized
+	 *                if the specified content type is not recognized
 	 * @exception IllegalArgumentException
-	 *              if no compiled report definition for the specified name can be
-	 *              found
+	 *                if no compiled report definition for the specified name
+	 *                can be found
 	 */
 	public void jasperReport(String name, String type, ResultSet data,
-	    Map params, HttpServletRequest request, HttpServletResponse response) {
+			Map params, HttpServletRequest request, HttpServletResponse response) {
 		// Validate that we recognize the report type
 		// before potentially wasting time filling the
 		// report with data
-		String[] VALID_TYPES = { "application/pdf", "text/html", "application/rtf" };
+		String[] VALID_TYPES = { "application/pdf", "text/html",
+				"application/rtf" };
 		boolean found = false;
 		for (int i = 0; i < VALID_TYPES.length; i++) {
 			if (VALID_TYPES[i].equals(type)) {
@@ -135,21 +136,22 @@ public class EbReport {
 			response.setContentType(type);
 			if ("application/pdf".equals(type)) {
 				exporter = new JRPdfExporter();
-				exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
+				exporter.setParameter(JRExporterParameter.JASPER_PRINT,
+						jasperPrint);
 				exporter.setParameter(JRExporterParameter.OUTPUT_STREAM,
-				    response.getOutputStream());
+						response.getOutputStream());
 			} else if ("text/html".equals(type)) {
 				exporter = new JRHtmlExporter();
-				exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
+				exporter.setParameter(JRExporterParameter.JASPER_PRINT,
+						jasperPrint);
 				exporter.setParameter(JRExporterParameter.OUTPUT_WRITER,
-				    response.getWriter());
+						response.getWriter());
 				// Make images available for the HTML output
-				request.getSession()
-				    .setAttribute(
-				        BaseHttpServlet.DEFAULT_JASPER_PRINT_SESSION_ATTRIBUTE,
-				        jasperPrint);
-				exporter
-				    .setParameter(JRHtmlExporterParameter.IMAGES_MAP, new HashMap());
+				request.getSession().setAttribute(
+						BaseHttpServlet.DEFAULT_JASPER_PRINT_SESSION_ATTRIBUTE,
+						jasperPrint);
+				exporter.setParameter(JRHtmlExporterParameter.IMAGES_MAP,
+						new HashMap());
 				// The following statement requires mapping /image
 				// to the imageServlet in the web.xml.
 				//
@@ -160,7 +162,7 @@ public class EbReport {
 				// don't incur the extra overhead associated with
 				// with a JSF request for a non-JSF entity.
 				exporter.setParameter(JRHtmlExporterParameter.IMAGES_URI,
-				    request.getContextPath() + "/image?image=");
+						request.getContextPath() + "/image?image=");
 			}
 		} catch (RuntimeException e) {
 			this.stError += "<BR>ERROR: " + e;

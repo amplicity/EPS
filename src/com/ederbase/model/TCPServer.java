@@ -23,7 +23,8 @@ public class TCPServer {
 			System.out.print("Server has connected on port: " + iPort + " !\n");
 			out = new PrintWriter(skt.getOutputStream(), true);
 		} catch (Exception e) {
-			System.out.print("Whoops! It didn't workon port: " + iPort + " !" + e);
+			System.out.print("Whoops! It didn't workon port: " + iPort + " !"
+					+ e);
 		}
 	}
 

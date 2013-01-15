@@ -42,7 +42,7 @@ public class EbEnterprise {
 	public ResultSet rsA = null;
 
 	public EbEnterprise(int nmSkinId, int nmLanguage, String stEbName,
-	    String stEbEnterpriseName, String stEbCommon) {
+			String stEbEnterpriseName, String stEbCommon) {
 		String stSql = "";
 		this.nmSkinId = nmSkinId;
 		this.nmLanguage = nmLanguage;
@@ -51,16 +51,18 @@ public class EbEnterprise {
 
 			if (this.dbEb == null) {
 				/*
-				 * this.dbEb = new EbDatabase(0, "localhost", "root", "27225643",
-				 * stEbName, ""); this.dbEnterprise = new EbDatabase(0, "localhost",
-				 * "root", "27225643", stEbEnterpriseName, ""); this.dbCommon = new
-				 * EbDatabase(0, "localhost", "root", "27225643", stEbCommon, "");
+				 * this.dbEb = new EbDatabase(0, "localhost", "root",
+				 * "27225643", stEbName, ""); this.dbEnterprise = new
+				 * EbDatabase(0, "localhost", "root", "27225643",
+				 * stEbEnterpriseName, ""); this.dbCommon = new EbDatabase(0,
+				 * "localhost", "root", "27225643", stEbCommon, "");
 				 */
-				this.dbEb = new EbDatabase(0, "localhost", "root", "", stEbName, "");
+				this.dbEb = new EbDatabase(0, "localhost", "root", "",
+						stEbName, "");
 				this.dbEnterprise = new EbDatabase(0, "localhost", "root", "",
-				    stEbEnterpriseName, "");
-				this.dbCommon = new EbDatabase(0, "localhost", "root", "", stEbCommon,
-				    "");
+						stEbEnterpriseName, "");
+				this.dbCommon = new EbDatabase(0, "localhost", "root", "",
+						stEbCommon, "");
 				this.ebUd = new EbUserData(this);
 				this.ebSec = new EbSecurity(this);
 				this.ebNorm = new EbNormalized(this);
@@ -70,12 +72,13 @@ public class EbEnterprise {
 					this.rsEbCompany.absolute(1);
 					this.nmMainApp = this.rsEbCompany.getInt("nmMainApp");
 					stSql = "select * from t_application s where nmAppId='"
-					    + this.nmMainApp + "' ";
+							+ this.nmMainApp + "' ";
 					this.rsApp = this.dbEb.ExecuteSql(stSql);
 					this.rsApp.absolute(1);
 					this.nmDynId = this.rsApp.getInt("nmDynId");
 				} catch (Exception e) {
-					this.stError = (this.stError + "<br>ERROR ebDyn:  " + stSql + ": " + e);
+					this.stError = (this.stError + "<br>ERROR ebDyn:  " + stSql
+							+ ": " + e);
 				}
 			}
 		} catch (Exception e) {
@@ -101,7 +104,7 @@ public class EbEnterprise {
 	}
 
 	public String processApplication(HttpServletRequest request,
-	    HttpServletResponse response) {
+			HttpServletResponse response) {
 		String stHTML = "";
 		int nmApp = 0;
 		int iSel = 0;
@@ -110,18 +113,18 @@ public class EbEnterprise {
 			String stUnsubscribe = request.getParameter("v");
 
 			String stSql = "SELECT * FROM t_application a left join t_security sec on a.nmSecurity=sec.nmSecurityId where nmAppMain="
-			    + this.rsEbCompany.getString("nmMainApp")
-			    + " order by nmAppType,nmAppParent,nmOrder";
+					+ this.rsEbCompany.getString("nmMainApp")
+					+ " order by nmAppType,nmAppParent,nmOrder";
 			this.rsA = this.dbEb.ExecuteSql(stSql);
 			if (this.rsA != null) {
 				this.rsA.last();
 				int iMaxA = this.rsA.getRow();
 				if (iMaxA >= 1) {
 					this.ebMb = new EbMenuBar(
-					    this.rsEbCompany.getString("stCompanyName"),
-					    this.rsEbCompany.getString("stLogo"),
-					    this.rsEbCompany.getString("stCompanyName"),
-					    this.ebUd.getLoginName(), this.rsA);
+							this.rsEbCompany.getString("stCompanyName"),
+							this.rsEbCompany.getString("stLogo"),
+							this.rsEbCompany.getString("stCompanyName"),
+							this.ebUd.getLoginName(), this.rsA);
 					if ((stUnsubscribe != null) && (stUnsubscribe.length() > 5)) {
 						stHTML = unSubscribe(EBDecrypt(stUnsubscribe));
 					} else {
@@ -134,19 +137,21 @@ public class EbEnterprise {
 									this.ebUd.setAppId(myHome);
 								}
 							}
-							if (this.rsA.getInt("nmAppId") == this.ebUd.getAppId()) {
+							if (this.rsA.getInt("nmAppId") == this.ebUd
+									.getAppId()) {
 								nmApp = iA;
 								if (this.ebSec.checkSecurity(this.rsA) > 0) {
 									Calendar cal1 = Calendar.getInstance();
 									long lTime1 = cal1.getTimeInMillis();
 									EbCrm ebCrm = new EbCrm();
 									EbMail ebMmail = new EbMail(this);
-									EbCampaignManager ebCamp = new EbCampaignManager(this,
-									    request);
+									EbCampaignManager ebCamp = new EbCampaignManager(
+											this, request);
 									EbTwitter ebTwitter = new EbTwitter(this);
 									switch (this.rsA.getInt("nmProcessId")) {
 									case 1:
-										stHTML = this.rsA.getString("stContent");
+										stHTML = this.rsA
+												.getString("stContent");
 										break;
 									case 1000:
 										if (this.ebUd.getLoginId() > 0)
@@ -157,29 +162,33 @@ public class EbEnterprise {
 										stHTML = createMyHome(this.rsA);
 										break;
 									case 1001:
-										stHTML = getTOC(this.rsA.getInt("nmMainDb"));
+										stHTML = getTOC(this.rsA
+												.getInt("nmMainDb"));
 										break;
 									case 1002:
 										stHTML = "<br>TODO Dynamic Data getHTML ";
 										break;
 									case 2000:
-										stHTML = "~~" + this.rsA.getString("stUrl");
+										stHTML = "~~"
+												+ this.rsA.getString("stUrl");
 										return stHTML;
 									case 1900:
 										stHTML = createMyHome(this.rsA);
 										break;
 									case 2001:
-										EbMarketingSpider ebSpider = new EbMarketingSpider(this,
-										    request);
+										EbMarketingSpider ebSpider = new EbMarketingSpider(
+												this, request);
 										stHTML = stHTML + ebSpider.doSpider(1);
 										this.stError += ebSpider.getError();
 										break;
 									case 2003:
-										stHTML = stHTML + ebCamp.campainManager(1);
+										stHTML = stHTML
+												+ ebCamp.campainManager(1);
 										this.stError += ebCamp.getError();
 										break;
 									case 2004:
-										stHTML = stHTML + ebCamp.campainManager(20);
+										stHTML = stHTML
+												+ ebCamp.campainManager(20);
 										this.stError += ebCamp.getError();
 										break;
 									case 2005:
@@ -189,43 +198,54 @@ public class EbEnterprise {
 									case 2011:
 										if (getState("b", request) > 1)
 											break;
-										stHTML = "~~" + this.rsA.getString("stUrl");
+										stHTML = "~~"
+												+ this.rsA.getString("stUrl");
 										return stHTML;
 									case 2010:
-										stHTML = stHTML + ebCrm.doSearch(this, request);
+										stHTML = stHTML
+												+ ebCrm.doSearch(this, request);
 										break;
 									case 2012:
-										stHTML = stHTML + ebCrm.emailBulkReply(this, request);
+										stHTML = stHTML
+												+ ebCrm.emailBulkReply(this,
+														request);
 										break;
 									case 2013:
-										stHTML = stHTML + ebCrm.emailJunk(this, request);
+										stHTML = stHTML
+												+ ebCrm.emailJunk(this, request);
 										break;
 									case 2018:
-										stHTML = stHTML + ebTwitter.processMarketing(0);
+										stHTML = stHTML
+												+ ebTwitter.processMarketing(0);
 										this.stError += ebTwitter.getError();
 										break;
 									case 2019:
-										EbCraigsList ebCl = new EbCraigsList(this);
-										stHTML = stHTML + ebCl.processCraigsList(1);
+										EbCraigsList ebCl = new EbCraigsList(
+												this);
+										stHTML = stHTML
+												+ ebCl.processCraigsList(1);
 										this.stError += ebCl.getError();
 										break;
 									case 2021:
-										stHTML = stHTML + "<BR>Reports Disabled";
+										stHTML = stHTML
+												+ "<BR>Reports Disabled";
 
 										break;
 									case 1901:
 									case 1902:
 									case 1903:
-										stHTML = this.ebAdmin.getAdmin(this.rsA, request);
+										stHTML = this.ebAdmin.getAdmin(
+												this.rsA, request);
 										this.stError += this.ebAdmin.getError();
 										break;
 									}
 									stHTML = "<BR>WARNING: no application found for: "
-									    + this.rsA.getInt("nmProcessId");
+											+ this.rsA.getInt("nmProcessId");
 
 									Calendar cal2 = Calendar.getInstance();
 									long lTime2 = cal2.getTimeInMillis();
-									stHTML = stHTML + "<br>Duration (ms): " + (lTime2 - lTime1);
+									stHTML = stHTML + "<br>Duration (ms): "
+											+ (lTime2 - lTime1);
 								} else if (this.ebUd.getDebugScript() > 0) {
 									this.stError += "<br>ERROR APP: security failure";
 								}
@@ -301,21 +321,23 @@ public class EbEnterprise {
 		String stReturn = "";
 		try {
 			stReturn = stReturn
-			    + "<hr><form method=post><table border=0><tr><th colspan=2>Login</th></trh>";
+					+ "<hr><form method=post><table border=0><tr><th colspan=2>Login</th></trh>";
 			stReturn = stReturn
-			    + "<tr><td align=right>Enter your email: </td><td align=left><input type=text name=un size=30 value=\""
-			    + stEMail + "\"></td></tr>";
+					+ "<tr><td align=right>Enter your email: </td><td align=left><input type=text name=un size=30 value=\""
+					+ stEMail + "\"></td></tr>";
 			stReturn = stReturn
-			    + "<tr><td align=right>Enter your password: </td><td align=left><input type=password name=p size=10></td></tr>";
+					+ "<tr><td align=right>Enter your password: </td><td align=left><input type=password name=p size=10></td></tr>";
 			stReturn = stReturn
-			    + "<tr><td align=center colspan=2><input type=submit name=Login value='Login'></td></tr>";
+					+ "<tr><td align=center colspan=2><input type=submit name=Login value='Login'></td></tr>";
 			stReturn = stReturn + "</table></form>";
 			stReturn = stReturn
-			    + "<br>"
-			    + this.dbEb.ExecuteSql1(new StringBuilder()
-			        .append("SELECT stValue FROM t_setting where nmCid=")
-			        .append(this.rsEbCompany.getString("RecId"))
-			        .append(" and nmSeq=1 and stField='defmsg'").toString());
+					+ "<br>"
+					+ this.dbEb
+							.ExecuteSql1(new StringBuilder()
+									.append("SELECT stValue FROM t_setting where nmCid=")
+									.append(this.rsEbCompany.getString("RecId"))
+									.append(" and nmSeq=1 and stField='defmsg'")
+									.toString());
 		} catch (Exception e) {
 			this.stError = (this.stError + "<br>ERROR ebDyn: : " + e);
 		}
@@ -358,7 +380,8 @@ public class EbEnterprise {
 				fpIn.close();
 			} catch (Exception e) {
 				System.err
-				    .println("File input error: /etc/ederbase/ederbase.conf ERR: " + e);
+						.println("File input error: /etc/ederbase/ederbase.conf ERR: "
+								+ e);
 			}
 		}
 	}
@@ -370,8 +393,9 @@ public class EbEnterprise {
 		try {
 			this.stError = "";
 			String stSql = "select * from t_dynamic y where y.nmDynId="
-			    + this.nmDynId + " and y.nmSkinId=" + this.nmSkinId
-			    + " and y.nmLanguage=" + this.nmLanguage + " order by y.nmOrder";
+					+ this.nmDynId + " and y.nmSkinId=" + this.nmSkinId
+					+ " and y.nmLanguage=" + this.nmLanguage
+					+ " order by y.nmOrder";
 			ResultSet rsD = this.dbEb.ExecuteSql(stSql);
 			if (rsD != null) {
 				rsD.last();
@@ -399,32 +423,34 @@ public class EbEnterprise {
 							break;
 						case 30:
 							stReturn = stReturn
-							    + this.ebMb.makeMenuBar(rsD.getString("stContent"));
+									+ this.ebMb.makeMenuBar(rsD
+											.getString("stContent"));
 							break;
 						case 40:
 						case 50:
 							break;
 						default:
-							stReturn = stReturn + "<hr>TODO:nmContentType " + nmContentType
-							    + "<hr>";
+							stReturn = stReturn + "<hr>TODO:nmContentType "
+									+ nmContentType + "<hr>";
 						}
 					}
 				} else {
 					this.stError = (this.stError + "<br>ERROR fmtHTML: NO DYN " + stSql);
 				}
 			} else {
-				this.stError = (this.stError + "<br>ERROR fmtHTML: " + stSql + " eb: " + this.dbEb
-				    .getError());
+				this.stError = (this.stError + "<br>ERROR fmtHTML: " + stSql
+						+ " eb: " + this.dbEb.getError());
 			}
 		} catch (Exception e) {
 			this.stError = (this.stError + "<br>ERROR fmtHTML: " + e);
 		}
 		if (!this.stError.equals("")) {
-			stReturn = stReturn + "<hr>FATAL ERROR1: " + this.stError + " err: "
-			    + stErr + "<hr>" + stHTML;
+			stReturn = stReturn + "<hr>FATAL ERROR1: " + this.stError
+					+ " err: " + stErr + "<hr>" + stHTML;
 		}
 		if (stReturn.equals("")) {
-			stReturn = stReturn + "<hr>FATAL ERROR2: " + stErr + "<hr>" + stHTML;
+			stReturn = stReturn + "<hr>FATAL ERROR2: " + stErr + "<hr>"
+					+ stHTML;
 		}
 		return stReturn;
 	}
@@ -507,19 +533,20 @@ public class EbEnterprise {
 
 	String unSubscribe(String stEMail) {
 		String stReturn = "<html><body><br>&nbsp;<br>&nbsp;<p>Sorry to see you leave: <b>"
-		    + stEMail;
+				+ stEMail;
 		stEMail = this.dbEnterprise.fmtDbString(stEMail);
 		if (this.dbEnterprise
-		    .ExecuteSql1n("select count(*) from X25DoNotCall where stValue="
-		        + stEMail) <= 0) {
+				.ExecuteSql1n("select count(*) from X25DoNotCall where stValue="
+						+ stEMail) <= 0) {
 			String stSql = "insert into X25DoNotCall (stValue, nmFlags, dtEntered ) values("
-			    + stEMail + ",2,now())";
+					+ stEMail + ",2,now())";
 			this.dbEnterprise.ExecuteUpdate(stSql);
 		}
 		this.dbEnterprise
-		    .ExecuteUpdate("update X25User set nmPriviledge=0 where stEMail="
-		        + stEMail);
-		stReturn = stReturn + "</b><br>You have been removed.<br></body></html>";
+				.ExecuteUpdate("update X25User set nmPriviledge=0 where stEMail="
+						+ stEMail);
+		stReturn = stReturn
+				+ "</b><br>You have been removed.<br></body></html>";
 		return stReturn;
 	}
 

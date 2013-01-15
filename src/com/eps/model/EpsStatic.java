@@ -25,10 +25,12 @@ public class EpsStatic {
 
 		for (i = 0; i < iLen; i++) {
 			if ((i % 16) == 0) {
-				stReturn += "<td>" + stText + "</td></tr><tr><td align=right>" + i;
+				stReturn += "<td>" + stText + "</td></tr><tr><td align=right>"
+						+ i;
 				stText = "";
 			}
-			stReturn += "<td>" + Integer.toHexString((pMsg[i] & 0xFF)) + "</td>";
+			stReturn += "<td>" + Integer.toHexString((pMsg[i] & 0xFF))
+					+ "</td>";
 			if (pMsg[i] > ' ' && pMsg[i] <= 'z') {
 				byte[] byteArray = new byte[1];
 				byteArray[0] = pMsg[i];

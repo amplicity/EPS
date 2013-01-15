@@ -25,16 +25,16 @@ public class EbCrm {
 			if ((astJunk != null) && (astJunk.length > 0)) {
 				for (int iJ = 0; iJ < astJunk.length; iJ++) {
 					ebEnt.dbEnterprise
-					    .ExecuteUpdate("update X25Person set nmFlags = ( nmFlags | 0x00010000 ) where RecId="
-					        + astJunk[iJ]);
+							.ExecuteUpdate("update X25Person set nmFlags = ( nmFlags | 0x00010000 ) where RecId="
+									+ astJunk[iJ]);
 				}
 			}
 			astJunk = request.getParameterValues("lowprio");
 			if ((astJunk != null) && (astJunk.length > 0)) {
 				for (int iJ = 0; iJ < astJunk.length; iJ++) {
 					ebEnt.dbEnterprise
-					    .ExecuteUpdate("update X25Person set nmFlags = ( nmFlags | 0x00008000 ) where RecId="
-					        + astJunk[iJ]);
+							.ExecuteUpdate("update X25Person set nmFlags = ( nmFlags | 0x00008000 ) where RecId="
+									+ astJunk[iJ]);
 				}
 			}
 			stReturn = stReturn + "<h1>Processing emailJunk</h1>";
@@ -49,7 +49,7 @@ public class EbCrm {
 					stReturn = stReturn + "<tr>";
 					stReturn = stReturn + "<td>" + rs.getString("stEMail");
 					stReturn = stReturn + "<br>&nbsp;&nbsp;"
-					    + rs.getString("stFirstName") + " ";
+							+ rs.getString("stFirstName") + " ";
 					stTemp = rs.getString("stLastName");
 					if (stTemp != null) {
 						if (stTemp.length() > 20)
@@ -58,12 +58,16 @@ public class EbCrm {
 					if ((stTemp == null) || (stTemp.equals("")))
 						stTemp = "&nbsp;";
 					stReturn = stReturn + stTemp + "</td>";
-					stReturn = stReturn + "<td>" + rs.getString("dtDate") + "</td>";
-					stReturn = stReturn + "<td>" + rs.getString("stTitle") + "</td>";
-					stReturn = stReturn + "<td><input type=checkbox name=lowprio value="
-					    + rs.getString("nmPersonId") + "></td>";
-					stReturn = stReturn + "<td><input type=checkbox name=junk value="
-					    + rs.getString("nmPersonId") + "></td>";
+					stReturn = stReturn + "<td>" + rs.getString("dtDate")
+							+ "</td>";
+					stReturn = stReturn + "<td>" + rs.getString("stTitle")
+							+ "</td>";
+					stReturn = stReturn
+							+ "<td><input type=checkbox name=lowprio value="
+							+ rs.getString("nmPersonId") + "></td>";
+					stReturn = stReturn
+							+ "<td><input type=checkbox name=junk value="
+							+ rs.getString("nmPersonId") + "></td>";
 					stTemp = rs.getString("stContent");
 					if (stTemp != null) {
 						try {
@@ -84,10 +88,10 @@ public class EbCrm {
 					stReturn = stReturn + "</tr>";
 				}
 				stReturn = stReturn
-				    + "<tr><td colspan=5 align=center><input type=submit name=submit9 value='Mark Junk'></tr>";
+						+ "<tr><td colspan=5 align=center><input type=submit name=submit9 value='Mark Junk'></tr>";
 			} else {
 				stReturn = stReturn + "<tr><td>ERROR: no results: " + stSql
-				    + "</td></tr>";
+						+ "</td></tr>";
 			}
 			stReturn = stReturn + "</table>";
 		} catch (Exception e) {
@@ -134,33 +138,39 @@ public class EbCrm {
 					String stSubject = EbStatic.myString(request, "subject");
 					String stBody = EbStatic.myString(request, "ebody");
 					String stComment = EbStatic.myString(request, "comment");
-					this.ebEnt.dbEnterprise.ExecuteUpdate("update X25Person set nmFlags="
-					    + nmFlags + " where RecId=" + nmPersonId);
+					this.ebEnt.dbEnterprise
+							.ExecuteUpdate("update X25Person set nmFlags="
+									+ nmFlags + " where RecId=" + nmPersonId);
 					if ((stTo.length() > 4) && (stSubject.length() > 0)
-					    && (stBody.length() > 0)) {
+							&& (stBody.length() > 0)) {
 						int nmUserId = this.ebEnt.ebNorm.getEmailId(stTo);
 						if (nmUserId > 0) {
-							this.ebEnt.ebNorm.addUserRef(nmUserId, 1, nmPersonId);
+							this.ebEnt.ebNorm.addUserRef(nmUserId, 1,
+									nmPersonId);
 							ResultSet rsUser = this.ebEnt.dbEnterprise
-							    .ExecuteSql("select * from X25User u, X25RefUser ru, X25Person p where p.RecId=ru.nmPersonId and ru.nmRefType=1 and ru.nmUserId=u.RecId and u.RecId="
-							        + nmUserId);
+									.ExecuteSql("select * from X25User u, X25RefUser ru, X25Person p where p.RecId=ru.nmPersonId and ru.nmRefType=1 and ru.nmUserId=u.RecId and u.RecId="
+											+ nmUserId);
 
 							rsUser.absolute(1);
 							EbMail ebM = new EbMail(this.ebEnt);
 							ebM.setProduction(1);
-							nmCommId = ebM.sendMail(rsUser, "0", stSubject, stBody);
+							nmCommId = ebM.sendMail(rsUser, "0", stSubject,
+									stBody);
 							if (nmCommId < 0)
-								stComment = stComment + " ERROR SENDING EMAIL TO: " + stTo;
+								stComment = stComment
+										+ " ERROR SENDING EMAIL TO: " + stTo;
 						} else {
-							stComment = stComment + " ERROR SENDING EMAIL TO (2): " + stTo;
+							stComment = stComment
+									+ " ERROR SENDING EMAIL TO (2): " + stTo;
 						}
 					}
 					if (nmCommId > 0) {
 						stComment = stComment + " Sent email to: " + stTo;
-						this.ebEnt.ebNorm.addHistory(1, nmPersonId, "", stComment, 11,
-						    nmCommId);
+						this.ebEnt.ebNorm.addHistory(1, nmPersonId, "",
+								stComment, 11, nmCommId);
 					} else if (stComment.length() > 0) {
-						this.ebEnt.ebNorm.addHistory(1, nmPersonId, "", stComment, 0, 0);
+						this.ebEnt.ebNorm.addHistory(1, nmPersonId, "",
+								stComment, 0, 0);
 					}
 				}
 			} else if (stTemp.equals("Cancel")) {
@@ -170,7 +180,7 @@ public class EbCrm {
 			switch (iState) {
 			case 1:
 				stReturn = stReturn
-				    + "<p align=left><form method=post id=\"form2\" name=\"form2\"><table border=0 width='100%'><tr><td valign=top>";
+						+ "<p align=left><form method=post id=\"form2\" name=\"form2\"><table border=0 width='100%'><tr><td valign=top>";
 
 				stReturn = stReturn + searchMenuResult(1);
 				stReturn = stReturn + "</td><td valign=top>";
@@ -180,22 +190,25 @@ public class EbCrm {
 				break;
 			case 2:
 				stReturn = stReturn
-				    + "<p align=left><form method=post id=\"form2\" name=\"form2\"><table border=0 width='100%'><tr><td valign=top>";
+						+ "<p align=left><form method=post id=\"form2\" name=\"form2\"><table border=0 width='100%'><tr><td valign=top>";
 
 				stReturn = stReturn + doEditPerson();
 				stReturn = stReturn + "</td></tr></table>";
 				break;
 			case 10:
 				stReturn = stReturn
-				    + showHistoryDetail(Integer.parseInt(request.getParameter("h")), 1);
+						+ showHistoryDetail(
+								Integer.parseInt(request.getParameter("h")), 1);
 				break;
 			case 11:
 				stReturn = stReturn
-				    + showHistoryDetail(Integer.parseInt(request.getParameter("h")), 2);
+						+ showHistoryDetail(
+								Integer.parseInt(request.getParameter("h")), 2);
 				break;
 			default:
-				stReturn = stReturn + "<BR>ERROR doSearch: invalid state/process: "
-				    + this.ebEnt.getState("b", request);
+				stReturn = stReturn
+						+ "<BR>ERROR doSearch: invalid state/process: "
+						+ this.ebEnt.getState("b", request);
 			}
 		} catch (Exception e) {
 			this.stError = (this.stError + "<br>ERROR doSearch" + e);
@@ -211,8 +224,8 @@ public class EbCrm {
 			stReturn = "<table border=0 width='100%'>";
 		try {
 			ResultSet rs = this.ebEnt.dbEnterprise
-			    .ExecuteSql("select * from X25HistoryLog h left join X25Communications com on com.RecId = h.nmRefId2 and h.nmRefType2=11 where h.RecId="
-			        + iRecId);
+					.ExecuteSql("select * from X25HistoryLog h left join X25Communications com on com.RecId = h.nmRefId2 and h.nmRefType2=11 where h.RecId="
+							+ iRecId);
 
 			if (rs != null) {
 				rs.last();
@@ -220,41 +233,49 @@ public class EbCrm {
 				if (iMax == 1) {
 					if (iType == 1) {
 						stReturn = stReturn
-						    + "<tr><td>History: <a href='./?a=28&tn=27&tid=" + iRecId
-						    + "'>" + rs.getString("RecId") + "</a></td>";
+								+ "<tr><td>History: <a href='./?a=28&tn=27&tid="
+								+ iRecId + "'>" + rs.getString("RecId")
+								+ "</a></td>";
 						if (rs.getInt("nmRefType2") == 11)
 							stReturn = stReturn
-							    + "<td>Communications: <a href='./?a=28&tn=23&tid="
-							    + rs.getString("nmRefId2") + "'>" + rs.getString("nmRefId2")
-							    + "</a></td>";
+									+ "<td>Communications: <a href='./?a=28&tn=23&tid="
+									+ rs.getString("nmRefId2") + "'>"
+									+ rs.getString("nmRefId2") + "</a></td>";
 						stReturn = stReturn + "</tr>";
 					} else {
 						stTemp = rs.getString("stHtml");
 						if ((stTemp == null) || (stTemp.length() <= 0)) {
 							stTemp = rs.getString("stContent");
 							if ((stTemp == null) || (stTemp.length() < 10)
-							    || (stTemp.indexOf("<html>") < 0))
+									|| (stTemp.indexOf("<html>") < 0))
 								stTemp = "";
 						}
 						if ((stTemp != null) && (stTemp.trim().length() > 4)) {
-							stReturn = stReturn + "<br><b>"
-							    + EbStatic.myString(rs.getString("dtEventStartTime"))
-							    + " &nbsp;&nbsp;&nbsp;&nbsp;"
-							    + EbStatic.myString(rs.getString("stTitle"))
-							    + "</b><hr><br>&nbsp;";
+							stReturn = stReturn
+									+ "<br><b>"
+									+ EbStatic.myString(rs
+											.getString("dtEventStartTime"))
+									+ " &nbsp;&nbsp;&nbsp;&nbsp;"
+									+ EbStatic
+											.myString(rs.getString("stTitle"))
+									+ "</b><hr><br>&nbsp;";
 
 							stReturn = stReturn + stTemp;
 						} else {
 							stReturn = stReturn + "<tr><td>";
-							stReturn = stReturn + "<br><b>"
-							    + EbStatic.myString(rs.getString("dtEventStartTime"))
-							    + " &nbsp;&nbsp;&nbsp;&nbsp;"
-							    + EbStatic.myString(rs.getString("stTitle"))
-							    + "</b><hr><br>&nbsp;<pre>";
+							stReturn = stReturn
+									+ "<br><b>"
+									+ EbStatic.myString(rs
+											.getString("dtEventStartTime"))
+									+ " &nbsp;&nbsp;&nbsp;&nbsp;"
+									+ EbStatic
+											.myString(rs.getString("stTitle"))
+									+ "</b><hr><br>&nbsp;<pre>";
 
 							stTemp = rs.getString("stContent");
 							if ((stTemp != null) && (stTemp.length() > 0))
-								stReturn = stReturn + stTemp.trim().replace("<", "&lt;");
+								stReturn = stReturn
+										+ stTemp.trim().replace("<", "&lt;");
 							stReturn = stReturn + "</pre></td>></tr>";
 						}
 					}
@@ -283,19 +304,19 @@ public class EbCrm {
 				stReturn = stReturn + "</td>";
 				stReturn = stReturn + "</tr>";
 				stReturn = stReturn
-				    + "<tr><td>EM:<input type=text name=tomail value=\""
-				    + this.stEmail
-				    + "\"> Subj:<input type=text name=subject value=\"\" size=60><br>"
-				    + "<textarea name=ebody rows=5 cols=90></textarea></td>"
-				    + "<td valign=top>"
-				    + editPersonStatus(nmPersonId)
-				    + "<br>"
-				    + "<textarea name=comment rows=2 cols=90></textarea><br>"
-				    + "<input type=submit name=submit9 value='Save'> <input type=submit name=submit9 value='Cancel'> </td>"
-				    + "</tr>";
+						+ "<tr><td>EM:<input type=text name=tomail value=\""
+						+ this.stEmail
+						+ "\"> Subj:<input type=text name=subject value=\"\" size=60><br>"
+						+ "<textarea name=ebody rows=5 cols=90></textarea></td>"
+						+ "<td valign=top>"
+						+ editPersonStatus(nmPersonId)
+						+ "<br>"
+						+ "<textarea name=comment rows=2 cols=90></textarea><br>"
+						+ "<input type=submit name=submit9 value='Save'> <input type=submit name=submit9 value='Cancel'> </td>"
+						+ "</tr>";
 
-				stReturn = stReturn + "<tr><td colspan=2>" + showHistory(nmPersonId)
-				    + "</td></tr>";
+				stReturn = stReturn + "<tr><td colspan=2>"
+						+ showHistory(nmPersonId) + "</td></tr>";
 			} else {
 				this.stError += "<BR>ERROR doEditPerson: invalid person id";
 			}
@@ -313,98 +334,99 @@ public class EbCrm {
 		try {
 			int iValue = 1;
 			int nmFlags = this.ebEnt.dbEnterprise
-			    .ExecuteSql1n("select nmFlags from X25Person where RecId="
-			        + nmPersonId);
+					.ExecuteSql1n("select nmFlags from X25Person where RecId="
+							+ nmPersonId);
 			if ((iValue & nmFlags) != 0)
 				stChecked = " checked ";
 			else
 				stChecked = "";
 			stReturn = stReturn + "<input name=nmFlags type=checkbox value='"
-			    + iValue + "' " + stChecked + "> Active | ";
+					+ iValue + "' " + stChecked + "> Active | ";
 			iValue = 65536;
 			if ((iValue & nmFlags) != 0)
 				stChecked = " checked ";
 			else
 				stChecked = "";
 			stReturn = stReturn + "<input name=nmFlags type=checkbox value='"
-			    + iValue + "' " + stChecked + "> Junk | ";
+					+ iValue + "' " + stChecked + "> Junk | ";
 			iValue = 131072;
 			if ((iValue & nmFlags) != 0)
 				stChecked = " checked ";
 			else
 				stChecked = "";
 			stReturn = stReturn + "<input name=nmFlags type=checkbox value='"
-			    + iValue + "' " + stChecked + "> Hide | ";
+					+ iValue + "' " + stChecked + "> Hide | ";
 			iValue = 262144;
 			if ((iValue & nmFlags) != 0)
 				stChecked = " checked ";
 			else
 				stChecked = "";
 			stReturn = stReturn + "<input name=nmFlags type=checkbox value='"
-			    + iValue + "' " + stChecked + "> Friend | ";
+					+ iValue + "' " + stChecked + "> Friend | ";
 			iValue = 524288;
 			if ((iValue & nmFlags) != 0)
 				stChecked = " checked ";
 			else
 				stChecked = "";
 			stReturn = stReturn + "<input name=nmFlags type=checkbox value='"
-			    + iValue + "' " + stChecked + "> Customer | ";
+					+ iValue + "' " + stChecked + "> Customer | ";
 			iValue = 1048576;
 			if ((iValue & nmFlags) != 0)
 				stChecked = " checked ";
 			else
 				stChecked = "";
 			stReturn = stReturn + "<input name=nmFlags type=checkbox value='"
-			    + iValue + "' " + stChecked + "> Prospect | ";
+					+ iValue + "' " + stChecked + "> Prospect | ";
 			iValue = 2097152;
 			if ((iValue & nmFlags) != 0)
 				stChecked = " checked ";
 			else
 				stChecked = "";
 			stReturn = stReturn + "<input name=nmFlags type=checkbox value='"
-			    + iValue + "' " + stChecked + "> Private ";
+					+ iValue + "' " + stChecked + "> Private ";
 			iValue = 4194304;
 			if ((iValue & nmFlags) != 0)
 				stChecked = " checked ";
 			else
 				stChecked = "";
-			stReturn = stReturn + "<br><input name=nmFlags type=checkbox value='"
-			    + iValue + "' " + stChecked + "> QW | ";
+			stReturn = stReturn
+					+ "<br><input name=nmFlags type=checkbox value='" + iValue
+					+ "' " + stChecked + "> QW | ";
 			iValue = 8388608;
 			if ((iValue & nmFlags) != 0)
 				stChecked = " checked ";
 			else
 				stChecked = "";
 			stReturn = stReturn + "<input name=nmFlags type=checkbox value='"
-			    + iValue + "' " + stChecked + "> Cgn | ";
+					+ iValue + "' " + stChecked + "> Cgn | ";
 			iValue = 16777216;
 			if ((iValue & nmFlags) != 0)
 				stChecked = " checked ";
 			else
 				stChecked = "";
 			stReturn = stReturn + "<input name=nmFlags type=checkbox value='"
-			    + iValue + "' " + stChecked + "> Cgn+ | ";
+					+ iValue + "' " + stChecked + "> Cgn+ | ";
 			iValue = 33554432;
 			if ((iValue & nmFlags) != 0)
 				stChecked = " checked ";
 			else
 				stChecked = "";
 			stReturn = stReturn + "<input name=nmFlags type=checkbox value='"
-			    + iValue + "' " + stChecked + "> Cgn- | ";
+					+ iValue + "' " + stChecked + "> Cgn- | ";
 			iValue = 67108864;
 			if ((iValue & nmFlags) != 0)
 				stChecked = " checked ";
 			else
 				stChecked = "";
 			stReturn = stReturn + "<input name=nmFlags type=checkbox value='"
-			    + iValue + "' " + stChecked + "> DNCgn | ";
+					+ iValue + "' " + stChecked + "> DNCgn | ";
 			iValue = 134217728;
 			if ((iValue & nmFlags) != 0)
 				stChecked = " checked ";
 			else
 				stChecked = "";
 			stReturn = stReturn + "<input name=nmFlags type=checkbox value='"
-			    + iValue + "' " + stChecked + "> Aff | ";
+					+ iValue + "' " + stChecked + "> Aff | ";
 		} catch (Exception e) {
 			this.stError = (this.stError + "<BR>ERROR editPersonStatus: " + e);
 		}
@@ -419,38 +441,40 @@ public class EbCrm {
 		String stTemp = "";
 		try {
 			stSql = "select * from X25Company c, X25RefCompany rc  where rc.nmCompanyId=c.RecId and rc.nmRefType = 1 and rc.nmRefId="
-			    + nmPersonId;
+					+ nmPersonId;
 
 			ResultSet rs = this.ebEnt.dbEnterprise.ExecuteSql(stSql);
 			if (rs != null) {
 				rs.last();
 				iMax = rs.getRow();
 				if (iMax == 1) {
-					stReturn = stReturn + "<tr><th colspan=2 bgcolor=skyblue><h2>";
-					stReturn = stReturn + rs.getString("stCompanyName") + "</h2></td>";
+					stReturn = stReturn
+							+ "<tr><th colspan=2 bgcolor=skyblue><h2>";
+					stReturn = stReturn + rs.getString("stCompanyName")
+							+ "</h2></td>";
 					stReturn = stReturn + "</tr>";
 					stTemp = showPhone(2, rs.getInt("RecId"));
 					if (stTemp.length() > 0)
 						stReturn = stReturn
-						    + "<tr><td align=right valign=top>Phones: </td><td>" + stTemp
-						    + "</td></tr>";
+								+ "<tr><td align=right valign=top>Phones: </td><td>"
+								+ stTemp + "</td></tr>";
 					stTemp = showEmail(2, rs.getInt("RecId"));
 					if (stTemp.length() > 0) {
 						stReturn = stReturn
-						    + "<tr><td align=right valign=top>Emails: </td><td>" + stTemp
-						    + "</td></tr>";
+								+ "<tr><td align=right valign=top>Emails: </td><td>"
+								+ stTemp + "</td></tr>";
 					}
 					stTemp = showAddress(2, rs.getInt("RecId"));
 					if (stTemp.length() > 0)
-						stReturn = stReturn + "<tr><td align=left colspan=2>" + stTemp
-						    + "</td></tr>";
+						stReturn = stReturn + "<tr><td align=left colspan=2>"
+								+ stTemp + "</td></tr>";
 					stTemp = showWeb(2, rs.getInt("RecId"));
 					if (stTemp.length() > 0)
-						stReturn = stReturn + "<tr><td align=left colspan=2>" + stTemp
-						    + "</td></tr>";
+						stReturn = stReturn + "<tr><td align=left colspan=2>"
+								+ stTemp + "</td></tr>";
 				} else {
 					this.stError = (this.stError
-					    + "<BR>ERROR showCompany: invalid records " + iMax);
+							+ "<BR>ERROR showCompany: invalid records " + iMax);
 				}
 			} else {
 				this.stError = (this.stError + "<BR>ERROR showCompany: " + nmPersonId);
@@ -472,37 +496,46 @@ public class EbCrm {
 		String stComment = "";
 		try {
 			stSql = "select h.* ,com.* from X25HistoryLog h left join X25Communications com on h.nmRefType2=11 and h.nmRefId2=com.RecId where h.nmRefType = 1 and h.nmRefId = "
-			    + nmPersonId + " " + "order by h.dtEventStartTime desc";
+					+ nmPersonId + " " + "order by h.dtEventStartTime desc";
 
-			ResultSet rs = this.ebEnt.dbEnterprise.ExecuteSql(this.ebEnt.dbEnterprise
-			    .setSqlLimit(stSql, "200"));
+			ResultSet rs = this.ebEnt.dbEnterprise
+					.ExecuteSql(this.ebEnt.dbEnterprise.setSqlLimit(stSql,
+							"200"));
 			if (rs != null) {
 				rs.last();
 				iMax = rs.getRow();
 				if (iMax > 0) {
 					for (int iH = 1; iH <= iMax; iH++) {
 						rs.absolute(iH);
-						stReturn = stReturn + "<tr><td nowrap><a href='./?a="
-						    + this.ebEnt.ebUd.request.getParameter("a") + "&b=11&h="
-						    + rs.getString("RecId") + "'>"
-						    + rs.getString("dtEventStartTime").substring(2, 16);
+						stReturn = stReturn
+								+ "<tr><td nowrap><a href='./?a="
+								+ this.ebEnt.ebUd.request.getParameter("a")
+								+ "&b=11&h="
+								+ rs.getString("RecId")
+								+ "'>"
+								+ rs.getString("dtEventStartTime").substring(2,
+										16);
 
 						stReturn = stReturn + "</a></td><td><a href='./?a="
-						    + this.ebEnt.ebUd.request.getParameter("a") + "&b=10&h="
-						    + rs.getString("RecId") + "'>" + rs.getString("nmEventFlags")
-						    + "</a>";
+								+ this.ebEnt.ebUd.request.getParameter("a")
+								+ "&b=10&h=" + rs.getString("RecId") + "'>"
+								+ rs.getString("nmEventFlags") + "</a>";
 
 						if (rs.getInt("nmRefType2") == 11) {
-							stComment = EbStatic.myString(rs.getString("stTitle"));
-							String stTemp = EbStatic.myString(rs.getString("stContent"));
+							stComment = EbStatic.myString(rs
+									.getString("stTitle"));
+							String stTemp = EbStatic.myString(rs
+									.getString("stContent"));
 							if (stTemp.length() > 0) {
 								if (stTemp.length() > 2000)
-									stComment = stComment + " || " + stTemp.substring(0, 2000);
+									stComment = stComment + " || "
+											+ stTemp.substring(0, 2000);
 								else
 									stComment = stComment + " || " + stTemp;
 							}
 						} else {
-							stComment = EbStatic.myString(rs.getString("stComment"));
+							stComment = EbStatic.myString(rs
+									.getString("stComment"));
 						}
 						stComment = stComment.replace("<", "&lt;");
 						stComment = stComment.replace("\\", "");
@@ -530,7 +563,9 @@ public class EbCrm {
 		String stTemp = "";
 		try {
 			stSql = "select * from X25Person p left join X25PersonStatus ps on p.RecId=ps.nmRefPersonId and ps.nmLoginPersonId="
-			    + this.ebEnt.ebUd.getLoginPersonId() + " where p.RecId=" + nmPersonId;
+					+ this.ebEnt.ebUd.getLoginPersonId()
+					+ " where p.RecId="
+					+ nmPersonId;
 
 			ResultSet rs = this.ebEnt.dbEnterprise.ExecuteSql(stSql);
 			if (rs != null) {
@@ -538,25 +573,26 @@ public class EbCrm {
 				int iMax = rs.getRow();
 				if (iMax == 1) {
 					stReturn = stReturn
-					    + "<tr><th colspan=2 align=center bgcolor=skyblue><a href='./?a=28&tn=29&tid="
-					    + nmPersonId + "'><b>";
+							+ "<tr><th colspan=2 align=center bgcolor=skyblue><a href='./?a=28&tn=29&tid="
+							+ nmPersonId + "'><b>";
 					stReturn = stReturn + rs.getString("stFirstName") + " ";
 					stReturn = stReturn + rs.getString("stMiddleName") + " ";
-					stReturn = stReturn + rs.getString("stLastName") + "</b></a></td>";
+					stReturn = stReturn + rs.getString("stLastName")
+							+ "</b></a></td>";
 					stReturn = stReturn + "</tr>";
 					stTemp = showPhone(1, nmPersonId);
 					if (stTemp.length() > 0)
 						stReturn = stReturn
-						    + "<tr><td align=right valign=top>Phones: </td><td>" + stTemp
-						    + "</td></tr>";
+								+ "<tr><td align=right valign=top>Phones: </td><td>"
+								+ stTemp + "</td></tr>";
 					stTemp = showEmail(1, nmPersonId);
 					if (stTemp.length() > 0)
 						stReturn = stReturn
-						    + "<tr><td align=right valign=top>Emails: </td><td>" + stTemp
-						    + "</td></tr>";
+								+ "<tr><td align=right valign=top>Emails: </td><td>"
+								+ stTemp + "</td></tr>";
 				} else {
 					this.stError = (this.stError
-					    + "<BR>ERROR showPerson: invalid records " + iMax);
+							+ "<BR>ERROR showPerson: invalid records " + iMax);
 				}
 			} else {
 				this.stError = (this.stError + "<BR>ERROR showPerson: " + nmPersonId);
@@ -574,7 +610,7 @@ public class EbCrm {
 		String stSql = "";
 		try {
 			stSql = "select * from X25Phone p, X25RefPhone rp where p.RecId=rp.nmPhoneId and rp.nmRefType="
-			    + nmRefType + " and nmRefId=" + nmRefId;
+					+ nmRefType + " and nmRefId=" + nmRefId;
 
 			ResultSet rs = this.ebEnt.dbEnterprise.ExecuteSql(stSql);
 			if (rs != null) {
@@ -587,14 +623,24 @@ public class EbCrm {
 					for (int iP = 1; iP <= iMax; iP++) {
 						rs.absolute(iP);
 						if (iMax > 4) {
-							stReturn = stReturn + " <a href=\"skype:+1"
-							    + rs.getString("stPhone")
-							    + "?call\" onclick=\"return skypeCheck();\">"
-							    + EbStatic.makePhone(rs.getString("stPhone")) + "</a>"
-							    + EbStatic.myString(rs.getString("stCountry")) + " "
-							    + EbStatic.myString(rs.getString("stExtension")) + " "
-							    + EbStatic.myString(rs.getString("stPhoneType")) + " "
-							    + EbStatic.myString(rs.getString("stComment"));
+							stReturn = stReturn
+									+ " <a href=\"skype:+1"
+									+ rs.getString("stPhone")
+									+ "?call\" onclick=\"return skypeCheck();\">"
+									+ EbStatic.makePhone(rs
+											.getString("stPhone"))
+									+ "</a>"
+									+ EbStatic.myString(rs
+											.getString("stCountry"))
+									+ " "
+									+ EbStatic.myString(rs
+											.getString("stExtension"))
+									+ " "
+									+ EbStatic.myString(rs
+											.getString("stPhoneType"))
+									+ " "
+									+ EbStatic.myString(rs
+											.getString("stComment"));
 
 							if ((iP < 4) || (iMax - iP <= 0))
 								continue;
@@ -602,17 +648,31 @@ public class EbCrm {
 							break;
 						}
 
-						stReturn = stReturn + "<tr><td><input type=text name=xx" + iP
-						    + " id=xx" + iP + " value=\"" + rs.getString("stPhone")
-						    + "\" onmouseover=\"this.focus()\" onfocus=\"ebCopy('xx" + iP
-						    + "')\" >" + EbStatic.makePhone(rs.getString("stPhone"))
-						    + "</a></td>" + "<td>"
-						    + EbStatic.myString(rs.getString("stCountry")) + "</td>"
-						    + "<td>" + EbStatic.myString(rs.getString("stExtension"))
-						    + "</td>" + "<td>"
-						    + EbStatic.myString(rs.getString("stPhoneType")) + "</td>"
-						    + "<td>" + EbStatic.myString(rs.getString("stComment"))
-						    + "</td></tr>";
+						stReturn = stReturn
+								+ "<tr><td><input type=text name=xx"
+								+ iP
+								+ " id=xx"
+								+ iP
+								+ " value=\""
+								+ rs.getString("stPhone")
+								+ "\" onmouseover=\"this.focus()\" onfocus=\"ebCopy('xx"
+								+ iP
+								+ "')\" >"
+								+ EbStatic.makePhone(rs.getString("stPhone"))
+								+ "</a></td>"
+								+ "<td>"
+								+ EbStatic.myString(rs.getString("stCountry"))
+								+ "</td>"
+								+ "<td>"
+								+ EbStatic
+										.myString(rs.getString("stExtension"))
+								+ "</td>"
+								+ "<td>"
+								+ EbStatic
+										.myString(rs.getString("stPhoneType"))
+								+ "</td>" + "<td>"
+								+ EbStatic.myString(rs.getString("stComment"))
+								+ "</td></tr>";
 					}
 
 					if (iMax > 4)
@@ -632,7 +692,7 @@ public class EbCrm {
 		String stReturn = "";
 		try {
 			stSql = "select * from X25User u, X25RefUser ru where u.RecId=ru.nmUserId and ru.nmRefType="
-			    + nmRefType + " and nmPersonId=" + nmRefId;
+					+ nmRefType + " and nmPersonId=" + nmRefId;
 
 			ResultSet rs = this.ebEnt.dbEnterprise.ExecuteSql(stSql);
 			if (rs != null) {
@@ -645,10 +705,13 @@ public class EbCrm {
 						if (this.stEmail.length() <= 0) {
 							this.stEmail = rs.getString("stEmail");
 						}
-						stReturn = stReturn + "<tr><td><a href='./?a=28&tn=44&tid="
-						    + rs.getString("nmUserId") + "'>" + rs.getString("stEmail")
-						    + "</a></td>" + "<td>"
-						    + EbStatic.myString(rs.getString("stType")) + "</td></tr>";
+						stReturn = stReturn
+								+ "<tr><td><a href='./?a=28&tn=44&tid="
+								+ rs.getString("nmUserId") + "'>"
+								+ rs.getString("stEmail") + "</a></td>"
+								+ "<td>"
+								+ EbStatic.myString(rs.getString("stType"))
+								+ "</td></tr>";
 					}
 
 					stReturn = stReturn + "</table>";
@@ -666,7 +729,7 @@ public class EbCrm {
 		String stReturn = "";
 		try {
 			stSql = "select * from X25Address a, X25RefAddress ra  where a.RecId=ra.nmAddressId and ra.nmRefType="
-			    + nmRefType + " and ra.nmRefId=" + nmRefId;
+					+ nmRefType + " and ra.nmRefId=" + nmRefId;
 
 			ResultSet rs = this.ebEnt.dbEnterprise.ExecuteSql(stSql);
 			if (rs != null) {
@@ -677,9 +740,10 @@ public class EbCrm {
 					for (int iP = 1; iP <= iMax; iP++) {
 						rs.absolute(iP);
 						stReturn = stReturn + "<tr><td>"
-						    + EbStatic.myString(rs.getString("stAddress1")) + ", </td>"
-						    + "<td>" + EbStatic.myString(rs.getString("stZipCity"))
-						    + "</td></tr>";
+								+ EbStatic.myString(rs.getString("stAddress1"))
+								+ ", </td>" + "<td>"
+								+ EbStatic.myString(rs.getString("stZipCity"))
+								+ "</td></tr>";
 					}
 
 					stReturn = stReturn + "</table>";
@@ -697,7 +761,9 @@ public class EbCrm {
 		String stReturn = "";
 		try {
 			stSql = "select * from X25Website w, X25RefWeb rw  where w.nmWebId=rw.nmWebId and rw.nmRefType="
-			    + nmRefType + " and w.stUrl != '' and rw.nmRefId=" + nmRefId;
+					+ nmRefType
+					+ " and w.stUrl != '' and rw.nmRefId="
+					+ nmRefId;
 
 			ResultSet rs = this.ebEnt.dbEnterprise.ExecuteSql(stSql);
 			if (rs != null) {
@@ -708,8 +774,10 @@ public class EbCrm {
 					for (int iP = 1; iP <= iMax; iP++) {
 						rs.absolute(iP);
 						stReturn = stReturn + "<tr><td><a target=_blank href='"
-						    + EbStatic.myString(rs.getString("stUrl")) + "'>"
-						    + EbStatic.myString(rs.getString("stUrl")) + "</a></td></tr>";
+								+ EbStatic.myString(rs.getString("stUrl"))
+								+ "'>"
+								+ EbStatic.myString(rs.getString("stUrl"))
+								+ "</a></td></tr>";
 					}
 
 					stReturn = stReturn + "</table>";
@@ -727,76 +795,83 @@ public class EbCrm {
 		String stSql = "";
 		try {
 			String stSearchType = this.ebEnt.ebUd
-			    .getRequestCookieValue("stSearchType");
+					.getRequestCookieValue("stSearchType");
 			String stSearchField = this.ebEnt.ebUd
-			    .getRequestCookieValue("stSearchField");
+					.getRequestCookieValue("stSearchField");
 			String stWhere = this.ebEnt.ebUd.getRequestCookieValue("stWhere");
 			String stTextSearch = this.ebEnt.ebUd
-			    .getRequestCookieValue("stTextSearch");
+					.getRequestCookieValue("stTextSearch");
 			String stOut = this.ebEnt.ebUd.getRequestCookieValue("stOut");
 			switch (iType) {
 			case 1:
 				stReturn = stReturn
-				    + "<table border=0 width='100%'><tr><td align=left>Type of Search:</td>";
+						+ "<table border=0 width='100%'><tr><td align=left>Type of Search:</td>";
 				stReturn = stReturn
-				    + "<td align=left><select name=stSearchType class=FormField onChange=\"form2.submit();\">";
+						+ "<td align=left><select name=stSearchType class=FormField onChange=\"form2.submit();\">";
 				stReturn = stReturn
-				    + this.ebEnt.ebNorm.AddOptionList("search", "Quick Search",
-				        stSearchType);
+						+ this.ebEnt.ebNorm.AddOptionList("search",
+								"Quick Search", stSearchType);
 				stReturn = stReturn + "</select></td></tr>";
 
 				stReturn = stReturn + "<tr><td align=left>Search Field:</td>";
 				stReturn = stReturn
-				    + "<td align=left><select name=stSearchField class=FormField onChange=\"form2.submit();\">";
+						+ "<td align=left><select name=stSearchField class=FormField onChange=\"form2.submit();\">";
 				stReturn = stReturn
-				    + this.ebEnt.ebNorm.AddOptionList("fu", "Full Name (First/Last)",
-				        stSearchField);
+						+ this.ebEnt.ebNorm.AddOptionList("fu",
+								"Full Name (First/Last)", stSearchField);
 				stReturn = stReturn
-				    + this.ebEnt.ebNorm.AddOptionList("ln", "Last Name", stSearchField);
+						+ this.ebEnt.ebNorm.AddOptionList("ln", "Last Name",
+								stSearchField);
 				stReturn = stReturn
-				    + this.ebEnt.ebNorm
-				        .AddOptionList("fn", "First Name", stSearchField);
+						+ this.ebEnt.ebNorm.AddOptionList("fn", "First Name",
+								stSearchField);
 				stReturn = stReturn
-				    + this.ebEnt.ebNorm.AddOptionList("ph", "Phone", stSearchField);
+						+ this.ebEnt.ebNorm.AddOptionList("ph", "Phone",
+								stSearchField);
 				stReturn = stReturn
-				    + this.ebEnt.ebNorm.AddOptionList("em", "Email", stSearchField);
+						+ this.ebEnt.ebNorm.AddOptionList("em", "Email",
+								stSearchField);
 				stReturn = stReturn + "</select></td></tr>";
 
 				stReturn = stReturn
-				    + "<tr><td valign=top>Search how:</td><td><select name=stWhere class=FormField>";
+						+ "<tr><td valign=top>Search how:</td><td><select name=stWhere class=FormField>";
 				stReturn = stReturn
-				    + this.ebEnt.ebNorm.AddOptionList("beg", "Beginning of field",
-				        stWhere);
+						+ this.ebEnt.ebNorm.AddOptionList("beg",
+								"Beginning of field", stWhere);
 				stReturn = stReturn
-				    + this.ebEnt.ebNorm.AddOptionList("any", "Anywhere in field",
-				        stWhere);
+						+ this.ebEnt.ebNorm.AddOptionList("any",
+								"Anywhere in field", stWhere);
 				stReturn = stReturn
-				    + this.ebEnt.ebNorm.AddOptionList("end", "End of Field", stWhere);
+						+ this.ebEnt.ebNorm.AddOptionList("end",
+								"End of Field", stWhere);
 				stReturn = stReturn
-				    + this.ebEnt.ebNorm.AddOptionList("excact", "Exact Match", stWhere);
+						+ this.ebEnt.ebNorm.AddOptionList("excact",
+								"Exact Match", stWhere);
 				stReturn = stReturn + "</select>";
 				stReturn = stReturn + "</td></tr>";
 
 				stReturn = stReturn + "<tr><td align=left>Search String:</td>";
 				stReturn = stReturn
-				    + "<td align=left><input type=text name=stTextSearch class=FormField value=\""
-				    + stTextSearch + "\"  size=50></td></tr>";
+						+ "<td align=left><input type=text name=stTextSearch class=FormField value=\""
+						+ stTextSearch + "\"  size=50></td></tr>";
 				stReturn = stReturn + "<tr>";
 
 				stReturn = stReturn
-				    + "<tr><td valign=top>Return:</td><td><select name=stOut class=FormField>";
+						+ "<tr><td valign=top>Return:</td><td><select name=stOut class=FormField>";
 				stReturn = stReturn
-				    + this.ebEnt.ebNorm.AddOptionList("100", "Top 100 records", stOut);
+						+ this.ebEnt.ebNorm.AddOptionList("100",
+								"Top 100 records", stOut);
 				stReturn = stReturn
-				    + this.ebEnt.ebNorm
-				        .AddOptionList("1000", "Top 1000 records", stOut);
+						+ this.ebEnt.ebNorm.AddOptionList("1000",
+								"Top 1000 records", stOut);
 				stReturn = stReturn
-				    + this.ebEnt.ebNorm.AddOptionList("all", "All records", stOut);
+						+ this.ebEnt.ebNorm.AddOptionList("all", "All records",
+								stOut);
 				stReturn = stReturn + "</select>";
 				stReturn = stReturn + "</td></tr>";
 
 				stReturn = stReturn
-				    + "<tr><td colspan=2 align=center><input type=submit name=submit1 class=FormField value='Search'></td></tr>";
+						+ "<tr><td colspan=2 align=center><input type=submit name=submit1 class=FormField value='Search'></td></tr>";
 				stReturn = stReturn + "</table>";
 			}
 
@@ -815,59 +890,82 @@ public class EbCrm {
 						stWildCard1 = "";
 					}
 					stSql = "select * from X25Person p left join X25PersonStatus ps on p.RecId=ps.nmRefPersonId and ps.nmLoginPersonId="
-					    + this.ebEnt.ebUd.getLoginPersonId() + " where ";
+							+ this.ebEnt.ebUd.getLoginPersonId() + " where ";
 
 					if (stSearchField.equals("fu")) {
 						String[] aName = stTextSearch.split(" ");
 
 						if (aName.length > 2) {
 							stSql = stSql
-							    + " stFirstName like "
-							    + this.ebEnt.dbEnterprise.fmtDbString(new StringBuilder()
-							        .append(stWildCard1).append(aName[0]).append(stWildCard2)
-							        .toString())
-							    + " and sMiddleName like "
-							    + this.ebEnt.dbEnterprise.fmtDbString(new StringBuilder()
-							        .append(stWildCard1).append(aName[1]).append(stWildCard2)
-							        .toString())
-							    + " and stLastName like "
-							    + this.ebEnt.dbEnterprise.fmtDbString(new StringBuilder()
-							        .append(stWildCard1).append(aName[2]).append(stWildCard2)
-							        .toString());
+									+ " stFirstName like "
+									+ this.ebEnt.dbEnterprise
+											.fmtDbString(new StringBuilder()
+													.append(stWildCard1)
+													.append(aName[0])
+													.append(stWildCard2)
+													.toString())
+									+ " and sMiddleName like "
+									+ this.ebEnt.dbEnterprise
+											.fmtDbString(new StringBuilder()
+													.append(stWildCard1)
+													.append(aName[1])
+													.append(stWildCard2)
+													.toString())
+									+ " and stLastName like "
+									+ this.ebEnt.dbEnterprise
+											.fmtDbString(new StringBuilder()
+													.append(stWildCard1)
+													.append(aName[2])
+													.append(stWildCard2)
+													.toString());
 						} else if (aName.length == 2) {
 							stSql = stSql
-							    + " stFirstName like "
-							    + this.ebEnt.dbEnterprise.fmtDbString(new StringBuilder()
-							        .append(stWildCard1).append(aName[0]).append(stWildCard2)
-							        .toString())
-							    + " and stLastName like "
-							    + this.ebEnt.dbEnterprise.fmtDbString(new StringBuilder()
-							        .append(stWildCard1).append(aName[1]).append(stWildCard2)
-							        .toString());
+									+ " stFirstName like "
+									+ this.ebEnt.dbEnterprise
+											.fmtDbString(new StringBuilder()
+													.append(stWildCard1)
+													.append(aName[0])
+													.append(stWildCard2)
+													.toString())
+									+ " and stLastName like "
+									+ this.ebEnt.dbEnterprise
+											.fmtDbString(new StringBuilder()
+													.append(stWildCard1)
+													.append(aName[1])
+													.append(stWildCard2)
+													.toString());
 						} else {
 							stSql = stSql
-							    + " stFirstName like "
-							    + this.ebEnt.dbEnterprise.fmtDbString(new StringBuilder()
-							        .append(stWildCard1).append(aName[0]).append(stWildCard2)
-							        .toString());
+									+ " stFirstName like "
+									+ this.ebEnt.dbEnterprise
+											.fmtDbString(new StringBuilder()
+													.append(stWildCard1)
+													.append(aName[0])
+													.append(stWildCard2)
+													.toString());
 						}
 					} else if (stSearchField.equals("fn")) {
 						stSql = stSql
-						    + " stFirstName like "
-						    + this.ebEnt.dbEnterprise.fmtDbString(new StringBuilder()
-						        .append(stWildCard1).append(stTextSearch)
-						        .append(stWildCard2).toString());
+								+ " stFirstName like "
+								+ this.ebEnt.dbEnterprise
+										.fmtDbString(new StringBuilder()
+												.append(stWildCard1)
+												.append(stTextSearch)
+												.append(stWildCard2).toString());
 					} else if (stSearchField.equals("ln")) {
 						stSql = stSql
-						    + " stLastName like "
-						    + this.ebEnt.dbEnterprise.fmtDbString(new StringBuilder()
-						        .append(stWildCard1).append(stTextSearch)
-						        .append(stWildCard2).toString());
+								+ " stLastName like "
+								+ this.ebEnt.dbEnterprise
+										.fmtDbString(new StringBuilder()
+												.append(stWildCard1)
+												.append(stTextSearch)
+												.append(stWildCard2).toString());
 					}
 
 					stSql = stSql + " order by stLastName, stFirstName ";
 					if ((stOut.length() > 0) && (!stOut.equals("all"))) {
-						stSql = this.ebEnt.dbEnterprise.setSqlLimit(stSql, stOut);
+						stSql = this.ebEnt.dbEnterprise.setSqlLimit(stSql,
+								stOut);
 					}
 					ResultSet rs = this.ebEnt.dbEnterprise.ExecuteSql(stSql);
 					if (rs != null) {
@@ -881,12 +979,15 @@ public class EbCrm {
 								stBg = " bgcolor='#EEEEEE' ";
 							else
 								stBg = " bgcolor='#FFFFFF' ";
-							stReturn = stReturn + "<td valign=top " + stBg + "><a href='"
-							    + this.ebEnt.rsA.getString("stUrl") + "&b=2&p="
-							    + rs.getInt("RecId") + "'>" + rs.getString("stFirstName");
-							stReturn = stReturn + " " + rs.getString("stMiddleName");
-							stReturn = stReturn + " " + rs.getString("stLastName")
-							    + "</a></td>";
+							stReturn = stReturn + "<td valign=top " + stBg
+									+ "><a href='"
+									+ this.ebEnt.rsA.getString("stUrl")
+									+ "&b=2&p=" + rs.getInt("RecId") + "'>"
+									+ rs.getString("stFirstName");
+							stReturn = stReturn + " "
+									+ rs.getString("stMiddleName");
+							stReturn = stReturn + " "
+									+ rs.getString("stLastName") + "</a></td>";
 							stReturn = stReturn + "<tr>";
 						}
 					}
@@ -908,7 +1009,7 @@ public class EbCrm {
 				rs.last();
 				int iMax = rs.getRow();
 				stReturn = stReturn
-				    + "<table width='100%'><tr><td colspan=2 bgcolor=skyblue align=center width='100%'><h2>Call Back List</h2></td></tr>";
+						+ "<table width='100%'><tr><td colspan=2 bgcolor=skyblue align=center width='100%'><h2>Call Back List</h2></td></tr>";
 				String stBg = "";
 				for (int iH = 1; iH <= iMax; iH++) {
 					rs.absolute(iH);
@@ -918,11 +1019,12 @@ public class EbCrm {
 						stBg = " bgcolor='#FFFFFF' ";
 					}
 					stReturn = stReturn + "<tr>";
-					stReturn = stReturn + "<td " + stBg + ">" + rs.getString("MaxDate")
-					    + "</td>";
+					stReturn = stReturn + "<td " + stBg + ">"
+							+ rs.getString("MaxDate") + "</td>";
 					stReturn = stReturn + "<td " + stBg + "><a href='"
-					    + this.ebEnt.rsA.getString("stUrl") + "&b=2&p="
-					    + rs.getInt("RecId") + "'>" + rs.getString("stFirstName") + " ";
+							+ this.ebEnt.rsA.getString("stUrl") + "&b=2&p="
+							+ rs.getInt("RecId") + "'>"
+							+ rs.getString("stFirstName") + " ";
 					stReturn = stReturn + rs.getString("stMiddleName") + " ";
 					stReturn = stReturn + rs.getString("stLastName") + "</td>";
 					stReturn = stReturn + "</tr>";
@@ -944,7 +1046,7 @@ public class EbCrm {
 				rs.last();
 				int iMax = rs.getRow();
 				stReturn = stReturn
-				    + "<table><tr><td colspan=2 bgcolor=skyblue align=center><h2>Recent History</h2></td></tr>";
+						+ "<table><tr><td colspan=2 bgcolor=skyblue align=center><h2>Recent History</h2></td></tr>";
 				String stBg = "";
 				for (int iH = 1; iH <= iMax; iH++) {
 					rs.absolute(iH);
@@ -954,11 +1056,12 @@ public class EbCrm {
 						stBg = " bgcolor='#FFFFFF' ";
 					}
 					stReturn = stReturn + "<tr>";
-					stReturn = stReturn + "<td " + stBg + ">" + rs.getString("MaxDate")
-					    + "</td>";
+					stReturn = stReturn + "<td " + stBg + ">"
+							+ rs.getString("MaxDate") + "</td>";
 					stReturn = stReturn + "<td " + stBg + "><a href='"
-					    + this.ebEnt.rsA.getString("stUrl") + "&b=2&p="
-					    + rs.getInt("RecId") + "'>" + rs.getString("stFirstName") + " ";
+							+ this.ebEnt.rsA.getString("stUrl") + "&b=2&p="
+							+ rs.getInt("RecId") + "'>"
+							+ rs.getString("stFirstName") + " ";
 					stReturn = stReturn + rs.getString("stMiddleName") + " ";
 					stReturn = stReturn + rs.getString("stLastName") + "</td>";
 					stReturn = stReturn + "</tr>";

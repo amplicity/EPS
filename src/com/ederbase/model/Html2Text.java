@@ -24,14 +24,14 @@ public class Html2Text extends HTMLEditorKit.ParserCallback {
 
 	@Override
 	public void handleStartTag(HTML.Tag tag, MutableAttributeSet attributes,
-	    int position) {
+			int position) {
 		if ((tag == HTML.Tag.P) || (tag == HTML.Tag.H1) || (tag == HTML.Tag.H2)) {
 			this.s.append("\r\n\r\n");
 		} else if (tag == HTML.Tag.BR) {
 			this.s.append("\r\n");
 		} else if ((tag == HTML.Tag.P) || (tag == HTML.Tag.LI)
-		    || (tag == HTML.Tag.H1) || (tag == HTML.Tag.H2) || (tag == HTML.Tag.TD)
-		    || (tag == HTML.Tag.A)) {
+				|| (tag == HTML.Tag.H1) || (tag == HTML.Tag.H2)
+				|| (tag == HTML.Tag.TD) || (tag == HTML.Tag.A)) {
 			this.s.append("\r\n");
 		}
 		parseAttributes(tag, attributes);
